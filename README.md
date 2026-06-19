@@ -8,8 +8,12 @@ De app haalt `catalog.json` op via GitHub raw en toont de extensies onder **Best
 | Pad | Rol |
 |---|---|
 | `catalog.json` | De catalogus die de app inleest (raw-URL, ~30 min gecachet) |
-| `extensions/<id>/` | Bron van elke extensie (manifest + main.js), voor leesbaarheid en PR's |
-| Releases | De installeerbare ZIP per extensie (waar `downloadUrl` naar wijst) |
+| `extensions/<id>/` | Bron + de installeerbare ZIP van elke extensie |
+
+> **Let op — hosting via `raw`, niet via Releases.** De app downloadt de ZIP met een
+> gewone browser-`fetch`. GitHub **release-assets** sturen géén `Access-Control-Allow-Origin`
+> en worden door CORS geblokkeerd; `raw.githubusercontent.com` stuurt `*` en werkt wél.
+> Commit de ZIP daarom in de repo en laat `downloadUrl` naar de raw-URL wijzen.
 
 ## `catalog.json`-formaat
 
@@ -41,8 +45,9 @@ Categorieën: `Import/Export`, `Planning`, `Reporting`, `Utility`, `Other`.
 ## Een extensie toevoegen
 
 1. Zet de bron in `extensions/<id>/` (`manifest.json` + `main.js`).
-2. Maak een ZIP met **minstens** `manifest.json` + `main.js` in de wortel.
-3. Publiceer die ZIP als release-asset (tag bv. `<id>-v<versie>`).
-4. Voeg een entry toe aan `catalog.json` met de `downloadUrl` naar die asset.
+2. Maak een ZIP met **minstens** `manifest.json` + `main.js` in de wortel en commit die
+   in `extensions/<id>/`.
+3. Voeg een entry toe aan `catalog.json` met `downloadUrl` naar de **raw**-URL van die ZIP
+   (zie de waarschuwing hierboven — release-assets werken niet door CORS).
 
 Zie de auteurshandleiding in de app-repo: [`docs/extensions.md`](https://github.com/OpenAEC-Foundation/open-planner-studio/blob/main/docs/extensions.md).
