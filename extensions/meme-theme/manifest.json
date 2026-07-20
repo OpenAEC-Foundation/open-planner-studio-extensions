@@ -1,0 +1,14 @@
+{
+  "id": "meme-theme",
+  "name": "Meme Theme",
+  "version": "1.0.0",
+  "minAppVersion": "2026.0.0",
+  "author": "OpenAEC Foundation",
+  "description": "Visuele meme make-over: Comic Sans, knalgele achtergrond, Impact-labels met zwarte text-shadow, waggelende iconen en dikke zwarte randen. Schakel aan/uit via de ribbon-knop onder tab Start.",
+  "category": "Utility",
+  "main": "main.js",
+  "permissions": ["ribbon"],
+  "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
+  "tags": ["meme", "theme", "comic-sans", "fun", "ui"],
+  "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M8 14s1.5 2 4 2 4-2 4-2'/><line x1='9' y1='9' x2='9.01' y2='9'/><line x1='15' y1='9' x2='15.01' y2='9'/></svg>"
+}
