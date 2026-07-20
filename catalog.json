@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-07-20",
+  "lastUpdated": "2026-06-19",
   "extensions": [
     {
       "id": "voorbeeld-takenlijst-importer",
@@ -14,19 +14,6 @@
       "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
       "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/voorbeeld-takenlijst-importer/voorbeeld-takenlijst-importer-1.0.0.zip",
       "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 6h13M8 12h13M8 18h13'/><path d='M3 6h.01M3 12h.01M3 18h.01'/></svg>"
-    },
-    {
-      "id": "meme-theme",
-      "name": "Meme Theme",
-      "version": "1.0.0",
-      "author": "OpenAEC Foundation",
-      "description": "Visuele meme make-over: Comic Sans, knalgele achtergrond, magenta accenten, Impact-labels met zwarte text-shadow, waggelende iconen en dikke zwarte randen. Schakel aan/uit via de ribbon-knop onder tab Start. Puur cosmetisch — raakt geen planningsdata.",
-      "category": "Utility",
-      "tags": ["meme", "theme", "comic-sans", "fun", "ui"],
-      "minAppVersion": "2026.0.0",
-      "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
-      "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/meme-theme/meme-theme-1.0.0.zip",
-      "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M8 14s1.5 2 4 2 4-2 4-2'/><line x1='9' y1='9' x2='9.01' y2='9'/><line x1='15' y1='9' x2='15.01' y2='9'/></svg>"
     }
   ]
 }
