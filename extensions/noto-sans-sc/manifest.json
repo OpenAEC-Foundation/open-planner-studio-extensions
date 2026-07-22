@@ -1,0 +1,14 @@
+{
+  "id": "noto-sans-sc",
+  "name": "Noto Sans SC (Chinees) — PDF-font",
+  "version": "1.0.0",
+  "minAppVersion": "2026.7.12",
+  "author": "OpenAEC Foundation",
+  "description": "Voegt Chinees (vereenvoudigd)-glyphs toe aan de vector-PDF-export via Noto Sans SC. Registreert een pdf-fonts-provider zodat taken, kalenders en rapporten met Chinese tekst correct als vectortekst (geen raster-fallback) in geëxporteerde PDF's verschijnen.",
+  "category": "Fonts",
+  "main": "main.js",
+  "permissions": ["pdf-fonts"],
+  "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
+  "tags": ["font", "cjk", "chinees", "pdf", "noto-sans-sc"],
+  "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text x='12' y='18' font-family='sans-serif' font-size='16' text-anchor='middle' fill='currentColor'>中</text></svg>"
+}
