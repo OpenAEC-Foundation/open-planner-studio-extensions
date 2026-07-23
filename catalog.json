@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-06-19",
+  "lastUpdated": "2026-07-22",
   "extensions": [
     {
       "id": "voorbeeld-takenlijst-importer",
@@ -14,6 +14,45 @@
       "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
       "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/voorbeeld-takenlijst-importer/voorbeeld-takenlijst-importer-1.0.0.zip",
       "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M8 6h13M8 12h13M8 18h13'/><path d='M3 6h.01M3 12h.01M3 18h.01'/></svg>"
+    },
+    {
+      "id": "noto-sans-sc",
+      "name": "Noto Sans SC (Chinees) — PDF-font",
+      "version": "1.0.0",
+      "author": "OpenAEC Foundation",
+      "description": "Voegt Chinees (vereenvoudigd)-glyphs toe aan de vector-PDF-export via Noto Sans SC. Registreert een pdf-fonts-provider zodat taken, kalenders en rapporten met Chinese tekst correct als vectortekst (geen raster-fallback) in geëxporteerde PDF's verschijnen.",
+      "category": "Fonts",
+      "tags": ["font", "cjk", "chinees", "pdf", "noto-sans-sc"],
+      "minAppVersion": "2026.7.12",
+      "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
+      "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/noto-sans-sc/noto-sans-sc-1.0.0.zip",
+      "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text x='12' y='18' font-family='sans-serif' font-size='16' text-anchor='middle' fill='currentColor'>中</text></svg>"
+    },
+    {
+      "id": "noto-sans-jp",
+      "name": "Noto Sans JP (Japans) — PDF-font",
+      "version": "1.0.0",
+      "author": "OpenAEC Foundation",
+      "description": "Voegt Japanse glyphs (kanji, hiragana, katakana) toe aan de vector-PDF-export via Noto Sans JP. Registreert een pdf-fonts-provider zodat taken, kalenders en rapporten met Japanse tekst correct als vectortekst (geen raster-fallback) in geëxporteerde PDF's verschijnen.",
+      "category": "Fonts",
+      "tags": ["font", "cjk", "japans", "pdf", "noto-sans-jp"],
+      "minAppVersion": "2026.7.12",
+      "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
+      "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/noto-sans-jp/noto-sans-jp-1.0.0.zip",
+      "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text x='12' y='18' font-family='sans-serif' font-size='16' text-anchor='middle' fill='currentColor'>あ</text></svg>"
+    },
+    {
+      "id": "noto-sans-kr",
+      "name": "Noto Sans KR (Koreaans) — PDF-font",
+      "version": "1.0.0",
+      "author": "OpenAEC Foundation",
+      "description": "Voegt Koreaanse glyphs (hangul + hanja) toe aan de vector-PDF-export via Noto Sans KR. Registreert een pdf-fonts-provider zodat taken, kalenders en rapporten met Koreaanse tekst correct als vectortekst (geen raster-fallback) in geëxporteerde PDF's verschijnen.",
+      "category": "Fonts",
+      "tags": ["font", "cjk", "koreaans", "pdf", "noto-sans-kr"],
+      "minAppVersion": "2026.7.12",
+      "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
+      "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/noto-sans-kr/noto-sans-kr-1.0.0.zip",
+      "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><text x='12' y='18' font-family='sans-serif' font-size='16' text-anchor='middle' fill='currentColor'>한</text></svg>"
     }
   ]
 }
