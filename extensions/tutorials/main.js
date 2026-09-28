@@ -10,7 +10,10 @@
  *   • api.help.startGuide(...)        → het begeleidingspaneel, met per stap een controle op de
  *                                       documenttoestand, "Toon mij" en waar zinvol "Opnieuw";
  *   • api.events.on(...)              → de laatste stap (Bereken) herkent een berekening via
- *                                       `host:schedule-calculated` (permissie "events").
+ *                                       `host:schedule-calculated` (permissie "events"), en
+ *                                       `host:tutorial-requested` start tutorial 1 wanneer de app
+ *                                       erom vraagt ("Ja" op de tutorialvraag na de eerste
+ *                                       voltooide rondleiding).
  *
  * Leesversie en paneel gebruiken DEZELFDE tekst: elke stap heeft een titel, een opdracht en een uitleg
  * ("wat je nu ziet, en waarom"); het artikel en de paneelstappen worden hieronder uit die ene bron
@@ -23,6 +26,11 @@
  */
 
 const sdk = require('open-planner-studio');
+
+/** Het id uit `manifest.json`: een host-verzoek voor een andere extensie negeren we. */
+const EXTENSION_ID = 'tutorials';
+/** Id van tutorial 1: het Help-artikel én de begeleiding. */
+const TUTORIAL_1_ID = 'tut-1-eerste-planning';
 
 // ── Het project ──────────────────────────────────────────────────────────────────────────────
 
@@ -630,7 +638,7 @@ function articleBody(lang) {
 function buildGuide() {
   const lang = uiLang();
   return {
-    id: 'tut-1-eerste-planning',
+    id: TUTORIAL_1_ID,
     title: { nl: TEXT.nl.title, en: TEXT.en.title },
     steps: STEP_ORDER.map((key) => {
       const logic = STEP_LOGIC[key];
@@ -646,10 +654,25 @@ function buildGuide() {
   };
 }
 
+/**
+ * Start het begeleidingspaneel van tutorial 1 — dezelfde route voor de lintknop en voor het verzoek
+ * van de app. `startGuide` gooit als er al een begeleiding van een ándere extensie loopt; die blijft
+ * dan staan, en de gebruiker krijgt uitleg in plaats van een stille klik.
+ */
+function startTutorial1(api) {
+  try {
+    api.help.startGuide(buildGuide());
+  } catch (error) {
+    api.ui.showNotification(uiLang() === 'nl'
+      ? 'De tutorial kon niet starten: er loopt al een andere begeleiding. Sluit die eerst.'
+      : 'The tutorial could not start: another guide is already running. Close it first.', 'error');
+  }
+}
+
 module.exports = {
   onLoad(api) {
     api.help.registerArticles([{
-      id: 'tut-1-eerste-planning',
+      id: TUTORIAL_1_ID,
       kind: 'tutorial',
       order: 1,
       title: { nl: TEXT.nl.title, en: TEXT.en.title },
@@ -663,17 +686,16 @@ module.exports = {
       group: 'Tutorials',
       label: 'Tutorial 1',
       icon: "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10 12 5 2 10l10 5 10-5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>",
-      onClick: () => {
-        // `startGuide` gooit als er al een begeleiding van een ándere extensie loopt; die blijft dan
-        // staan, en de gebruiker krijgt uitleg in plaats van een stille klik.
-        try {
-          api.help.startGuide(buildGuide());
-        } catch (error) {
-          api.ui.showNotification(uiLang() === 'nl'
-            ? 'De tutorial kon niet starten: er loopt al een andere begeleiding. Sluit die eerst.'
-            : 'The tutorial could not start: another guide is already running. Close it first.', 'error');
-        }
-      },
+      onClick: () => startTutorial1(api),
+    });
+
+    // De app vraagt om een tutorial (`host:tutorial-requested`, contract 1.4): "Ja" op de tutorialvraag
+    // na de eerste voltooide rondleiding. De app zendt pas uit als deze extensie actief is (ook direct
+    // na installeren), en kijkt meteen daarna of er een begeleiding van ons loopt — anders opent hij
+    // Help › Tutorials. Dus: alleen op een verzoek voor ons en voor tutorial 1, en SYNCHROON starten.
+    api.events.on(sdk.hostEvents.tutorialRequested || 'host:tutorial-requested', (data) => {
+      if (!data || data.extensionId !== EXTENSION_ID || data.tutorialId !== TUTORIAL_1_ID) return;
+      startTutorial1(api);
     });
 
     api.events.on(sdk.hostEvents.scheduleCalculated, (data) => {

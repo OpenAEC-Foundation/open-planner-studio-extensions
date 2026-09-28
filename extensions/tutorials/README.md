@@ -14,6 +14,11 @@ Interactieve tutorials voor **Open Planner Studio** (extensie-API 1.4, permissie
   (cumulatief: zet ook ontbrekende eerdere stappen klaar) en bij de fasenstap **Opnieuw**.
 - De laatste stap (Bereken) herkent een berekening van precies de huidige planning via
   `host:schedule-calculated` (permissie `events`).
+- **Op verzoek van de app**: zegt de gebruiker na de eerste voltooide rondleiding "Ja" op de
+  tutorialvraag, dan zendt de app `host:tutorial-requested` met
+  `{ extensionId: 'tutorials', tutorialId: 'tut-1-eerste-planning' }` (pas als deze extensie actief
+  is, ook direct na installeren). De extensie start dan tutorial 1, via dezelfde route als de
+  lintknop — synchroon, want de app kijkt meteen daarna of er een begeleiding loopt.
 
 Leesversie en paneel komen uit dezelfde tekst in `main.js`.
 
