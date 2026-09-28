@@ -1,5 +1,6 @@
 /**
- * Tutorials voor Open Planner Studio — tutorial 1 "Je eerste planning" (contract 1.4.0, permissie `help`).
+ * Tutorials voor Open Planner Studio — tutorial 1 "Je eerste planning" (contract 1.4.0, permissies
+ * `help`, `ribbon` en `events`).
  *
  * Wat deze extensie doet:
  *   • api.help.registerArticles(...)  → de leesversie van de tutorial in Help › Tutorials;
@@ -130,16 +131,11 @@ function itemOk(task, item) {
     && Math.abs(task.time.scheduleDuration - item.days) < 1e-9;
 }
 
-/** Staan de vier fasen op het hoogste niveau, in deze volgorde? */
+/** Staan de vier fasen op het hoogste niveau? Alleen aanwezigheid: de volgorde van fasen kan Toon
+ *  mij via de API niet herstellen, en een check die hij niet kan halen zou de stap laten vastlopen. */
 function phasesDone(api) {
   const tasks = api.data.getTasks();
-  const found = PHASES.map(p => findPhase(tasks, p));
-  if (found.some(t => !t)) return false;
-  // Volgorde via de WBS-nummers (automatisch genummerd in een nieuw project). Zonder bruikbare
-  // nummers (vrije WBS) is aanwezigheid genoeg.
-  const nums = found.map(t => Number(t.wbsCode));
-  if (nums.every(n => Number.isFinite(n))) return nums.every((n, i) => i === 0 || n > nums[i - 1]);
-  return true;
+  return PHASES.every(p => !!findPhase(tasks, p));
 }
 
 /** Staat de startmijlpaal (ergens) in het project? */
@@ -193,7 +189,13 @@ function newItemInput(item, lang, parentId) {
       time: sdk.factory.createTaskTime(START_DATE, 0),
     };
   }
-  return { name: item.name[lang], parentId, time: sdk.factory.createTaskTime(START_DATE, item.days) };
+  // Zoals met de hand: de knop Taak maakt een taak van 5 dagen, daarna typt de lezer de duur. Tot
+  // Bereken blijft de balk dus 5 dagen lang; Toon mij geeft hetzelfde beeld als de uitleg beschrijft.
+  return {
+    name: item.name[lang],
+    parentId,
+    time: { ...sdk.factory.createTaskTime(START_DATE, 5), scheduleDuration: item.days },
+  };
 }
 
 function ensurePhases(api) {
@@ -292,11 +294,11 @@ const TEXT = {
       '# Je eerste planning',
       '## Wat je bouwt',
       'Je maakt de planning voor een aanbouw: een uitbouw van 4 bij 5 meter aan de achtergevel van een eengezinswoning. Dat project loopt door alle zeven tutorials heen. In deze eerste tutorial zet je het geraamte neer: een nieuw project, vier fasen, twintig taken met een duur en drie mijlpalen.',
-      'Aan het eind staan alle taken in hun fase en heeft de app voor het eerst gerekend. Je ziet dan meteen waarom een lijst taken nog geen planning is: zonder relaties begint alles op dezelfde dag.',
+      'Aan het eind staan alle taken in hun fase en heeft de app voor het eerst gerekend. Je ziet dan meteen waarom een lijst taken nog geen planning is: zonder relaties, de afspraken welke taak op welke wacht, begint alles op dezelfde dag.',
       '## Uitgangspunt',
       'Dit is de eerste tutorial. Je hebt alleen Open Planner Studio nodig; je begint met een leeg project.',
       'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 1*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar.',
-      'Wil je het venster van stap 1 overslaan? [Open dan het startproject](project://projects/nl/start-tut-1.ifc). Dat is hetzelfde lege project.',
+      'Wil je het venster van stap 1 overslaan? [Open dan het startproject](project://projects/nl/start-tut-1.ifc). Dat is hetzelfde project als na stap 1.',
     ],
     outro: [
       '## Wat je hebt geleerd',
@@ -314,12 +316,13 @@ const TEXT = {
         task: [
           'Klik op *Start › Bestand › Nieuw*. Vul in het venster **Nieuw project** in:',
           '- **Projectnaam**: `Aanbouw woning`\n- **Startdatum**: `07-06-2027`, maandag 7 juni 2027\n- **Land**: Nederland, en bij **Bouwvak**: Geen',
+          'Onder **Bouwvak** staat nu de regel *36 feestdagen, 2026–2030*; klap hem open als je wilt zien welke dagen het zijn.',
           'Klik op **Aanmaken**.',
         ],
         explain: [
-          'Bovenaan staat nu een tabblad Aanbouw woning, met een lege takenlijst.',
-          'De startdatum is het anker van je planning. Zolang een taak geen voorganger heeft, begint hij op deze dag. Kies hem dus bewust: de dag dat de aannemer op de bouwplaats begint.',
-          'Met Nederland krijgt het project een kalender met de Nederlandse feestdagen van 2026 tot en met 2030. In het venster stond onder Bouwvak de regel *36 feestdagen, 2026–2030*; klap je die open, dan zie je welke dagen het zijn. Op die dagen wordt niet gewerkt, dus de app telt ze niet als werkdag. De bouwvak laat je nog weg. Die zet je in tutorial 3 zelf in de kalender, zodat je ziet wat hij met de einddatum doet.',
+          'Onder het lint staat nu een tabblad Aanbouw woning, met een lege takenlijst.',
+          'De startdatum is het anker van je planning. Zolang een taak geen voorganger heeft, een taak die eerst klaar moet zijn, begint hij op deze dag. Kies hem dus bewust: de dag dat de aannemer op de bouwplaats begint.',
+          'Met Nederland krijgt het project een kalender met de Nederlandse feestdagen: de 36 dagen uit die regel, van 2026 tot en met 2030. Op die dagen wordt niet gewerkt, dus de app telt ze niet als werkdag. De bouwvak laat je nog weg. Die zet je in tutorial 3 zelf in de kalender, zodat je ziet wat hij met de einddatum doet.',
         ],
       },
       fasen: {
@@ -329,7 +332,7 @@ const TEXT = {
           'Doe hetzelfde voor `Fundering`, `Ruwbouw` en `Afbouw`. Een nieuwe taak komt steeds onder de geselecteerde taak, dus de fasen staan vanzelf op volgorde.',
         ],
         explain: [
-          'De tijdbalk is naar juni 2027 gesprongen, naar je eerste taak. In de takenlijst staan vier regels met de WBS-nummers 1 tot en met 4. WBS staat voor *work breakdown structure*: de opdeling van het werk. Elke fase heeft nu nog een balk van 5 dagen, de standaardduur van een nieuwe taak.',
+          'In de takenlijst staan vier regels met de WBS-nummers 1 tot en met 4. WBS staat voor *work breakdown structure*: de opdeling van het werk. Rechts ernaast staat de Gantt: een tijdlijn met per taak een balk. Elke fase heeft daar nu nog een balk van 5 dagen, de standaardduur van een nieuwe taak. Na Taak is de Gantt naar juni 2027 gesprongen, naar je nieuwe taak. Gebruikte je Toon mij, klik dan een fase aan in de takenlijst; dan springt de Gantt erheen.',
           'Waarom eerst fasen? Twintig taken overzie je nog wel, driehonderd niet. Met fasen zie je per fase wanneer hij begint en eindigt, en je klapt weg wat je even niet nodig hebt. Zo meteen zet je de taken ín de fasen; dan telt die 5 dagen niet meer.',
         ],
       },
@@ -339,7 +342,7 @@ const TEXT = {
           'Klik in de takenlijst op **Voorbereiding**. Klik dan op *Start › Taken › Mijlpaal* en kies **Startmijlpaal**. Typ `Start bouw` en druk op Enter.',
         ],
         explain: [
-          'Start bouw staat direct onder Voorbereiding, maar op hetzelfde niveau: hij kreeg WBS-nummer 2, en Fundering schoof door naar 3. In de Gantt is hij een ruit, en zijn duur is 0.',
+          'Start bouw staat direct onder Voorbereiding, maar op hetzelfde niveau: hij kreeg WBS-nummer 2, en Fundering schoof door naar 3. In de Gantt is hij een ruit, en zijn duur is 0. (Gebruikte je **Toon mij**, dan staat Start bouw meteen ingesprongen als 1.1 en is stap 4 ook gedaan.)',
           'Een mijlpaal is een moment, geen werk. Hij kost geen tijd, maar er hangt wel iets van af: hier het moment dat de aannemer begint. Een startmijlpaal hoort bij het begin van een werkdag, een eindmijlpaal bij het einde ervan.',
         ],
       },
@@ -363,14 +366,14 @@ const TEXT = {
         ],
         explain: [
           'De drie taken staan in Voorbereiding, als 1.2 tot en met 1.4. Inspringen hoefde niet meer: een nieuwe taak komt op hetzelfde niveau als de taak die geselecteerd was.',
-          'Kijk naar de balk van Bouwplaats inrichten: die is nog 5 dagen lang, terwijl de duur 2 is. Onderaan in de statusbalk staat *Verouderd — herbereken (F5)*. Open Planner Studio rekent niet bij elke wijziging opnieuw; dat doe jij, met Bereken. Zo blijft de planning stil liggen terwijl je hem opbouwt. In de laatste stap reken je. (Staat de instelling *Automatisch berekenen* aan, dan rekent de app na elke wijziging zelf en zie je deze melding niet.)',
+          'Kijk naar de balk van Bouwplaats inrichten: die is nog 5 dagen lang, terwijl de duur 2 is. Onderaan in de statusbalk staat *Verouderd — herbereken (F5)*. Open Planner Studio rekent niet bij elke wijziging opnieuw; dat doe jij, met Bereken. Zo blijft de planning stil liggen terwijl je hem opbouwt. In de laatste stap reken je.',
         ],
       },
       fundering: {
         title: 'De fundering',
         task: [
-          'Klik in de takenlijst op **Fundering** en voeg met *Start › Taken › Taak* de eerste taak toe. Die komt naast de fase te staan, dus spring hem in, zoals in stap 4. Daarna gaat het zoals in stap 5:',
-          '- `Funderingssleuf ontgraven`, 2 werkdagen.\n- `Wapening en bekisting fundering`, 3 werkdagen.\n- `Inspectie wapening`: een keuring, dus een mijlpaal. Kies *Start › Taken › Mijlpaal › Inspectiemoment (verplicht)*.\n- `Fundering storten`, 1 werkdag.\n- `Funderingsmetselwerk`, 2 werkdagen.\n- `Kanaalplaatvloer leggen`, 1 werkdag.',
+          'Klik in de takenlijst op **Fundering**. Klik op *Start › Taken › Taak*, typ de naam van de eerste taak en druk op Enter. De taak komt op hetzelfde niveau als de fase, direct eronder: spring hem in zoals in stap 4 en geef hem daarna zijn duur. De rest van de fase gaat zoals in stap 5:',
+          '- `Funderingssleuf ontgraven`, 2 werkdagen: de sleuf graven waarin de fundering komt.\n- `Wapening en bekisting fundering`, 3 werkdagen: de bekisting zetten en het wapeningsstaal erin leggen.\n- `Inspectie wapening`: een keuring, dus een mijlpaal. Kies *Start › Taken › Mijlpaal › Inspectiemoment (verplicht)*.\n- `Fundering storten`, 1 werkdag: het beton in de bekisting storten.\n- `Funderingsmetselwerk`, 2 werkdagen: de fundering opmetselen tot vloerhoogte.\n- `Kanaalplaatvloer leggen`, 1 werkdag: de begane-grondvloer van betonnen kanaalplaten, die een kraan op zijn plaats legt.',
         ],
         explain: [
           'Fundering heeft nu zes regels, 2.1 tot en met 2.6. Selecteer Inspectie wapening: in **Eigenschappen** is hij een eindmijlpaal met een vinkje bij **Verplicht (contractueel)**.',
@@ -380,8 +383,8 @@ const TEXT = {
       ruwbouw: {
         title: 'De ruwbouw',
         task: [
-          'Klik op **Ruwbouw**, voeg de eerste taak toe en spring hem in. Vul de fase daarna aan:',
-          '- `Binnenspouwblad metselen`, 5 werkdagen.\n- `Buitenspouwblad metselen`, 6 werkdagen.\n- `Dakelementen plaatsen`, 1 werkdag.\n- `Dakbedekking aanbrengen`, 2 werkdagen.\n- `Kozijnen plaatsen`, 2 werkdagen.\n- `Achtergevel doorbreken`, 2 werkdagen.',
+          'Klik op **Ruwbouw** en maak de eerste taak zoals bij de fundering: Taak, naam, inspringen, duur. Vul de fase daarna aan:',
+          '- `Binnenspouwblad metselen`, 5 werkdagen: de dragende binnenmuur.\n- `Buitenspouwblad metselen`, 6 werkdagen: de gevel van metselwerk.\n- `Dakelementen plaatsen`, 1 werkdag: de kraan legt de geprefabriceerde dakelementen op de muren.\n- `Dakbedekking aanbrengen`, 2 werkdagen: het dak waterdicht maken.\n- `Kozijnen plaatsen`, 2 werkdagen: ramen en deuren erin, zodat de aanbouw dicht is.\n- `Achtergevel doorbreken`, 2 werkdagen: de bestaande achtergevel openmaken naar de aanbouw.',
         ],
         explain: [
           'Ruwbouw heeft nu zes taken, 3.1 tot en met 3.6.',
@@ -391,8 +394,8 @@ const TEXT = {
       afbouw: {
         title: 'De afbouw en de oplevering',
         task: [
-          'Klik op **Afbouw**, voeg de eerste taak toe en spring hem in. Vul de fase daarna aan:',
-          '- `Installaties aanleggen`, 3 werkdagen.\n- `Stucwerk`, 4 werkdagen.\n- `Dekvloer aanbrengen`, 1 werkdag.\n- `Tegelwerk`, 3 werkdagen.\n- `Schilderwerk`, 3 werkdagen.\n- `Opleverpunten en schoonmaken`, 1 werkdag.\n- `Oplevering`: het eindpunt, dus een mijlpaal. Kies *Start › Taken › Mijlpaal › Eindmijlpaal*.',
+          'Klik op **Afbouw** en maak de eerste taak zoals bij de fundering: Taak, naam, inspringen, duur. Vul de fase daarna aan:',
+          '- `Installaties aanleggen`, 3 werkdagen: leidingen voor elektra, water en verwarming.\n- `Stucwerk`, 4 werkdagen: wanden en plafond glad afwerken.\n- `Dekvloer aanbrengen`, 1 werkdag: de afwerkvloer over de kanaalplaten.\n- `Tegelwerk`, 3 werkdagen: de tegels leggen.\n- `Schilderwerk`, 3 werkdagen: kozijnen en wanden schilderen.\n- `Opleverpunten en schoonmaken`, 1 werkdag: de laatste gebreken herstellen en de aanbouw schoon opleveren.\n- `Oplevering`: het eindpunt, dus een mijlpaal. Kies *Start › Taken › Mijlpaal › Eindmijlpaal*.',
         ],
         explain: [
           'De WBS is compleet: vier fasen, twintig taken en drie mijlpalen. Onderaan in de statusbalk staat *Taken: 23* en *Mijlpalen: 3*: de twintig taken plus de drie mijlpalen. De fasen telt de app niet mee.',
@@ -402,7 +405,8 @@ const TEXT = {
       berekenen: {
         title: 'Rekenen',
         task: [
-          'Klik op *Start › Planning › Bereken*, of druk op F5.',
+          'Klik op *Start › Planning › Bereken*: de knop Bereken in de groep Planning op het tabblad Start. Of druk op F5.',
+          '(Staat de instelling *Automatisch berekenen* aan, dan heeft de app al na elke wijziging gerekend en is deze stap al gedaan.)',
         ],
         explain: [
           'De melding Verouderd is weg en de balken kloppen: Bouwplaats inrichten is 2 dagen lang, en elke fase loopt van het vroegste begin tot het laatste einde van zijn taken.',
@@ -420,11 +424,11 @@ const TEXT = {
       '# Your first schedule',
       '## What you build',
       'You make the schedule for a house extension: a 4 by 5 metre extension at the rear of a family home. That project runs through all seven tutorials. In this first tutorial you set up the skeleton: a new project, four phases, twenty tasks with a duration and three milestones.',
-      'At the end every task sits in its phase and the app has calculated for the first time. You will see straight away why a list of tasks is not yet a schedule: without relationships everything starts on the same day.',
+      'At the end every task sits in its phase and the app has calculated for the first time. You will see straight away why a list of tasks is not yet a schedule: without relationships, the agreements about which task waits for which, everything starts on the same day.',
       '## Starting point',
       'This is the first tutorial. All you need is Open Planner Studio; you start with an empty project.',
-      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 1* on the ribbon. A panel appears at the bottom right with one task at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you.',
-      'Want to skip the window of step 1? [Open the starting project](project://projects/en/start-tut-1.ifc) instead. It is the same empty project.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 1* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you.',
+      'Want to skip the window of step 1? [Open the starting project](project://projects/en/start-tut-1.ifc) instead. It is the same project as after step 1.',
     ],
     outro: [
       '## What you have learned',
@@ -442,12 +446,13 @@ const TEXT = {
         task: [
           'Click *Home › File › New*. In the **New project** window, fill in:',
           '- **Project Name**: `House extension`\n- **Start Date**: `07-06-2027` (day, month, year), Monday 7 June 2027\n- **Country**: Netherlands, and for **Construction holiday**: None',
+          'Below **Construction holiday** you now see the line *36 holidays, 2026–2030*; expand it if you want to see which days they are.',
           'Click **Create**.',
         ],
         explain: [
-          'At the top there is now a tab called House extension, with an empty task list.',
-          'The start date is the anchor of your schedule. As long as a task has no predecessor, it starts on this day. So choose it deliberately: the day the contractor starts on site.',
-          'With the Netherlands, the project gets a calendar with the Dutch public holidays from 2026 up to and including 2030. Below Construction holiday, the window showed the line *36 holidays, 2026–2030*; expand it to see which days they are. Nobody works on those days, so the app does not count them as working days. Leave out the construction holiday for now. You add it to the calendar yourself in tutorial 3, so you can see what it does to the finish date.',
+          'Below the ribbon there is now a tab called House extension, with an empty task list.',
+          'The start date is the anchor of your schedule. As long as a task has no predecessor, a task that has to finish first, it starts on this day. So choose it deliberately: the day the contractor starts on site.',
+          'With the Netherlands, the project gets a calendar with the Dutch public holidays: the 36 days from that line, from 2026 up to and including 2030. Nobody works on those days, so the app does not count them as working days. Leave out the construction holiday for now: the Dutch building trade\'s summer break of three weeks, with dates that differ per region. You add it to the calendar yourself in tutorial 3, so you can see what it does to the finish date.',
         ],
       },
       fasen: {
@@ -457,7 +462,7 @@ const TEXT = {
           'Do the same for `Foundations`, `Shell` and `Finishing`. A new task always goes below the selected task, so the phases end up in order by themselves.',
         ],
         explain: [
-          'The timeline has jumped to June 2027, to your first task. The task list shows four rows with the WBS numbers 1 to 4. WBS stands for *work breakdown structure*: how the work is divided up. For now each phase has a bar of 5 days, the default duration of a new task.',
+          'The task list shows four rows with the WBS numbers 1 to 4. WBS stands for *work breakdown structure*: how the work is divided up. Next to it is the Gantt: a timeline with a bar for each task. For now each phase has a bar of 5 days there, the default duration of a new task. After Task, the Gantt has jumped to June 2027, to your new task. If you used Show me, click a phase in the task list; the Gantt then jumps to it.',
           'Why phases first? You can keep track of twenty tasks, but not of three hundred. With phases you see per phase when it starts and finishes, and you collapse what you do not need for a while. In a moment you put the tasks inside the phases; then those 5 days no longer count.',
         ],
       },
@@ -467,7 +472,7 @@ const TEXT = {
           'Click **Preparation** in the task list. Then click *Home › Tasks › Milestone* and choose **Start milestone**. Type `Start of construction` and press Enter.',
         ],
         explain: [
-          'Start of construction sits directly below Preparation, but at the same level: it got WBS number 2, and Foundations moved on to 3. In the Gantt it is a diamond, and its duration is 0.',
+          'Start of construction sits directly below Preparation, but at the same level: it got WBS number 2, and Foundations moved on to 3. In the Gantt it is a diamond, and its duration is 0. (If you used **Show me**, Start of construction is already indented as 1.1 and step 4 is done as well.)',
           'A milestone is a moment, not work. It takes no time, but something depends on it: here the moment the contractor starts. A start milestone belongs to the start of a working day, a finish milestone to its end.',
         ],
       },
@@ -491,14 +496,14 @@ const TEXT = {
         ],
         explain: [
           'The three tasks are in Preparation, as 1.2 to 1.4. No indenting needed this time: a new task goes on the same level as the task that was selected.',
-          'Look at the bar of Set up site: it is still 5 days long, while the duration is 2. At the bottom, the status bar says *Out of date — recalculate (F5)*. Open Planner Studio does not recalculate after every change; you do that, with Calculate. That way the schedule stays still while you build it. You calculate in the last step. (If the setting *Calculate automatically* is on, the app recalculates after every change by itself and you will not see this message.)',
+          'Look at the bar of Set up site: it is still 5 days long, while the duration is 2. At the bottom, the status bar says *Out of date — recalculate (F5)*. Open Planner Studio does not recalculate after every change; you do that, with Calculate. That way the schedule stays still while you build it. You calculate in the last step.',
         ],
       },
       fundering: {
         title: 'The foundations',
         task: [
-          'Click **Foundations** in the task list and add the first task with *Home › Tasks › Task*. It lands next to the phase, so indent it, as in step 4. After that it goes as in step 5:',
-          '- `Excavate foundation trench`, 2 working days.\n- `Foundation formwork and reinforcement`, 3 working days.\n- `Reinforcement inspection`: an inspection, so a milestone. Choose *Home › Tasks › Milestone › Inspection point (mandatory)*.\n- `Pour foundation`, 1 working day.\n- `Foundation brickwork`, 2 working days.\n- `Lay hollow-core floor`, 1 working day.',
+          'Click **Foundations** in the task list. Click *Home › Tasks › Task*, type the name of the first task and press Enter. The task lands on the same level as the phase, directly below it: indent it as in step 4 and then give it its duration. The rest of the phase goes as in step 5:',
+          '- `Excavate foundation trench`, 2 working days: digging the trench the foundation goes into.\n- `Foundation formwork and reinforcement`, 3 working days: setting up the formwork and placing the reinforcing steel in it.\n- `Reinforcement inspection`: an inspection, so a milestone. Choose *Home › Tasks › Milestone › Inspection point (mandatory)*.\n- `Pour foundation`, 1 working day: pouring the concrete into the formwork.\n- `Foundation brickwork`, 2 working days: bricking up the foundation to floor level.\n- `Lay hollow-core floor`, 1 working day: the ground floor of precast concrete hollow-core slabs, which a crane lifts into place.',
         ],
         explain: [
           'Foundations now has six rows, 2.1 to 2.6. Select Reinforcement inspection: in **Properties** it is a finish milestone with a tick at **Mandatory (contractual)**.',
@@ -508,8 +513,8 @@ const TEXT = {
       ruwbouw: {
         title: 'The shell',
         task: [
-          'Click **Shell**, add the first task and indent it. Then fill in the phase:',
-          '- `Build inner cavity leaf`, 5 working days.\n- `Build outer cavity leaf`, 6 working days.\n- `Place roof elements`, 1 working day.\n- `Apply roofing`, 2 working days.\n- `Install window frames`, 2 working days.\n- `Break through rear wall`, 2 working days.',
+          'Click **Shell** and make the first task as for the foundations: Task, name, indent, duration. Then fill in the phase:',
+          '- `Build inner cavity leaf`, 5 working days: the load-bearing inner wall.\n- `Build outer cavity leaf`, 6 working days: the brick facade.\n- `Place roof elements`, 1 working day: the crane places the prefabricated roof elements on the walls.\n- `Apply roofing`, 2 working days: making the roof watertight.\n- `Install window frames`, 2 working days: windows and doors in, so the extension is closed.\n- `Break through rear wall`, 2 working days: opening up the existing rear wall into the extension.',
         ],
         explain: [
           'Shell now has six tasks, 3.1 to 3.6.',
@@ -519,8 +524,8 @@ const TEXT = {
       afbouw: {
         title: 'Finishing and handover',
         task: [
-          'Click **Finishing**, add the first task and indent it. Then fill in the phase:',
-          '- `Install building services`, 3 working days.\n- `Plastering`, 4 working days.\n- `Lay floor screed`, 1 working day.\n- `Tiling`, 3 working days.\n- `Painting`, 3 working days.\n- `Snagging and cleaning`, 1 working day.\n- `Handover`: the end point, so a milestone. Choose *Home › Tasks › Milestone › Finish milestone*.',
+          'Click **Finishing** and make the first task as for the foundations: Task, name, indent, duration. Then fill in the phase:',
+          '- `Install building services`, 3 working days: pipes and cables for electricity, water and heating.\n- `Plastering`, 4 working days: finishing walls and ceiling smooth.\n- `Lay floor screed`, 1 working day: the finishing floor over the hollow-core slabs.\n- `Tiling`, 3 working days: laying the tiles.\n- `Painting`, 3 working days: painting frames and walls.\n- `Snagging and cleaning`, 1 working day: fixing the last defects and handing over a clean extension.\n- `Handover`: the end point, so a milestone. Choose *Home › Tasks › Milestone › Finish milestone*.',
         ],
         explain: [
           'The WBS is complete: four phases, twenty tasks and three milestones. At the bottom, the status bar says *Tasks: 23* and *Milestones: 3*: the twenty tasks plus the three milestones. The app does not count the phases.',
@@ -530,7 +535,8 @@ const TEXT = {
       berekenen: {
         title: 'Calculating',
         task: [
-          'Click *Home › Schedule › Calculate*, or press F5.',
+          'Click *Home › Schedule › Calculate*: the Calculate button in the Schedule group on the Home tab. Or press F5.',
+          '(If the setting *Calculate automatically* is on, the app has already calculated after every change and this step is already done.)',
         ],
         explain: [
           'The out-of-date message is gone and the bars are right: Set up site is 2 days long, and each phase runs from the earliest start to the latest finish of its tasks.',
@@ -659,7 +665,17 @@ module.exports = {
       group: 'Tutorials',
       label: 'Tutorial 1',
       icon: "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10 12 5 2 10l10 5 10-5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>",
-      onClick: () => api.help.startGuide(buildGuide()),
+      onClick: () => {
+        // `startGuide` gooit als er al een begeleiding van een ándere extensie loopt; die blijft dan
+        // staan, en de gebruiker krijgt uitleg in plaats van een stille klik.
+        try {
+          api.help.startGuide(buildGuide());
+        } catch (error) {
+          api.ui.showNotification(uiLang() === 'nl'
+            ? 'De tutorial kon niet starten: er loopt al een andere begeleiding. Sluit die eerst.'
+            : 'The tutorial could not start: another guide is already running. Close it first.', 'error');
+        }
+      },
     });
 
     api.events.on(sdk.hostEvents.scheduleCalculated, (data) => {

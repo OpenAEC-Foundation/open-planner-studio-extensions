@@ -17,6 +17,14 @@ Interactieve tutorials voor **Open Planner Studio** (extensie-API 1.4, permissie
 
 Leesversie en paneel komen uit dezelfde tekst in `main.js`.
 
+## `minAppVersion`: nog een placeholder
+
+`minAppVersion` staat voorlopig op `2026.0.0`. **Bij de release zetten op de eerste app-versie met
+extensiecontract 1.4** (release v2026.9.0 heeft contract 1.0.0), en pas daarna een catalogusentry
+maken. Tot die tijd houdt `"apiVersion": "1.4"` oudere apps tegen: een host met een lagere
+contract-minor weigert de extensie. Een hogere `minAppVersion` nu zou de extensie in de huidige
+dev-build (ook 2026.9.0) weigeren.
+
 ## Projectbestanden
 
 `projects/<taal>/start-tut-1.ifc` en `na-tut-1.ifc` zijn **gegenereerd**, niet met de hand gemaakt.
