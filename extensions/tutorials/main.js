@@ -307,7 +307,6 @@ const TEXT = {
       '- **Een mijlpaal is een moment zonder duur.** Hij markeert iets waar het werk op wacht: de start, een keuring, de oplevering.',
       '- **Standaard reken je zelf, met Bereken (F5).** Pas daarna kloppen de balken; tot die tijd meldt de statusbalk dat de planning verouderd is.',
       '- **Zonder relaties is een planning een lijst.** Alles begint tegelijk en de langste taak bepaalt het einde. Daarom leg je in tutorial 2 de volgorde vast.',
-      'Waarom je een project zo opdeelt, en hoe fijn, lees je in [Goed plannen](docs://gids-goed-plannen#de-opdeling-fasen-werkpakketten-taken).',
       'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-1.ifc).',
     ],
     steps: {
@@ -437,7 +436,6 @@ const TEXT = {
       '- **A milestone is a moment without duration.** It marks something the work waits for: the start, an inspection, the handover.',
       '- **By default you calculate yourself, with Calculate (F5).** Only then are the bars right; until then the status bar says the schedule is out of date.',
       '- **Without relationships a schedule is a list.** Everything starts at once and the longest task sets the finish. That is why you fix the order in tutorial 2.',
-      'Why you break a project down like this, and how finely, is explained in [Planning well](docs://gids-goed-plannen#the-breakdown-phases-work-packages-tasks).',
       'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-1.ifc).',
     ],
     steps: {
