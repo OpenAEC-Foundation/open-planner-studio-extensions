@@ -1,0 +1,15 @@
+{
+  "id": "tutorials",
+  "name": "Tutorials",
+  "version": "1.0.0",
+  "apiVersion": "1.4",
+  "minAppVersion": "2026.9.0",
+  "author": "OpenAEC Foundation",
+  "description": "Leer plannen met Open Planner Studio aan de hand van één doorlopend project, een aanbouw aan een woning. De tutorials staan in Help › Tutorials en je doorloopt ze stap voor stap in de app zelf, met een begeleidingspaneel dat ziet wanneer een stap gedaan is. Nu beschikbaar: tutorial 1, je eerste planning.",
+  "category": "Other",
+  "main": "main.js",
+  "permissions": ["help", "ribbon", "events"],
+  "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
+  "tags": ["tutorial", "leren", "help", "begeleiding"],
+  "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10 12 5 2 10l10 5 10-5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>"
+}
