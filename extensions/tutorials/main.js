@@ -25,7 +25,7 @@
  *
  * De projectbestanden in `projects/<taal>/` zijn GEGENEREERD, niet met de hand gemaakt: in een
  * checkout van de app `npm run gen:tutorial-project -- --out <map>` en daarna `start-tut-1.ifc`,
- * `na-tut-1.ifc`, `na-tut-2.ifc` en `na-tut-3.ifc` per taal hierheen kopiëren. De getallen in de tekst
+ * `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc` en `na-tut-3.ifc` per taal hierheen kopiëren. De getallen in de tekst
  * komen uit die standen (zie README.md voor de tabel): tutorial 1 uit `na-tut-1` (7 juni 2027, 14 juni,
  * Buitenspouwblad metselen als enige kritieke taak), tutorial 2 uit `na-tut-2` (6 augustus 2027, 21
  * taken, 45 werkdagen, 2 werkdagen speling), tutorial 3 uit `tussen-tut-3-bouwvak` (27 augustus 2027)
@@ -304,7 +304,8 @@ function scheduleSignature(api) {
     t.constraint ? [t.constraint.type, t.constraint.date || '', t.constraint.hard ? 1 : 0] : '', t.deadline || '',
   ]);
   const sequences = api.data.getSequences().map(s => [
-    s.predecessorId, s.successorId, s.type, s.lagDays, s.lagUnit || '', s.lagPercent === undefined ? '' : s.lagPercent,
+    s.predecessorId, s.successorId, s.type, s.lagDays, s.lagMinutes === undefined ? '' : s.lagMinutes, s.lagUnit || '',
+    s.lagPercent === undefined ? '' : s.lagPercent,
   ]);
   const calendar = api.data.getCalendar();
   return JSON.stringify([
@@ -320,7 +321,7 @@ let calculatedSignature = null;
 //
 // Beide tutorials werken op het project van tutorial 1 (`na-tut-1`, later `na-tut-2`). De getallen in
 // de tekst (6 augustus 2027, 21 taken, 45 werkdagen, 27 augustus, 1 september, …) komen uit de standen
-// `na-tut-2` en `na-tut-3` van de generator plus één tussenstand (`tussen-tut-3-bouwvak`, zie README).
+// `na-tut-2`, `tussen-tut-3-bouwvak` en `na-tut-3` van de generator (zie README).
 
 // ── De relaties van tutorial 2 ───────────────────────────────────────────────────────────────
 
@@ -359,7 +360,8 @@ const taskByKey = (api, key, tasks = api.data.getTasks()) => tasks.find(t => has
 
 /** Is dit precies de relatie uit de tutorial: Eind-Start met de gevraagde lag in werkdagen? */
 const linkMatches = (s, l) => s.type === 'FINISH_START' && s.lagDays === l.lag
-  && (!s.lagUnit || s.lagUnit === 'WORKTIME') && (s.lagPercent === undefined || s.lagPercent === null);
+  && (!s.lagUnit || s.lagUnit === 'WORKTIME') && (s.lagPercent === undefined || s.lagPercent === null)
+  && (s.lagMinutes === undefined || s.lagMinutes === null);
 
 /** Bestaat de relatie `l` (tussen dit paar taken) precies zoals bedoeld? */
 function hasLink(api, l, tasks = api.data.getTasks(), seqs = api.data.getSequences()) {
@@ -376,8 +378,9 @@ function linksDone(api, links) {
   return links.every(l => hasLink(api, l, tasks, seqs));
 }
 
-/** Bestaat er al een relatie tussen een paar uit `links`, maar anders dan bedoeld (verkeerde soort of
- *  lag)? Zo'n relatie kan Toon mij niet corrigeren: de API kent geen relatie wijzigen of verwijderen. */
+/** Bestaat er al een relatie tussen een paar uit `links`, maar anders dan bedoeld: een verkeerde soort
+ *  of lag, of omgekeerd (opvolger → voorganger; die zou met de gewenste relatie een kring geven)? Zo'n
+ *  relatie kan Toon mij niet corrigeren: de API kent geen relatie wijzigen of verwijderen. */
 function linksConflict(api, links) {
   const tasks = api.data.getTasks();
   const seqs = api.data.getSequences();
@@ -385,7 +388,8 @@ function linksConflict(api, links) {
     const a = taskByKey(api, l.pred, tasks);
     const b = taskByKey(api, l.succ, tasks);
     if (!a || !b) return false;
-    return seqs.some(s => s.predecessorId === a.id && s.successorId === b.id && !linkMatches(s, l));
+    return seqs.some(s => (s.predecessorId === a.id && s.successorId === b.id && !linkMatches(s, l))
+      || (s.predecessorId === b.id && s.successorId === a.id));
   });
 }
 
@@ -404,14 +408,12 @@ const isCalculated = api => calculatedSignature !== null && calculatedSignature 
  *  nieuw document, en legt daar alles neer. */
 async function ensureLinks(api, group) {
   const links = linksUpTo(group);
-  if (!tasksPresent(api) || linksConflict(api, links)) {
-    await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-1'));
-  }
-  api.data.batch(() => {
+  const addMissing = () => api.data.batch(() => {
     const tasks = api.data.getTasks();
     const seqs = api.data.getSequences();
     for (const l of links) {
       if (hasLink(api, l, tasks, seqs)) continue;
+      // `addSequence` geeft `null` als de app de relatie weigert (kring, dubbel).
       api.data.addSequence({
         predecessorId: taskByKey(api, l.pred, tasks).id,
         successorId: taskByKey(api, l.succ, tasks).id,
@@ -420,6 +422,15 @@ async function ensureLinks(api, group) {
       });
     }
   });
+  const fresh = () => api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-1'));
+  if (!tasksPresent(api) || linksConflict(api, links)) await fresh();
+  addMissing();
+  // Weigerde de app er één (bijvoorbeeld een kring via een omgekeerde relatie die hierboven niet als
+  // conflict herkend werd), begin dan alsnog opnieuw vanaf het resultaat van de vorige tutorial.
+  if (!linksDone(api, links)) {
+    await fresh();
+    addMissing();
+  }
 }
 
 const outerLeafDays = api => {
@@ -771,9 +782,9 @@ const TEXT_2 = {
     outro: [
       '## Wat je hebt geleerd',
       '- **Een relatie legt een volgorde vast: de opvolger wacht op zijn voorganger.** Zonder relaties begon elke taak op 7 juni en was de planning op 14 juni al klaar; met 24 relaties schuift het einde naar 6 augustus.',
-      '- **Een lag is wachttijd, geteld in werkdagen.** Het beton kreeg 3 werkdagen: het metselwerk begon op donderdag 24 juni in plaats van maandag 21 juni, omdat het weekend niet meetelt.',
+      '- **Een lag is wachttijd, standaard geteld in werkdagen.** Het beton kreeg 3 werkdagen: het metselwerk begon op donderdag 24 juni in plaats van maandag 21 juni. Een lag in werkdagen slaat het weekend over; voor iets dat doorloopt, zoals uitharden, kies je kalenderdagen (`3ed`).',
       '- **Het kritieke pad is de langste keten van taken.** Elke taak erop bepaalt de einddatum: 21 taken, 45 werkdagen. Loopt er één een dag uit, dan schuift de oplevering een dag.',
-      '- **Speling is de ruimte van een taak buiten het kritieke pad.** Het buitenspouwblad heeft 2 werkdagen speling omdat het dak, waar de kozijnen ook op wachten, 2 werkdagen langer duurt. Loopt hij meer dan 2 werkdagen uit, dan schuift de oplevering.',
+      '- **Speling is de ruimte van een taak buiten het kritieke pad.** Het buitenspouwblad heeft 2 werkdagen speling omdat de keten binnenspouwblad, dakelementen en dakbedekking (8 werkdagen) 2 werkdagen langer duurt dan het buitenspouwblad (6); de kozijnen wachten op beide. Loopt hij meer dan 2 werkdagen uit, dan schuift de oplevering.',
       '- **Het kritieke pad staat niet vast.** Met 9 werkdagen metselen liep het kritieke pad ineens door het buitenspouwblad, niet meer door het binnenspouwblad. Reken daarom na elke wijziging opnieuw.',
       'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). De regels achter deze tutorial staan in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad).',
     ],
@@ -795,7 +806,7 @@ const TEXT_2 = {
         ],
         explain: [
           'Onderin verschijnt de melding *Relatie aangemaakt: Start bouw → Bouwplaats inrichten*, en in de Gantt loopt een stippellijn van de ene balk naar de andere. Selecteer je Bouwplaats inrichten, dan staat in het paneel *Eigenschappen*, onder *Afhankelijkheden*, de voorganger 1.1 met type **FS** en een lag van 0d.',
-          'Start bouw is nu de **voorganger** en Bouwplaats inrichten de **opvolger**. FS staat voor *Eind-Start*: de opvolger kan pas beginnen als de voorganger klaar is. Dat is de standaardrelatie en het type van bijna alle relaties in dit project. De volgorde van je klikken telt: eerst de voorganger, dan de opvolger. Klik je andersom, dan wijst de relatie de verkeerde kant op.',
+          'Start bouw is nu de **voorganger** en Bouwplaats inrichten de **opvolger**. FS staat voor *Eind-Start*: de opvolger kan pas beginnen als de voorganger klaar is. Dat is de standaardrelatie en het type van alle relaties in dit project. De volgorde van je klikken telt: eerst de voorganger, dan de opvolger. Klik je andersom, dan wijst de relatie de verkeerde kant op.',
           'De balken staan nog stil. Onderaan meldt de statusbalk *Verouderd — herbereken (F5)*: een relatie verandert de datums pas als je rekent.',
         ],
       },
@@ -815,11 +826,11 @@ const TEXT_2 = {
         title: 'De fundering, in de tabel',
         task: [
           'Ga naar het tabblad **Tabel**. Klik op de **+** rechts in de tabelkop (*Kolom toevoegen*), open het kopje **Relaties** en kies **Voorgangers**. De kolom Voorgangers staat nu rechts in de tabel.',
-          'Klik in die kolom op de cel van **Funderingssleuf ontgraven** (2.1). Typ `1.4 FS` en druk op Enter: voorganger is taak 1.4, Aanbouw uitzetten, met een Eind-Start-relatie. Enter brengt je naar de cel eronder, dus je kunt doortypen:',
+          'Klik in die kolom op de cel van **Funderingssleuf ontgraven** (2.1) en begin meteen te typen: `1.4 FS`. Druk op Enter. Dat betekent: voorganger is taak 1.4, Aanbouw uitzetten, met een Eind-Start-relatie. Zet altijd een spatie tussen het nummer en het type: zonder spatie herkent de app de invoer niet. Druk je eerst op Enter, dan opent een ander invoerveld met een zoekvak; dat werkt ook, maar hier typ je gewoon. Enter brengt je naar de cel eronder, dus je kunt doortypen:',
           '- 2.1 Funderingssleuf ontgraven: `1.4 FS`\n- 2.2 Wapening en bekisting fundering: `2.1 FS`\n- 2.3 Inspectie wapening: `2.2 FS`\n- 2.4 Fundering storten: `2.3 FS`',
         ],
         explain: [
-          'In de kolom Voorgangers staan de relaties als `1.4FS`, `2.1FS`, `2.2FS` en `2.3FS`. Het getal is het WBS-nummer van de voorganger. De relatie van 2.1 loopt over de fasegrens heen naar 1.4: relaties verbinden taken, geen fasen. Zo loopt de keten van de voorbereiding door in de fundering.',
+          'In de kolom Voorgangers staan de relaties als `1.4 FS`, `2.1 FS`, `2.2 FS` en `2.3 FS`. Het getal is het WBS-nummer van de voorganger. De relatie van 2.1 loopt over de fasegrens heen naar 1.4: relaties verbinden taken, geen fasen. Zo loopt de keten van de voorbereiding door in de fundering.',
           'Ook een mijlpaal hoort in de keten. Fundering storten wacht op Inspectie wapening, en die wacht op de wapening: pas na de goedkeuring gaat het beton erin. Een keuring kost geen tijd, maar het werk erna wacht erop. De planning is nog steeds verouderd, want je hebt niet gerekend.',
         ],
       },
@@ -827,10 +838,11 @@ const TEXT_2 = {
         title: 'Wachttijd: een lag',
         task: [
           'Beton moet uitharden voordat de metselaar erop kan. Klik in de kolom Voorgangers op de cel van **Funderingsmetselwerk** (2.5) en typ `2.4 FS+3`. Druk op Enter. De `+3` is de **lag**: drie werkdagen wachttijd na het einde van de voorganger.',
-          'Druk daarna op F5, of klik op *Start › Planning › Bereken*.',
+          'Een lag telt standaard in werkdagen. Beton hardt ook in het weekend uit; wil je dat laten meetellen, dan typ je `3ed` (kalenderdagen), zie [Relaties en lag](docs://uitleg-relaties). Hier houden we het bij werkdagen.',
+          'Druk daarna op F5, of klik op *Tabel › Planning › Bereken*.',
         ],
         explain: [
-          'De cel toont `2.4FS+3d`. De kolommen Start en Einde laten zien wat de relaties tot nu toe doen: Fundering storten staat op 18-06-2027, vrijdag. Funderingsmetselwerk begint op 24-06-2027, donderdag. Daartussen liggen drie werkdagen wachttijd: maandag 21, dinsdag 22 en woensdag 23 juni. Het weekend telt niet mee, want een lag telt in werkdagen.',
+          'De cel toont `2.4 FS+3d`. De kolommen Start en Einde laten zien wat de relaties tot nu toe doen: Fundering storten staat op 18-06-2027, vrijdag. Funderingsmetselwerk begint op 24-06-2027, donderdag. Daartussen liggen drie werkdagen wachttijd: maandag 21, dinsdag 22 en woensdag 23 juni. Het weekend telt hier niet mee, want de lag staat in werkdagen; met `3ed` begon het metselwerk op dinsdag 22 juni.',
           'Zonder lag was het metselwerk op maandag 21 juni begonnen, kort na het storten van het beton. De taken waar je nog geen relatie aan hangt, zoals Kanaalplaatvloer leggen, staan nog steeds op 07-06-2027.',
         ],
       },
@@ -843,7 +855,7 @@ const TEXT_2 = {
         ],
         explain: [
           'Na de vloer splitst het werk zich: het binnenspouwblad en het buitenspouwblad hangen allebei aan Kanaalplaatvloer leggen, dus ze kunnen tegelijk beginnen. De binnenkant loopt daarna door naar dakelementen en dakbedekking, de buitenkant is één klus.',
-          'Kozijnen plaatsen wacht op beide ketens: de kozijnen kunnen er pas in als het dak dicht is én de gevel staat. De cel toont `3.4FS;3.2FS`. Zo werkt een taak met meer voorgangers: hij wacht op de laatste die klaar is. Welke dat is, zie je zodra je rekent.',
+          'Kozijnen plaatsen wacht op beide ketens: de kozijnen kunnen er pas in als het dak dicht is én de gevel staat. De cel toont `3.4 FS; 3.2 FS`. Zo werkt een taak met meer voorgangers: hij wacht op de laatste die klaar is. Welke dat is, zie je zodra je rekent.',
         ],
       },
       afbouw: {
@@ -864,7 +876,7 @@ const TEXT_2 = {
           'Ga terug naar het tabblad **Start** en klik op *Start › Planning › Bereken*, of druk op F5. Zie je de hele planning niet, klik dan op *Beeld › Tijdschaal › Passend maken op project*.',
         ],
         explain: [
-          'De taken staan nu achter elkaar in plaats van allemaal op 7 juni. Onderaan in de statusbalk staat *Einde: 06-08-2027* en *Kritiek pad: 21 taken, 45 werkdagen*. De oplevering staat op vrijdag 6 augustus 2027, negen weken na de start.',
+          'De taken staan nu achter elkaar in plaats van allemaal op 7 juni. Onderaan in de statusbalk staat *Einde: 06-08-2027* en *Kritiek pad: 21 taken, 45 werkdagen*. De oplevering staat op vrijdag 6 augustus 2027, in de negende week van het project.',
           'Waarom precies die datum? De app rekent voorwaarts: elke taak begint op de eerste werkdag na het einde van zijn voorgangers, en de lag telt mee. Heeft een taak meer voorgangers, dan wacht hij op de laatste. Het einde van de langste keten is het einde van het project. Die keten is het **kritieke pad**: alle taken die de einddatum bepalen. Loopt één van die 21 taken een dag uit, dan schuift de oplevering een dag.',
           'De balken van het kritieke pad zijn rood. Twee balken zijn dat niet: Buitenspouwblad metselen en Schilderwerk. Achter hun balk loopt een groene band: dat is hun speling, de ruimte die ze hebben voordat de oplevering schuift.',
         ],
@@ -872,23 +884,25 @@ const TEXT_2 = {
       uitloop: {
         title: 'Speling, en wat als het buitenspouwblad uitloopt',
         task: [
-          'Ga naar het tabblad **Tabel** en kijk naar de kolommen **Kritiek** en **Totale speling** (de korte koppen *Kri…* en *Tot…*). Bijna elke taak is kritiek en heeft 0d speling. Buitenspouwblad metselen (3.2) heeft 2d speling en Schilderwerk (4.5) 6d.',
-          'Test de speling van het buitenspouwblad. Klik in de kolom **Duur** op de cel van Buitenspouwblad metselen, typ `9` en druk op Enter. Druk daarna op F5.',
+          'Ga naar het tabblad **Tabel**. Klik op de rij van **Buitenspouwblad metselen** (3.2). In het paneel *Eigenschappen* (scroll zo nodig omlaag) staat onder *CPM Resultaat*: *Vroegste einde* 06-07-2027 en *Laatste einde* 08-07-2027. Kijk ook naar de kolommen **Kritiek** en **Totale speling** (de korte koppen *Kri…* en *Tot…*): bijna elke taak is kritiek en heeft 0d speling, het buitenspouwblad heeft 2d en Schilderwerk (4.5) 6d. Bij Kozijnen plaatsen (3.5) staat in de kolom Voorgangers het bliksemsymbool bij `3.4 FS`.',
+          'Test de speling van het buitenspouwblad. Klik in de kolom **Duur** op zijn cel, typ `9` en druk op Enter. Druk daarna op F5, of klik op *Tabel › Planning › Bereken*.',
         ],
         explain: [
-          'Voor de wijziging had Buitenspouwblad metselen 2 werkdagen speling. Klik je de taak aan, dan staat in het paneel *Eigenschappen* onder *CPM Resultaat*: *Vroegste einde* 06-07-2027 en *Laatste einde* 08-07-2027. Waarom 2? Beide spouwbladen beginnen na de vloer, maar de kozijnen wachten ook op het dak. Binnenspouwblad (5 werkdagen), Dakelementen (1) en Dakbedekking (2) duren samen 8 werkdagen, het buitenspouwblad 6. Dus 2 werkdagen over: 7 en 8 juli. Je ziet het ook in de kolom Voorgangers: bij Kozijnen plaatsen staat `3.4FS` met een bliksemsymbool en `3.2FS` zonder. De relatie met het dak is **bepalend**, omdat het dak als laatste klaar is; het buitenspouwblad is eerder klaar, en dat verschil is zijn speling.',
-          'Schilderwerk heeft 6 werkdagen speling. Het schilderwerk hoeft pas klaar te zijn als Opleverpunten en schoonmaken begint, en die wacht op het tegelwerk, dat vijf werkdagen wacht op het drogen van de dekvloer. Speling zegt dus niets over hoe belangrijk een taak is, alleen hoeveel tijd er nog over is.',
-          'Met 9 werkdagen is het buitenspouwblad klaar op vrijdag 9 juli: 3 werkdagen uitloop tegen 2 werkdagen speling. De oplevering schuift een werkdag, naar maandag 9 augustus. De statusbalk toont *Einde: 09-08-2027* en *Kritiek pad: 19 taken, 46 werkdagen*. Het kritieke pad is verlegd: het loopt nu door het buitenspouwblad, en het binnenspouwblad, de dakelementen en de dakbedekking hebben 1 werkdag speling. Daarom reken je na elke wijziging opnieuw.',
+          'Het buitenspouwblad had 2 werkdagen speling: 7 en 8 juli. Het dak (Binnenspouwblad 5 werkdagen, Dakelementen 1 en Dakbedekking 2, samen 8) duurt 2 werkdagen langer dan het buitenspouwblad (6), en de kozijnen wachten op allebei. Daarom stond het bliksemsymbool bij `3.4 FS`: de relatie met het dak is **bepalend**. Schilderwerk had 6 werkdagen speling, want het hoeft pas klaar te zijn als Opleverpunten en schoonmaken begint, en die wacht op het tegelwerk. Speling zegt dus niets over hoe belangrijk een taak is, alleen hoeveel tijd er nog over is. Meer daarover: [Kritiek pad en speling](docs://uitleg-kritiek-pad).',
+          'Met 9 werkdagen is het buitenspouwblad klaar op vrijdag 9 juli: 3 werkdagen uitloop tegen 2 werkdagen speling. De oplevering schuift een werkdag, naar maandag 9 augustus. De statusbalk toont *Einde: 09-08-2027* en *Kritiek pad: 19 taken, 46 werkdagen*. Nu staat het bliksemsymbool bij `3.2 FS`: het buitenspouwblad is de bepalende voorganger geworden en het kritieke pad loopt door hem. Het binnenspouwblad, de dakelementen en de dakbedekking hebben 1 werkdag speling. Daarom reken je na elke wijziging opnieuw.',
         ],
       },
       terugzetten: {
         title: 'Terug naar 6 werkdagen',
         task: [
-          'Zet in de kolom **Duur** de cel van Buitenspouwblad metselen terug op `6`, druk op Enter en druk op F5.',
+          'Zet in de kolom **Duur** de cel van Buitenspouwblad metselen terug op `6`, druk op Enter en druk op F5, of klik op *Tabel › Planning › Bereken*.',
         ],
         explain: [
           'Alles staat weer zoals bij het rekenen: *Einde: 06-08-2027*, *Kritiek pad: 21 taken, 45 werkdagen* en 2 werkdagen speling bij het buitenspouwblad.',
-          'Dit is het resultaat van tutorial 2, en het beginpunt van tutorial 3: daarin komen de bouwvak en twee datumafspraken erbij. Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). Meer over de regels lees je in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad).',
+          'Dit is het resultaat van tutorial 2, en het beginpunt van tutorial 3: daarin komen de bouwvak en twee datumafspraken erbij.',
+        ],
+        panelOnly: [
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). Meer over de regels lees je in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad).',
         ],
       },
     },
@@ -908,9 +922,9 @@ const TEXT_2 = {
     outro: [
       '## What you have learned',
       '- **A relationship fixes an order: the successor waits for its predecessor.** Without relationships every task started on 7 June and the schedule was finished on 14 June; with 24 relationships the finish moves to 6 August.',
-      '- **A lag is waiting time, counted in working days.** The concrete got 3 working days: the brickwork started on Thursday 24 June instead of Monday 21 June, because the weekend does not count.',
+      '- **A lag is waiting time, by default counted in working days.** The concrete got 3 working days: the brickwork started on Thursday 24 June instead of Monday 21 June. A lag in working days skips the weekend; for something that carries on, such as curing, you choose calendar days (`3ed`).',
       '- **The critical path is the longest chain of tasks.** Every task on it decides the finish date: 21 tasks, 45 work days. If one of them runs a day late, the handover moves a day.',
-      '- **Float is the room a task has outside the critical path.** The outer cavity leaf has 2 working days of float because the roof, which the window frames also wait for, takes 2 working days longer. If it runs more than 2 working days late, the handover moves.',
+      '- **Float is the room a task has outside the critical path.** The outer cavity leaf has 2 working days of float because the chain inner cavity leaf, roof elements and roofing (8 working days) takes 2 working days longer than the outer leaf (6); the window frames wait for both. If it runs more than 2 working days late, the handover moves.',
       '- **The critical path is not fixed.** With 9 working days of bricklaying the critical path suddenly ran through the outer leaf, no longer through the inner leaf. So recalculate after every change.',
       'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). The rules behind this tutorial are in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad).',
     ],
@@ -932,7 +946,7 @@ const TEXT_2 = {
         ],
         explain: [
           'The message *Relation created: Start of construction → Set up site* appears at the bottom, and in the Gantt a dotted line runs from one bar to the other. Select Set up site and in the *Properties* panel, under *Dependencies*, you see the predecessor 1.1 with type **FS** and a lag of 0d.',
-          'Start of construction is now the **predecessor** and Set up site the **successor**. FS stands for *finish-start*: the successor can only start when the predecessor has finished. It is the default relationship and the type of nearly every relationship in this project. The order matters: you clicked the predecessor first, then the successor. The other way round, the relationship points the wrong way.',
+          'Start of construction is now the **predecessor** and Set up site the **successor**. FS stands for *finish-start*: the successor can only start when the predecessor has finished. It is the default relationship and the type of every relationship in this project. The order matters: you clicked the predecessor first, then the successor. The other way round, the relationship points the wrong way.',
           'The bars have not moved. The status bar says *Out of date — recalculate (F5)*: a relationship only changes the dates when you calculate.',
         ],
       },
@@ -952,11 +966,11 @@ const TEXT_2 = {
         title: 'The foundations, in the table',
         task: [
           'Go to the **Table** tab. Click the **+** at the right of the table header (*Add column*), open the **Relations** heading and choose **Predecessors**. The Predecessors column is now at the right of the table.',
-          'In that column, click the cell of **Excavate foundation trench** (2.1). Type `1.4 FS` and press Enter: the predecessor is task 1.4, Set out the extension, with a finish-start relationship. Enter takes you to the cell below, so you can keep typing:',
+          'In that column, click the cell of **Excavate foundation trench** (2.1) and start typing right away: `1.4 FS`. Press Enter. That means: the predecessor is task 1.4, Set out the extension, with a finish-start relationship. Always put a space between the number and the type: without the space the app does not recognise the input. If you press Enter first, a different input box with a search field opens; that works too, but here you simply type. Enter takes you to the cell below, so you can keep typing:',
           '- 2.1 Excavate foundation trench: `1.4 FS`\n- 2.2 Foundation formwork and reinforcement: `2.1 FS`\n- 2.3 Reinforcement inspection: `2.2 FS`\n- 2.4 Pour foundation: `2.3 FS`',
         ],
         explain: [
-          'In the Predecessors column the relationships read `1.4FS`, `2.1FS`, `2.2FS` and `2.3FS`. The number is the WBS number of the predecessor. The relationship of 2.1 crosses the phase boundary to 1.4: relationships connect tasks, not phases. That is how the chain of the preparation continues into the foundations.',
+          'In the Predecessors column the relationships read `1.4 FS`, `2.1 FS`, `2.2 FS` and `2.3 FS`. The number is the WBS number of the predecessor. The relationship of 2.1 crosses the phase boundary to 1.4: relationships connect tasks, not phases. That is how the chain of the preparation continues into the foundations.',
           'A milestone belongs in the chain too. Pour foundation waits for Reinforcement inspection, and that waits for the reinforcement: only after approval does the concrete go in. An inspection takes no time, but the work after it waits for it. The schedule is still out of date, because you have not calculated.',
         ],
       },
@@ -964,10 +978,11 @@ const TEXT_2 = {
         title: 'Waiting time: a lag',
         task: [
           'Concrete has to cure before the bricklayer can build on it. In the Predecessors column, click the cell of **Foundation brickwork** (2.5) and type `2.4 FS+3`. Press Enter. The `+3` is the **lag**: three working days of waiting time after the predecessor finishes.',
-          'Then press F5, or click *Home › Schedule › Calculate*.',
+          'A lag counts in working days by default. Concrete also cures over the weekend; if you want that to count, you type `3ed` (calendar days), see [Relations and lag](docs://uitleg-relaties). Here we stick to working days.',
+          'Then press F5, or click *Table › Schedule › Calculate*.',
         ],
         explain: [
-          'The cell shows `2.4FS+3d`. The Start and Finish columns show what the relationships do so far: Pour foundation is on 18-06-2027, a Friday. Foundation brickwork starts on 24-06-2027, a Thursday. In between are three working days of waiting time: Monday 21, Tuesday 22 and Wednesday 23 June. The weekend does not count, because a lag counts in working days.',
+          'The cell shows `2.4 FS+3d`. The Start and Finish columns show what the relationships do so far: Pour foundation is on 18-06-2027, a Friday. Foundation brickwork starts on 24-06-2027, a Thursday. In between are three working days of waiting time: Monday 21, Tuesday 22 and Wednesday 23 June. The weekend does not count here, because the lag is in working days; with `3ed` the brickwork would have started on Tuesday 22 June.',
           'Without the lag the brickwork would have started on Monday 21 June, right after the concrete was poured. The tasks you have not linked yet, such as Lay hollow-core floor, are still on 07-06-2027.',
         ],
       },
@@ -980,7 +995,7 @@ const TEXT_2 = {
         ],
         explain: [
           'After the floor the work splits: the inner and the outer leaf both hang on Lay hollow-core floor, so they can start at the same time. The inside continues to roof elements and roofing, the outside is a single job.',
-          'Install window frames waits for both chains: the frames can only go in when the roof is closed and the facade is up. The cell shows `3.4FS;3.2FS`. That is how a task with more than one predecessor works: it waits for the last one to finish. Which one that is, you see as soon as you calculate.',
+          'Install window frames waits for both chains: the frames can only go in when the roof is closed and the facade is up. The cell shows `3.4 FS; 3.2 FS`. That is how a task with more than one predecessor works: it waits for the last one to finish. Which one that is, you see as soon as you calculate.',
         ],
       },
       afbouw: {
@@ -1001,7 +1016,7 @@ const TEXT_2 = {
           'Go back to the **Home** tab and click *Home › Schedule › Calculate*, or press F5. If you cannot see the whole schedule, click *View › Time Scale › Fit to project*.',
         ],
         explain: [
-          'The tasks are now lined up one after another instead of all on 7 June. At the bottom the status bar says *End: 06-08-2027* and *Critical path: 21 tasks, 45 work days*. The handover is on Friday 6 August 2027, nine weeks after the start.',
+          'The tasks are now lined up one after another instead of all on 7 June. At the bottom the status bar says *End: 06-08-2027* and *Critical path: 21 tasks, 45 work days*. The handover is on Friday 6 August 2027, in the ninth week of the project.',
           'Why exactly that date? The app calculates forwards: every task starts on the first working day after its predecessors finish, and the lag counts. A task with more than one predecessor waits for the last one. The end of the longest chain is the end of the project. That chain is the **critical path**: all the tasks that decide the finish date. If one of those 21 tasks runs a day late, the handover moves a day.',
           'The bars of the critical path are red. Two bars are not: Build outer cavity leaf and Painting. A green band runs behind their bar: that is their float, the room they have before the handover moves.',
         ],
@@ -1009,23 +1024,25 @@ const TEXT_2 = {
       uitloop: {
         title: 'Float, and what if the outer leaf runs late',
         task: [
-          'Go to the **Table** tab and look at the **Critical** and **Total float** columns (the short headers *Cri…* and *Tot…*). Nearly every task is critical and has 0d of float. Build outer cavity leaf (3.2) has 2d of float and Painting (4.5) 6d.',
-          'Test the float of the outer leaf. In the **Duration** column, click the cell of Build outer cavity leaf, type `9` and press Enter. Then press F5.',
+          'Go to the **Table** tab. Click the row of **Build outer cavity leaf** (3.2). In the *Properties* panel (scroll down if needed), under *CPM Result*, it says: *Early finish* 06-07-2027 and *Late finish* 08-07-2027. Also look at the **Critical** and **Total float** columns (the short headers *Cri…* and *Tot…*): nearly every task is critical and has 0d of float, the outer leaf has 2d and Painting (4.5) 6d. At Install window frames (3.5), the Predecessors column has the lightning-bolt symbol at `3.4 FS`.',
+          'Test the float of the outer leaf. In the **Duration** column, click its cell, type `9` and press Enter. Then press F5, or click *Table › Schedule › Calculate*.',
         ],
         explain: [
-          'Before the change, Build outer cavity leaf had 2 working days of float. Click the task and the *Properties* panel says under *CPM Result*: *Early finish* 06-07-2027 and *Late finish* 08-07-2027. Why 2? Both cavity leaves start after the floor, but the window frames also wait for the roof. Build inner cavity leaf (5 working days), Place roof elements (1) and Apply roofing (2) together take 8 working days, the outer leaf 6. So 2 working days to spare: 7 and 8 July. You also see it in the Predecessors column: at Install window frames, `3.4FS` has a lightning-bolt symbol and `3.2FS` does not. The relationship with the roof is **driving**, because the roof finishes last; the outer leaf finishes earlier, and that difference is its float.',
-          'Painting has 6 working days of float. The painting only has to be finished when Snagging and cleaning starts, and that waits for the tiling, which waits five working days for the screed to dry. So float says nothing about how important a task is, only how much time is left.',
-          'With 9 working days the outer leaf is finished on Friday 9 July: 3 working days of overrun against 2 working days of float. The handover moves a working day, to Monday 9 August. The status bar shows *End: 09-08-2027* and *Critical path: 19 tasks, 46 work days*. The critical path has moved: it now runs through the outer leaf, and the inner leaf, the roof elements and the roofing have 1 working day of float. That is why you recalculate after every change.',
+          'The outer leaf had 2 working days of float: 7 and 8 July. The roof (Build inner cavity leaf 5 working days, Place roof elements 1 and Apply roofing 2, together 8) takes 2 working days longer than the outer leaf (6), and the window frames wait for both. That is why the lightning bolt was at `3.4 FS`: the relationship with the roof is **driving**. Painting had 6 working days of float, because it only has to be finished when Snagging and cleaning starts, and that waits for the tiling. So float says nothing about how important a task is, only how much time is left. More on that: [Critical path and float](docs://uitleg-kritiek-pad).',
+          'With 9 working days the outer leaf is finished on Friday 9 July: 3 working days of overrun against 2 working days of float. The handover moves a working day, to Monday 9 August. The status bar shows *End: 09-08-2027* and *Critical path: 19 tasks, 46 work days*. Now the lightning bolt is at `3.2 FS`: the outer leaf has become the driving predecessor and the critical path runs through it. The inner leaf, the roof elements and the roofing have 1 working day of float. That is why you recalculate after every change.',
         ],
       },
       terugzetten: {
         title: 'Back to 6 working days',
         task: [
-          'In the **Duration** column, set the cell of Build outer cavity leaf back to `6`, press Enter and press F5.',
+          'In the **Duration** column, set the cell of Build outer cavity leaf back to `6`, press Enter and press F5, or click *Table › Schedule › Calculate*.',
         ],
         explain: [
           'Everything is back as when you first calculated: *End: 06-08-2027*, *Critical path: 21 tasks, 45 work days* and 2 working days of float at the outer leaf.',
-          'This is the result of tutorial 2, and the starting point of tutorial 3: in that one the construction holiday and two date agreements are added. Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). You can read more about the rules in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad).',
+          'This is the result of tutorial 2, and the starting point of tutorial 3: in that one the construction holiday and two date agreements are added.',
+        ],
+        panelOnly: [
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). You can read more about the rules in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad).',
         ],
       },
     },
@@ -1045,7 +1062,7 @@ const TEXT_3 = {
       'Bij elke stap zie je hoe de planning verschuift, en waarom. Aan het eind staat de oplevering op woensdag 1 september 2027, en heb je gezien wat een deadline doet als je hem wel en als je hem niet haalt.',
       '## Uitgangspunt',
       'Je hebt tutorial 2 afgerond: de planning met 24 relaties, berekend, met de oplevering op vrijdag 6 augustus 2027. Heb je dat niet, [open dan het resultaat van tutorial 2](project://projects/nl/na-tut-2.ifc).',
-      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 3*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. **Opnieuw** in de bouwvakstap laadt het resultaat van tutorial 2 opnieuw.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 3*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. **Opnieuw** in de bouwvakstap laadt het resultaat van tutorial 2 opnieuw, en in de constraintstap dat resultaat mét de bouwvak erin.',
     ],
     outro: [
       '## Wat je hebt geleerd',
@@ -1070,13 +1087,13 @@ const TEXT_3 = {
         title: 'De bouwvak in de kalender',
         task: [
           'Klik op *Planning › Kalender › Kalender*. Het venster **Kalenders** opent: links staat *Bouwkalender NL* met een ster, de projectkalender.',
-          'Klik op **Feestdagen genereren…**. Laat **Land** op Nederland staan en kies bij **Bouwvak** voor **Midden**. Klik op **Genereren** en daarna op **Toepassen**.',
+          'Klik op **Feestdagen genereren…**. Laat **Land** op Nederland staan en kies bij **Bouwvak** voor **Midden**. De getallen hieronder horen bij die regio; koos je een andere, genereer dan opnieuw met Midden. Klik op **Genereren** en daarna op **Toepassen**.',
           '**Toon mij** opent hier het project met de bouwvak al erin, als nieuw tabblad. De kalender kan het paneel zelf niet aanpassen.',
         ],
         explain: [
           'In de Gantt is een grijs blok bijgekomen: *Bouwvak (Midden)*, van maandag 2 tot en met vrijdag 20 augustus 2027. Drie weken zonder werkdagen. Zie je het blok niet, klik dan op *Beeld › Tijdschaal › Passend maken op project*. Toepassen heeft de planning meteen opnieuw doorgerekend, dus de melding Verouderd blijft weg.',
           'De statusbalk zegt nu *Einde: 27-08-2027*: de oplevering staat drie weken later dan eerst. Het aantal werkdagen is hetzelfde gebleven, *Kritiek pad: 21 taken, 45 werkdagen*, want de bouwvak telt niet als werkdag.',
-          'Waarom schuift de oplevering precies drie weken op, terwijl het meeste werk vóór de bouwvak valt? Kijk naar Tegelwerk. Dat wacht vijf werkdagen op de dekvloer, die maandag 26 juli klaar is. Dinsdag 27 tot en met vrijdag 30 juli zijn vier van die vijf wachtdagen. De vijfde zou maandag 2 augustus zijn, maar dat is bouwvak: die dag telt niet. De tegelzetter begint daarom pas op dinsdag 24 augustus in plaats van dinsdag 3 augustus, en alles daarna schuift mee. Het schilderwerk valt vóór de bouwvak en verandert niet.',
+          'Waarom schuift de oplevering precies drie weken op, terwijl het meeste werk vóór de bouwvak valt? Kijk naar Tegelwerk. Dat wacht vijf werkdagen op de dekvloer, die maandag 26 juli klaar is. Dinsdag 27 tot en met vrijdag 30 juli zijn vier van die vijf wachtdagen. De vijfde zou maandag 2 augustus zijn, maar dat is bouwvak: die dag telt niet. De tegelzetter begint daarom pas op dinsdag 24 augustus in plaats van dinsdag 3 augustus, en alles daarna schuift mee. Het schilderwerk valt vóór de bouwvak en verandert niet. Een lag in werkdagen slaat de bouwvak over, ook als het om droogtijd gaat die in werkelijkheid doorloopt; daarvoor is `5ed` bedoeld (zie [Relaties en lag](docs://uitleg-relaties)).',
         ],
       },
       constraint: {
@@ -1096,8 +1113,8 @@ const TEXT_3 = {
         ],
         explain: [
           'Kozijnen plaatsen begint nu op woensdag 14 juli, drie werkdagen later dan de vrijdag 9 juli waarop de relaties het toelieten: vrijdag 9, maandag 12 en dinsdag 13 juli zijn wachtdagen. Alles wat op de kozijnen volgt, schuift drie werkdagen mee. Oplevering staat op woensdag 1 september 2027: *Einde: 01-09-2027*, drie werkdagen later dan 27 augustus.',
-          'Het kritieke pad is korter geworden: *Kritiek pad: 8 taken, 48 werkdagen*. Het begint nu bij de constraint: van Kozijnen plaatsen tot en met de oplevering. De taken ervoor, van Start bouw tot en met Dakbedekking, zijn niet meer rood. Ze hebben 3 werkdagen speling, want de kozijnen wachten toch tot 14 juli. Buitenspouwblad heeft er nu 5.',
-          'Schilderwerk duurt 3 werkdagen, maar loopt van 29 juli tot en met 23 augustus: de bouwvak ligt er middenin. Een feestdag of bouwvak midden in een taak telt niet mee; de taak loopt er gewoon overheen.',
+          'Het kritieke pad telt nu minder taken: *Kritiek pad: 8 taken, 48 werkdagen*. Die 48 werkdagen zijn de looptijd van het hele project, drie meer dan eerst. Het kritieke pad begint nu bij de constraint: van Kozijnen plaatsen tot en met de oplevering. De taken ervoor, van Start bouw tot en met Dakbedekking, zijn niet meer rood. Ze hebben 3 werkdagen speling, want de kozijnen wachten toch tot 14 juli. Buitenspouwblad heeft er nu 5.',
+          'Schilderwerk duurt 3 werkdagen, maar loopt van 29 juli tot en met 23 augustus: de bouwvak ligt er middenin. Een feestdag of bouwvak midden in een taak telt niet mee; de taak loopt er gewoon overheen. Klik je op Schilderwerk, dan meldt het paneel *Eigenschappen* bij *Duur*: *⚠ Deze taak loopt over Bouwvak (Midden) — een vrije periode van 23 dagen (31-07-2027 t/m 22-08-2027).*',
         ],
       },
       deadline: {
@@ -1116,8 +1133,8 @@ const TEXT_3 = {
           'Wat als de afspraak strakker is? Zet de deadline van **Oplevering** op vrijdag 27 augustus 2027, de datum waarop je zonder de constraint klaar was: typ `27`, `08` en `2027` en druk op Enter. Druk daarna op F5.',
         ],
         explain: [
-          'De balken blijven waar ze staan: Oplevering blijft op woensdag 1 september. Maar bij Oplevering staat op 27 augustus nu een rode pijl omlaag, links van het ruitje, en de statusbalk meldt *1 deadline(s) overschreden*. In het paneel *Waarschuwingen* staat *Deadline 27-08-2027 overschreden — vroegste einde 01-09-2027*.',
-          'Selecteer je Oplevering, dan zie je onder *CPM Resultaat* een *Totale speling* van -3 dagen: op papier ben je 3 werkdagen te laat. Ook de keten ervoor is nu kritiek: *Kritiek pad: 21 taken*, van Start bouw tot en met de oplevering. De app verschuift niets om de datum te halen. Hij laat zien dat de afspraak niet past.',
+          'De balken blijven waar ze staan: Oplevering blijft op woensdag 1 september. Maar bij Oplevering staat op 27 augustus nu een rode pijl omlaag, links van het ruitje, en de statusbalk meldt *1 deadline(s) overschreden*. Klik op die melding in de statusbalk: het paneel *Waarschuwingen* opent met *Deadline 27-08-2027 overschreden — vroegste einde 01-09-2027*.',
+          'Selecteer je Oplevering, dan zie je onder *CPM Resultaat* een *Totale speling* van -3 dagen: op papier ben je 3 werkdagen te laat. Dat geldt voor de hele keten van Kozijnen plaatsen tot en met de oplevering. De taken daarvoor, van Start bouw tot en met Dakbedekking, hebben 0 dagen speling: ze zijn kritiek zonder marge. Alleen Buitenspouwblad (2 dagen) en Schilderwerk (3 dagen) zijn niet kritiek. Zo komt de statusbalk op *Kritiek pad: 21 taken*. De app verschuift niets om de datum te halen. Hij laat zien dat de afspraak niet past.',
           'Wil je de deadline halen, dan maak je de keten korter of de afspraak ruimer, bijvoorbeeld een eerdere levering van de kozijnen. Dat is een keuze voor de planner, niet voor de rekenmotor.',
         ],
       },
@@ -1128,7 +1145,10 @@ const TEXT_3 = {
         ],
         explain: [
           'Alles staat weer zoals na de eerste deadline: geen overschreden deadline, *Kritiek pad: 8 taken, 48 werkdagen* en *Einde: 01-09-2027*.',
-          'Dit is het resultaat van tutorial 3: een planning met de bouwvak in de kalender, een constraint op de kozijnen en een deadline op de oplevering. Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-3.ifc). Meer over de regels lees je in [Kalenders en werkdagen](docs://uitleg-kalenders) en [Constraints en deadlines](docs://uitleg-constraints).',
+          'Dit is het resultaat van tutorial 3: een planning met de bouwvak in de kalender, een constraint op de kozijnen en een deadline op de oplevering.',
+        ],
+        panelOnly: [
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-3.ifc). Meer over de regels lees je in [Kalenders en werkdagen](docs://uitleg-kalenders) en [Constraints en deadlines](docs://uitleg-constraints).',
         ],
       },
     },
@@ -1143,7 +1163,7 @@ const TEXT_3 = {
       'At every step you see how the schedule shifts, and why. At the end the handover is on Wednesday 1 September 2027, and you have seen what a deadline does when you meet it and when you do not.',
       '## Starting point',
       'You have finished tutorial 2: the schedule with 24 relationships, calculated, with the handover on Friday 6 August 2027. If you have not, [open the result of tutorial 2](project://projects/en/na-tut-2.ifc).',
-      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 3* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. **Start over** in the construction holiday step reloads the result of tutorial 2.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 3* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. **Start over** in the construction holiday step reloads the result of tutorial 2, and in the constraint step that result with the construction holiday in it.',
     ],
     outro: [
       '## What you have learned',
@@ -1168,13 +1188,13 @@ const TEXT_3 = {
         title: 'The construction holiday in the calendar',
         task: [
           'Click *Planning › Calendar › Calendar*. The **Calendars** window opens: on the left is the project calendar, marked with a star.',
-          'Click **Generate holidays…**. Leave **Country** on the Netherlands and choose **Central** under **Construction holiday**. Click **Generate** and then **Apply**.',
+          'Click **Generate holidays…**. Leave **Country** on the Netherlands and choose **Central** under **Construction holiday**. The numbers below belong to that region; if you chose another one, generate again with Central. Click **Generate** and then **Apply**.',
           '**Show me** opens the project with the construction holiday already in it, as a new tab. The guide cannot change the calendar itself.',
         ],
         explain: [
-          'A grey block has appeared in the Gantt: *Bouwvak (Midden)*, from Monday 2 to Friday 20 August 2027. Three weeks without working days. If you cannot see the block, click *View › Time Scale › Fit to project*. Apply has recalculated the schedule straight away, so the Out of date message stays away.',
+          'A grey block has appeared in the Gantt: *Bouwvak (Midden)* (the app uses the Dutch name), from Monday 2 to Friday 20 August 2027. Three weeks without working days. If you cannot see the block, click *View › Time Scale › Fit to project*. Apply has recalculated the schedule straight away, so the Out of date message stays away.',
           'The status bar now says *End: 27-08-2027*: the handover is three weeks later than before. The number of work days is the same, *Critical path: 21 tasks, 45 work days*, because the construction holiday does not count as a working day.',
-          'Why does the handover move by exactly three weeks, when most of the work falls before the construction holiday? Look at Tiling. It waits five working days for the screed, which is finished on Monday 26 July. Tuesday 27 to Friday 30 July are four of those five waiting days. The fifth would be Monday 2 August, but that is construction holiday: that day does not count. So the tiler starts on Tuesday 24 August instead of Tuesday 3 August, and everything after that moves along. The painting falls before the construction holiday and does not change.',
+          'Why does the handover move by exactly three weeks, when most of the work falls before the construction holiday? Look at Tiling. It waits five working days for the screed, which is finished on Monday 26 July. Tuesday 27 to Friday 30 July are four of those five waiting days. The fifth would be Monday 2 August, but that is construction holiday: that day does not count. So the tiler starts on Tuesday 24 August instead of Tuesday 3 August, and everything after that moves along. The painting falls before the construction holiday and does not change. A lag in working days skips the construction holiday, even when it is drying time that carries on in reality; that is what `5ed` is for (see [Relations and lag](docs://uitleg-relaties)).',
         ],
       },
       constraint: {
@@ -1194,8 +1214,8 @@ const TEXT_3 = {
         ],
         explain: [
           'Install window frames now starts on Wednesday 14 July, three working days later than the Friday 9 July the relationships allowed: Friday 9, Monday 12 and Tuesday 13 July are waiting days. Everything that follows the frames moves three working days along. The handover is on Wednesday 1 September 2027: *End: 01-09-2027*, three working days later than 27 August.',
-          'The critical path has become shorter: *Critical path: 8 tasks, 48 work days*. It now starts at the constraint: from Install window frames up to and including the handover. The tasks before it, from Start of construction up to Apply roofing, are no longer red. They have 3 working days of float, because the frames wait until 14 July anyway. Build outer cavity leaf now has 5.',
-          'Painting takes 3 working days, but runs from 29 July up to and including 23 August: the construction holiday is in the middle of it. A holiday or construction holiday in the middle of a task does not count; the task simply runs across it.',
+          'The critical path now has fewer tasks: *Critical path: 8 tasks, 48 work days*. Those 48 work days are the duration of the whole project, three more than before. The critical path now starts at the constraint: from Install window frames up to and including the handover. The tasks before it, from Start of construction up to Apply roofing, are no longer red. They have 3 working days of float, because the frames wait until 14 July anyway. Build outer cavity leaf now has 5.',
+          'Painting takes 3 working days, but runs from 29 July up to and including 23 August: the construction holiday is in the middle of it. A holiday or construction holiday in the middle of a task does not count; the task simply runs across it. Click Painting and the *Properties* panel says at *Duration*: *⚠ This task runs through Bouwvak (Midden) — a 23-day non-working period (31-07-2027 to 22-08-2027).*',
         ],
       },
       deadline: {
@@ -1214,8 +1234,8 @@ const TEXT_3 = {
           'What if the agreement is tighter? Set the deadline of **Handover** to Friday 27 August 2027, the date you were finished on without the constraint: type `27`, `08` and `2027` and press Enter. Then press F5.',
         ],
         explain: [
-          'The bars stay where they are: Handover stays on Wednesday 1 September. But at Handover there is now a red arrow pointing down on 27 August, to the left of the diamond, and the status bar says *1 deadline(s) missed*. The *Warnings* panel says *Deadline 27-08-2027 missed — early finish 01-09-2027*.',
-          'Select Handover and under *CPM Result* you see a *Total float* of -3 days: on paper you are 3 working days late. The chain before it is now critical too: *Critical path: 21 tasks*, from Start of construction up to the handover. The app moves nothing to meet the date. It shows you that the agreement does not fit.',
+          'The bars stay where they are: Handover stays on Wednesday 1 September. But at Handover there is now a red arrow pointing down on 27 August, to the left of the diamond, and the status bar says *1 deadline(s) missed*. Click that message in the status bar: the *Warnings* panel opens with *Deadline 27-08-2027 missed — early finish 01-09-2027*.',
+          'Select Handover and under *CPM Result* you see a *Total float* of -3 days: on paper you are 3 working days late. That goes for the whole chain from Install window frames up to and including the handover. The tasks before it, from Start of construction up to Apply roofing, have 0 days of float: they are critical without any margin. Only Build outer cavity leaf (2 days) and Painting (3 days) are not critical. That is how the status bar gets to *Critical path: 21 tasks*. The app moves nothing to meet the date. It shows you that the agreement does not fit.',
           'To meet the deadline you make the chain shorter or the agreement looser, for example an earlier delivery of the window frames. That is a choice for the planner, not for the calculation engine.',
         ],
       },
@@ -1226,7 +1246,10 @@ const TEXT_3 = {
         ],
         explain: [
           'Everything is back as after the first deadline: no missed deadline, *Critical path: 8 tasks, 48 work days* and *End: 01-09-2027*.',
-          'This is the result of tutorial 3: a schedule with the construction holiday in the calendar, a constraint on the window frames and a deadline on the handover. Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). You can read more about the rules in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints).',
+          'This is the result of tutorial 3: a schedule with the construction holiday in the calendar, a constraint on the window frames and a deadline on the handover.',
+        ],
+        panelOnly: [
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). You can read more about the rules in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints).',
         ],
       },
     },
@@ -1351,8 +1374,10 @@ const STEP_LOGIC_2 = {
       api.data.recalculate();
     },
   },
+  // Anker op Eigenschappen: het paneel wijkt naar links uit, zodat CPM Resultaat in beeld blijft; de
+  // tabelkolommen rechts (Kritiek, Totale speling, Voorgangers) blijven leesbaar.
   uitloop: {
-    anchor: 'ribbon-tab:table',
+    anchor: 'properties-panel',
     check: api => linksDone(api, ALL_LINKS) && outerLeafDays(api) === OUTER_LEAF_DAYS.late && isCalculated(api),
     prepare: async (api) => {
       await ensureLinks(api, 'afbouw');
@@ -1372,8 +1397,9 @@ const STEP_LOGIC_2 = {
 };
 
 // Tutorial 3. De bouwvak zit in de kalender, die de API niet kan wijzigen: Toon mij opent daarvoor
-// het meegeleverde project mét bouwvak (`tussen-tut-3-bouwvak`). Opnieuw op de bouwvakstap laadt het
-// resultaat van tutorial 2 (`na-tut-2`), een echte stand van de generator.
+// het meegeleverde project mét bouwvak (`tussen-tut-3-bouwvak`). Opnieuw staat bij de eerste stap met
+// handelingen (`na-tut-2`) en bij de constraintstap, die met de tussenstand `tussen-tut-3-bouwvak` begint:
+// beide zijn standen van de generator.
 const STEP_ORDER_3 = [
   'startpunt', 'bouwvak', 'constraint', 'berekenen', 'deadline', 'deadline-krap', 'terugzetten',
 ];
@@ -1398,6 +1424,7 @@ const STEP_LOGIC_3 = {
   constraint: {
     check: api => withBouwvak(api) && constraintSet(api),
     prepare: ensureConstraint,
+    reset: 'tussen-tut-3-bouwvak',
   },
   berekenen: {
     anchor: 'ribbon:start:calc',
@@ -1439,11 +1466,11 @@ const TUTORIALS = [
 
 const para = lines => lines.join('\n\n');
 
-/** Paneeltekst van een stap: titel + opdracht, `---`, uitleg. */
+/** Paneeltekst van een stap: titel + opdracht, `---`, uitleg. `panelOnly`: alinea's die alleen in het paneel staan (het artikel heeft ze in de afsluiting). */
 function stepBody(def, lang, key) {
   const t = def.text[lang];
   const s = t.steps[key];
-  return `**${s.title}**\n\n${para(s.task)}\n\n---\n\n${t.whatLabel}\n\n${para(s.explain)}`;
+  return `**${s.title}**\n\n${para(s.task)}\n\n---\n\n${t.whatLabel}\n\n${para([...s.explain, ...(s.panelOnly || [])])}`;
 }
 
 /** Leesversie: dezelfde stappen, als artikel. */

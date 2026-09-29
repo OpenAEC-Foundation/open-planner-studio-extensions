@@ -43,9 +43,9 @@ stap; **Toon mij** op die stap opent hem als het project niet klopt):
 - tutorial 2: `na-tut-1`;
 - tutorial 3: `na-tut-2`.
 
-**Opnieuw** staat alleen bij de eerste stap met handelingen, waar de generator een tussenstand levert:
+**Opnieuw** staat alleen bij stappen waarvoor de generator een beginstand levert:
 tutorial 1 stap *De fasen* (`start-tut-1`), tutorial 2 stap *De eerste relatie* (`na-tut-1`) en
-tutorial 3 stap *De bouwvak in de kalender* (`na-tut-2`).
+tutorial 3 stap *De bouwvak in de kalender* (`na-tut-2`) en stap *Een constraint* (`tussen-tut-3-bouwvak`).
 
 ## De getallen in de tekst
 
@@ -77,19 +77,19 @@ dev-build (ook 2026.9.0) weigeren.
 
 ## Projectbestanden
 
-`projects/<taal>/start-tut-1.ifc`, `na-tut-1.ifc`, `na-tut-2.ifc` en `na-tut-3.ifc` zijn **gegenereerd**,
-niet met de hand gemaakt. In een checkout van de app:
+`projects/<taal>/start-tut-1.ifc`, `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc` en
+`na-tut-3.ifc` zijn **gegenereerd**, niet met de hand gemaakt. Alle standen komen uit de generator van de
+app. In een checkout van de app:
 
 ```bash
 npm run gen:tutorial-project -- --out <map>
-# kopieer daarna <map>/<taal>/start-tut-1.ifc, na-tut-1.ifc, na-tut-2.ifc en na-tut-3.ifc naar projects/<taal>/
+# kopieer daarna <map>/<taal>/start-tut-1.ifc, na-tut-1.ifc, na-tut-2.ifc, tussen-tut-3-bouwvak.ifc en
+# na-tut-3.ifc naar projects/<taal>/
 ```
 
-`projects/<taal>/tussen-tut-3-bouwvak.ifc` is een **tussenstand** (`na-tut-2` + de bouwvak), die de
-generator nog niet levert. De extensie-API kan de kalender niet wijzigen, dus **Toon mij** op de
-bouwvakstap opent dit project (als nieuw tabblad) in plaats van de kalender aan te passen. Maken met
-`tools/gen-tussenstand-bouwvak.ts` (uitleg bovenin het script; het draait tegen een app-checkout en
-zit niet in de ZIP). Hij hoort in de generator van de app; tot dan is dit script de bron.
+`tussen-tut-3-bouwvak` is `na-tut-2` plus de bouwvak in de kalender. De extensie-API kan de kalender
+niet wijzigen, dus **Toon mij** op de bouwvakstap opent dit project (als nieuw tabblad) in plaats van de
+kalender aan te passen; **Opnieuw** op de constraintstap laadt hem als beginstand van die stap.
 
 ## ZIP maken
 
