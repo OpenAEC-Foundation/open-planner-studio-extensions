@@ -2065,10 +2065,13 @@ const STEP_LOGIC_2 = {
       api.data.recalculate();
     },
   },
-  // Anker op Eigenschappen: het paneel wijkt naar links uit, zodat CPM Resultaat in beeld blijft; de
-  // tabelkolommen rechts (Kritiek, Totale speling, Voorgangers) blijven leesbaar.
+  // Anker op het tabblad Tabel, bewust NIET op Eigenschappen. In de doorloop op 1366×768 wijkt het
+  // begeleidingspaneel bij een anker op Eigenschappen naar links uit en bedekt dan de onderste helft van de
+  // tabel: de rij van het buitenspouwblad (3.2) en de kolom Duur, waar je in deze stap in klikt, zijn dan
+  // niet te bedienen. Rechtsonder bedekt het paneel alleen het onderste deel van Eigenschappen; CPM
+  // Resultaat lees je door dat paneel naar boven te scrollen.
   uitloop: {
-    anchor: 'properties-panel',
+    anchor: 'ribbon-tab:table',
     check: api => linksDone(api, ALL_LINKS) && outerLeafDays(api) === OUTER_LEAF_DAYS.late && isCalculated(api),
     prepare: async (api) => {
       await ensureLinks(api, 'afbouw');
@@ -2133,10 +2136,11 @@ const STEP_LOGIC_3 = {
       api.data.recalculate();
     },
   },
-  // Anker op Eigenschappen, zoals tutorial 2 stap 9: het paneel Waarschuwingen opent onder Eigenschappen
-  // in de rechterrail en CPM Resultaat staat onderaan in Eigenschappen; rechtsonder zou het
-  // begeleidingspaneel ze allebei bedekken. Het paneel wijkt dan naar links; Oplevering staat nog
-  // geselecteerd uit de vorige stap en de Gantt blijft vrij.
+  // Anker op Eigenschappen: het paneel Waarschuwingen opent onder Eigenschappen in de rechterrail en CPM
+  // Resultaat staat onderaan in Eigenschappen; rechtsonder zou het begeleidingspaneel ze allebei bedekken.
+  // Het paneel wijkt dan naar links uit. Anders dan in tutorial 2 stap 9 hoef je hier links niets aan te
+  // klikken: Oplevering staat nog geselecteerd uit de vorige stap en de melding in de statusbalk blijft vrij
+  // (gecontroleerd op 1366×768).
   'deadline-krap': {
     anchor: 'properties-panel',
     check: api => deadlineCalculated(api, DEADLINE.tight),

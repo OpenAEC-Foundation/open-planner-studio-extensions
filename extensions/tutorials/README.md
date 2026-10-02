@@ -80,6 +80,21 @@ werkregels of nivellering. Gevolgen:
   `tussen-tut-5-werkregel` (+ stucwerk op Vast werk met twee stukadoors, berekend; de overbezette stand
   vóór het nivelleren). Daarmee kunnen Toon mij en Opnieuw ook de middelste stappen van tutorial 5 doen.
 
+## Ankers en de plek van het begeleidingspaneel
+
+Het begeleidingspaneel staat rechtsonder en is hoog zodra de uitleg zichtbaar is. Gecontroleerd op 1600×950 en
+1366×768:
+
+- Stappen in Eigenschappen hebben geen anker (het paneel zou naar links uitwijken over de takenlijst), behalve
+  waar je links niets aanklikt: tutorial 3 *deadline-krap* en tutorial 5 *tweede-stukadoor* (blok
+  Toewijzingen onderaan Eigenschappen) wijzen `properties-panel` aan.
+- Tutorial 2 *uitloop* wijst `ribbon-tab:table` aan en niet `properties-panel`: op 1366×768 bedekt het paneel
+  links dan de tabelrij en de kolom Duur waar je in klikt.
+- Voor lintitems die een eigen component renderen (de keuzelijst *Toewijzen*, de indicator *Overallocatie*)
+  wijst tutorial 5 de lintgroep aan (`ribbon-group:resources:resourceAssignment`,
+  `ribbon-group:resources:overallocationIndicator`). Het item-anker raakt kwijt zodra er een extensie met
+  lintknoppen actief is en de taakselectie wisselt; de markering viel dan terug op de linttab.
+
 ## De getallen in de tekst
 
 Alle getallen komen uit de gegenereerde standen (en zijn in de draaiende app nagelopen). Wijzigt de
