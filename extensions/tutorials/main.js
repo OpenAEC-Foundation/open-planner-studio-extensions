@@ -642,6 +642,12 @@ function workRuleDone(api) {
     && t.time.durationUnit !== 'hours' && Math.abs(t.time.scheduleDuration - PLASTER.days) < 1e-9;
 }
 
+/** Staat het stucwerk op Vast werk (de inzet mag nog 1 zijn)? */
+const plasterRuleSet = (api) => {
+  const t = taskByKey(api, 'plaster');
+  return !!t && t.workRule === 'FIXED_WORK' && !!resourceByKey(api, 'plasterer');
+};
+
 /** Alles t/m de werkregel: resources, alle twaalf toewijzingen en het stucwerk op Vast werk. */
 const setUpDone = api => tasksPresent(api) && resourcesDone(api) && ALL_ASSIGNMENTS.every(a => assignmentDone(api, a)) && workRuleDone(api);
 
@@ -1483,7 +1489,7 @@ const TEXT_4 = {
       stort: {
         title: 'De betonstort: 6 uur',
         task: [
-          'Klik in de takenlijst op **Fundering storten** (2.4). Klik in het paneel *Eigenschappen* in het veld **Duur**, typ `6h` en druk op Enter. De h staat voor uur (*hour*).',
+          'Klik in de takenlijst op **Fundering storten** (2.4). Klik in het paneel *Eigenschappen* (scroll zo nodig omlaag) in het veld **Duur**, typ `6h` en druk op Enter. De h staat voor uur (*hour*).',
         ],
         explain: [
           'In de takenlijst staat bij Fundering storten nu *6h* in plaats van 1d, en in *Eigenschappen* staat naast het veld Duur de eenheid **Uren**. Onderaan in de statusbalk staat weer *Verouderd — herbereken (F5)*: een nieuwe duur verandert de datums pas als je rekent.',
@@ -1591,7 +1597,7 @@ const TEXT_4 = {
       stort: {
         title: 'The concrete pour: 6 hours',
         task: [
-          'Click **Pour foundation** (2.4) in the task list. In the *Properties* panel, click the **Duration** field, type `6h` and press Enter. The h stands for hour.',
+          'Click **Pour foundation** (2.4) in the task list. In the *Properties* panel (scroll down if needed), click the **Duration** field, type `6h` and press Enter. The h stands for hour.',
         ],
         explain: [
           'In the task list Pour foundation now says *6h* instead of 1d, and in *Properties* the unit **Hours** sits next to the Duration field. At the bottom, the status bar says *Out of date — recalculate (F5)* again: a new duration only changes the dates when you calculate.',
@@ -1620,7 +1626,7 @@ const TEXT_4 = {
         title: 'Calculating and reading the clock',
         task: [
           'Click *Home › Schedule › Calculate*, or press F5.',
-          'Then go to the **Table** tab. The **Start** and **End** columns are too narrow for a clock time. Drag the right edge of both column headers about 40 pixels to the right.',
+          'Then go to the **Table** tab. The **Start** and **Finish** columns are too narrow for a clock time. Drag the right edge of both column headers about 40 pixels to the right.',
         ],
         explain: [
           'The three hour tasks now have a clock time. Pour foundation runs on Friday 18 June from 07:00 to 14:00: 5 hours in the morning and 1 hour after the break from 12:00 to 13:00. Lay hollow-core floor is on Monday 28 June from 07:00 to 12:00 and Place roof elements on Tuesday 6 July from 07:00 to 14:00.',
@@ -1733,14 +1739,24 @@ const TEXT_5 = {
         ],
       },
       werkregel: {
-        title: 'De werkregel: een tweede stukadoor',
+        title: 'De werkregel: Vast werk',
         task: [
           'Zet eerst de werkregel in beeld: klik op *Instellingen › Project › Instellingen*, open het tabblad **Planning** en zet onder **Berekenen** het vinkje bij **Toon werkregels en werk** aan. Sluit het venster met **Sluiten**.',
-          'Het stucwerk gaat met twee stukadoors werken. Selecteer **Stucwerk** (4.2). Kies in *Eigenschappen* bij **Werkregel** de regel **Vast werk**. Zet daarna in het blok **Toewijzingen** (onderaan, scroll zo nodig omlaag) de **Eenh./dag** van de Stukadoor op `2` en druk op Enter.',
+          'Het stucwerk gaat straks met twee stukadoors werken. Selecteer **Stucwerk** (4.2) in de takenlijst. Kies in *Eigenschappen* bij **Werkregel** de regel **Vast werk**.',
+        ],
+        explain: [
+          'Onder het veld Werkregel staat nu *Beschermd: werk (duur volgt de inzet)*. Er is nog niets veranderd: Stucwerk duurt nog 4d en de planning is niet verouderd. Een werkregel doet pas iets bij je eerstvolgende wijziging. Wel legt de app nu het werk vast, zodat er iets is om te beschermen: 4 dagen × 1 stukadoor × 8 uur is 32 uur. Het staat onder **Toewijzingen** bij **Werk (rest)**.',
+          'De werkregel bepaalt wat de app aanpast als je de duur, de inzet of het werk wijzigt. Bij **Vast werk** blijft het werk staan en volgt de duur de inzet. Meer: [Werkregels: duur, inzet en werk](docs://uitleg-werkregels).',
+        ],
+      },
+      'tweede-stukadoor': {
+        title: 'Een tweede stukadoor',
+        task: [
+          'Zet in *Eigenschappen* in het blok **Toewijzingen** (onderaan, scroll zo nodig omlaag) de **Eenh./dag** van de Stukadoor op `2` en druk op Enter: twee stukadoors dus.',
         ],
         explain: [
           'Stucwerk duurt nu 2d in plaats van 4d, en de statusbalk meldt weer *Verouderd — herbereken (F5)*. Het werk is gelijk gebleven: 4 dagen × 1 stukadoor × 8 uur is 32 uur, en met twee stukadoors per dag is dat 2 werkdagen.',
-          'De werkregel bepaalt wat de app aanpast als je de inzet wijzigt. Onder de standaardregel *Vaste duur en inzet* bleef het stucwerk 4 werkdagen duren en verdubbelde het werk naar 64 uur: je betaalt dan twee stukadoors voor hetzelfde werk. Onder **Vast werk** blijft het werk staan en volgt de duur de inzet. Meer: [Werkregels: duur, inzet en werk](docs://uitleg-werkregels).',
+          'Onder de standaardregel *Vaste duur en inzet* was het stucwerk 4 werkdagen blijven duren en was het werk verdubbeld naar 64 uur: je betaalt dan twee stukadoors voor hetzelfde werk. Onder Vast werk volgt de duur de inzet.',
         ],
       },
       berekenen: {
@@ -1863,14 +1879,24 @@ const TEXT_5 = {
         ],
       },
       werkregel: {
-        title: 'The work rule: a second plasterer',
+        title: 'The work rule: Fixed work',
         task: [
           'First make the work rule visible: click *Settings › Project › Settings*, open the **Planning** tab and tick **Show work rules and work** under **Calculation**. Close the window with **Close**.',
-          'The plastering is going to be done with two plasterers. Select **Plastering** (4.2). In *Properties*, choose the rule **Fixed work** at **Work rule**. Then, in the **Assignments** block (at the bottom, scroll down if needed), set the **Units/day** of the Plasterer to `2` and press Enter.',
+          'The plastering is going to be done with two plasterers. Select **Plastering** (4.2) in the task list. In *Properties*, choose the rule **Fixed work** at **Work rule**.',
+        ],
+        explain: [
+          'Under the Work rule field it now says *Protected: work (duration follows units)*. Nothing has changed yet: Plastering still takes 4d and the schedule is not out of date. A work rule only does something at your next change. What the app does now is fix the work, so that there is something to protect: 4 days × 1 plasterer × 8 hours is 32 hours. It is shown under **Assignments**, at **Work (rem.)**.',
+          'The work rule decides what the app adjusts when you change the duration, the units or the work. With **Fixed work** the work stays put and the duration follows the units. More: [Work rules: duration, units and work](docs://uitleg-werkregels).',
+        ],
+      },
+      'tweede-stukadoor': {
+        title: 'A second plasterer',
+        task: [
+          'In *Properties*, in the **Assignments** block (at the bottom, scroll down if needed), set the **Units/day** of the Plasterer to `2` and press Enter: two plasterers.',
         ],
         explain: [
           'Plastering now takes 2d instead of 4d, and the status bar says *Out of date — recalculate (F5)* again. The work stayed the same: 4 days × 1 plasterer × 8 hours is 32 hours, and with two plasterers per day that is 2 working days.',
-          'The work rule decides what the app adjusts when you change the units. Under the default rule *Fixed duration and units* the plastering kept taking 4 working days and the work doubled to 64 hours: you would pay two plasterers for the same work. Under **Fixed work** the work stays put and the duration follows the units. More: [Work rules: duration, units and work](docs://uitleg-werkregels).',
+          'Under the default rule *Fixed duration and units* the plastering would have kept taking 4 working days and the work would have doubled to 64 hours: you would pay two plasterers for the same work. Under Fixed work the duration follows the units.',
         ],
       },
       berekenen: {
@@ -2193,9 +2219,13 @@ const STEP_LOGIC_4 = {
 // eerste stap die het document verandert; voor de latere stappen levert de generator geen tussenstand.
 const STEP_ORDER_5 = [
   'startpunt', 'resources', 'toewijzen-metselaar', 'toewijzen-ploeg-kraan', 'toewijzen-overig', 'werkregel',
-  'berekenen', 'histogram', 'overbezetting', 'nivelleren',
+  'tweede-stukadoor', 'berekenen', 'histogram', 'overbezetting', 'nivelleren',
 ];
 
+// Ankers: voor de lintitems die een eigen component renderen (de keuzelijst Toewijzen, de indicator
+// Overallocatie) wijzen we de GROEP aan: het anker op het item zelf raakt kwijt zodra de keuzelijst opnieuw
+// rendert (taakselectie wisselt) terwijl er een extensie met lintknoppen actief is, en de markering valt dan
+// terug op de linttab.
 const STEP_LOGIC_5 = {
   startpunt: {
     check: afterTutorial4,
@@ -2209,19 +2239,26 @@ const STEP_LOGIC_5 = {
     reset: 'na-tut-4',
   },
   'toewijzen-metselaar': {
-    anchor: 'ribbon:resources:resourceAssign',
+    anchor: 'ribbon-group:resources:resourceAssignment',
     check: api => assignmentsDone(api, 'bricklayer'),
   },
   'toewijzen-ploeg-kraan': {
-    anchor: 'ribbon:resources:resourceAssign',
+    anchor: 'ribbon-group:resources:resourceAssignment',
     check: api => assignmentsDone(api, 'crewCrane'),
   },
   'toewijzen-overig': {
-    anchor: 'ribbon:resources:resourceAssign',
+    anchor: 'ribbon-group:resources:resourceAssignment',
     check: api => assignmentsDone(api, 'other'),
   },
   werkregel: {
     anchor: 'ribbon:instellingen:projectSettings',
+    check: plasterRuleSet,
+  },
+  // Anker op Eigenschappen: het blok Toewijzingen staat onderaan in dat paneel; het begeleidingspaneel wijkt dan
+  // naar links uit en bedekt het niet. Stucwerk staat nog geselecteerd uit de vorige stap, de takenlijst is niet
+  // meer nodig.
+  'tweede-stukadoor': {
+    anchor: 'properties-panel',
     check: workRuleDone,
   },
   berekenen: {
@@ -2236,7 +2273,7 @@ const STEP_LOGIC_5 = {
     prepare: ensureBeforeLeveling,
   },
   overbezetting: {
-    anchor: 'ribbon:resources:overallocation',
+    anchor: 'ribbon-group:resources:overallocationIndicator',
     prepare: ensureBeforeLeveling,
   },
   nivelleren: {
