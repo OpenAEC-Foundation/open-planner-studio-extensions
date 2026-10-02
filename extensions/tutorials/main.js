@@ -1,11 +1,11 @@
 /**
  * Tutorials voor Open Planner Studio — tutorial 1 "Je eerste planning", tutorial 2 "Relaties en het
- * kritieke pad" en tutorial 3 "De kalender en datumafspraken" (contract 1.4.0, permissies `help`,
- * `ribbon` en `events`).
+ * kritieke pad", tutorial 3 "De kalender en datumafspraken", tutorial 4 "Plannen in uren" en tutorial 5
+ * "Resources en nivelleren" (contract 1.4.0, permissies `help`, `ribbon` en `events`).
  *
  * Wat deze extensie doet:
  *   • api.help.registerArticles(...)  → de leesversies van de tutorials in Help › Tutorials;
- *   • api.ui.addRibbonButton(...)     → Start › Tutorials › "Tutorial 1", "Tutorial 2", "Tutorial 3"
+ *   • api.ui.addRibbonButton(...)     → Start › Tutorials › "Tutorial 1" t/m "Tutorial 5"
  *                                       starten de begeleiding (permissie "ribbon"; een Help-artikel
  *                                       kan zelf geen begeleiding starten, alleen een `project://`-
  *                                       bestand openen);
@@ -21,15 +21,19 @@
  * ("wat je nu ziet, en waarom"); het artikel en de paneelstappen worden hieronder uit die ene bron
  * samengesteld. De extensielader kent één bestand (`require()` geeft alleen `open-planner-studio`
  * terug), dus dit bestand heeft duidelijke secties: het project en het lezen van de documenttoestand;
- * tutorial 1 (Toon mij); de logica van tutorial 2 en 3; de drie teksten; de stappen en `onLoad`.
+ * tutorial 1 (Toon mij); de logica van tutorial 2 en 3; die van tutorial 4 en 5; de vijf teksten; de stappen
+ * en `onLoad`.
  *
  * De projectbestanden in `projects/<taal>/` zijn GEGENEREERD, niet met de hand gemaakt: in een
  * checkout van de app `npm run gen:tutorial-project -- --out <map>` en daarna `start-tut-1.ifc`,
- * `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc` en `na-tut-3.ifc` per taal hierheen kopiëren. De getallen in de tekst
+ * `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc`, `na-tut-3.ifc`, `na-tut-4.ifc` en `na-tut-5.ifc` per taal hierheen
+ * kopiëren. De getallen in de tekst
  * komen uit die standen (zie README.md voor de tabel): tutorial 1 uit `na-tut-1` (7 juni 2027, 14 juni,
  * Buitenspouwblad metselen als enige kritieke taak), tutorial 2 uit `na-tut-2` (6 augustus 2027, 21
  * taken, 45 werkdagen, 2 werkdagen speling), tutorial 3 uit `tussen-tut-3-bouwvak` (27 augustus 2027)
- * en `na-tut-3` (1 september 2027, 8 taken, 48 werkdagen).
+ * en `na-tut-3` (1 september 2027, 8 taken, 48 werkdagen), tutorial 4 uit `na-tut-4` (kloktijden van de
+ * stort en de kraan, 3,25 en 3,38 dagen speling) en tutorial 5 uit `na-tut-5` (30 augustus 2027, 46
+ * werkdagen, 17 kritieke taken, nivelleervertraging 5).
  */
 
 const sdk = require('open-planner-studio');
@@ -42,6 +46,10 @@ const TUTORIAL_1_ID = 'tut-1-eerste-planning';
 const TUTORIAL_2_ID = 'tut-2-relaties-kritiek-pad';
 /** Id van tutorial 3. */
 const TUTORIAL_3_ID = 'tut-3-kalender';
+/** Id van tutorial 4. */
+const TUTORIAL_4_ID = 'tut-4-uren';
+/** Id van tutorial 5. */
+const TUTORIAL_5_ID = 'tut-5-resources';
 
 // ── Het project ──────────────────────────────────────────────────────────────────────────────
 
@@ -296,20 +304,24 @@ async function prepareUpTo(api, stepKey) {
 
 // ── Bereken herkennen: een berekening van precies deze planning (alle tutorials) ─────────────
 
-/** Vingerafdruk van wat de berekening beïnvloedt (niet van de rekenuitkomst zelf): de taken (duur,
- *  constraint, deadline), de relaties (soort en lag) en de kalender (werkdagen en vrije dagen). */
+/** Vingerafdruk van wat de berekening beïnvloedt (niet van de rekenuitkomst zelf): de taken (duur in dagen of
+ *  uren, constraint, deadline, werkregel, nivelleervertraging), de toewijzingen (resource en inzet), de relaties
+ *  (soort en lag) en de kalender (werkdagen en vrije dagen). */
 function scheduleSignature(api) {
   const tasks = api.data.getTasks().map(t => [
     t.id, t.parentId || '', t.isMilestone ? 1 : 0, t.milestoneKind || '', t.time.scheduleDuration, t.time.durationUnit || '',
     t.constraint ? [t.constraint.type, t.constraint.date || '', t.constraint.hard ? 1 : 0] : '', t.deadline || '',
+    t.time.durationMinutes === undefined ? '' : t.time.durationMinutes, t.workRule || '',
+    t.levelingDelay || 0, t.levelingDelayMinutes || 0,
   ]);
+  const assignments = api.data.getAssignments().map(a => [a.taskId, a.resourceId, a.unitsPerDay]);
   const sequences = api.data.getSequences().map(s => [
     s.predecessorId, s.successorId, s.type, s.lagDays, s.lagMinutes === undefined ? '' : s.lagMinutes, s.lagUnit || '',
     s.lagPercent === undefined ? '' : s.lagPercent,
   ]);
   const calendar = api.data.getCalendar();
   return JSON.stringify([
-    api.data.getProject().id, sequences, tasks,
+    api.data.getProject().id, sequences, tasks, assignments,
     [calendar.workDays, calendar.holidays.map(h => [h.startDate, h.endDate])],
   ]);
 }
@@ -499,6 +511,173 @@ async function ensureDeadline(api, date) {
 /** De stand waarin een stap van tutorial 3 berekend is. */
 const constraintCalculated = api => withBouwvak(api) && constraintSet(api) && isCalculated(api);
 const deadlineCalculated = (api, date) => constraintCalculated(api) && deadlineIs(api, date);
+
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+// TUTORIAL 4 EN 5 — de logica: uren, resources, werkregel en nivelleren
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+//
+// Tutorial 4 werkt op `na-tut-3`, tutorial 5 op `na-tut-4`. De getallen in de tekst (kloktijden, 3,25 en
+// 3,38 dagen speling, 12 uur kraan, 30 augustus, 46 werkdagen, 17 kritieke taken, …) komen uit de standen
+// `na-tut-4` en `na-tut-5` van de generator en uit wat-als-berekeningen op die standen (zie README).
+//
+// WAT DE EXTENSIE-API HIER NIET KAN, en wat daarvan het gevolg is:
+//   • De instelling Urenplanning (en Toon werkregels en werk) is een instelling van de app, geen
+//     documentdata. `api.data` kent geen instellingen. Tutorial 4 stap "Urenplanning aanzetten" leest de
+//     bewaarde instelling (`ops-enableHourPlanning` in localStorage, zie settingsRegistry van de app) en
+//     heeft geen Toon mij.
+//   • Resources, toewijzingen en werkregels zijn te LEZEN (`getResources`, `getAssignments`, `task.workRule`)
+//     maar niet te schrijven. De checks van tutorial 5 kunnen dus alles volgen; Toon mij kan alleen de
+//     stappen klaarzetten waarvan het resultaat een meegeleverd project is (na-tut-5, met de nivellering
+//     er via `levelingDelay` weer uit gehaald).
+
+// ── Urenplanning (tutorial 4) ─────────────────────────────────────────────────────────────────
+
+/** De drie taken die in uren gaan, met hun duur in werkminuten (gelijk aan HOUR_TASKS van de generator). */
+const HOUR_ORDER = ['pour', 'floor', 'roofElements'];
+const HOUR_MINUTES = { pour: 360, floor: 300, roofElements: 360 }; // stort 6 u, kraan 5 u en 6 u
+/** De wat-als van tutorial 4: de dakelementen kosten 12 uur kraan. */
+const ROOF_LONG_MINUTES = 720;
+
+/** Duur in werkminuten van een taak die in uren staat; `null` voor een dagtaak (of een onbekende taak). */
+function hourMinutes(api, key) {
+  const t = taskByKey(api, key);
+  return t && t.time.durationUnit === 'hours' && typeof t.time.durationMinutes === 'number' ? t.time.durationMinutes : null;
+}
+
+/** Staat urenplanning aan? Een instelling van de app, geen projectdata: de extensie-API kent geen
+ *  instellingen, dus lezen we de bewaarde instelling (`ops-<naam>` in localStorage). Kan dat niet (geblokkeerde
+ *  opslag), dan gooit dit: de begeleiding meldt het en valt terug op "Klaar, volgende". */
+function hourPlanningOn() {
+  return window.localStorage.getItem('ops-enableHourPlanning') === 'true';
+}
+
+/** Zet een taak op `minutes` werkminuten in uren (zoals het veld Duur bij invoer "6h"). */
+function setHourMinutes(api, key, minutes) {
+  const t = taskByKey(api, key);
+  if (!t || hourMinutes(api, key) === minutes) return;
+  const hoursPerDay = api.data.getCalendar().hoursPerDay || 8;
+  api.data.updateTask(t.id, {
+    time: { durationUnit: 'hours', durationMinutes: minutes, scheduleDuration: minutes / (hoursPerDay * 60) },
+  });
+}
+
+/** Het project zoals tutorial 3 het achterlaat: relaties, bouwvak en constraint. De deadline telt niet mee:
+ *  die wordt in tutorial 3 heen en weer gezet. */
+const afterTutorial3 = api => withBouwvak(api) && constraintSet(api);
+
+const stortDone = api => hourMinutes(api, 'pour') === HOUR_MINUTES.pour;
+const floorDone = api => hourMinutes(api, 'floor') === HOUR_MINUTES.floor;
+// De dakelementen mogen ook op 12 uur staan (de wat-als): wie vanuit die stap Terug gaat, loopt niet vast.
+const roofDone = api => [HOUR_MINUTES.roofElements, ROOF_LONG_MINUTES].includes(hourMinutes(api, 'roofElements'));
+const roofIs = (api, minutes) => hourMinutes(api, 'roofElements') === minutes;
+const hoursDone = api => afterTutorial3(api) && stortDone(api) && floorDone(api) && roofIs(api, HOUR_MINUTES.roofElements);
+
+/** Toon mij, tutorial 4: het project na tutorial 3 (indien nodig als nieuw tabblad) met de uren t/m `upTo`. */
+async function ensureHours(api, upTo, roofMinutes = HOUR_MINUTES.roofElements) {
+  if (!afterTutorial3(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-3'));
+  const count = HOUR_ORDER.indexOf(upTo) + 1;
+  api.data.batch(() => {
+    HOUR_ORDER.slice(0, count).forEach(key => setHourMinutes(api, key, key === 'roofElements' ? roofMinutes : HOUR_MINUTES[key]));
+  });
+}
+
+// ── Resources, toewijzingen, werkregel en nivelleren (tutorial 5) ──────────────────────────────
+
+/** De vijf resources van tutorial 5, gelijk aan RESOURCES in `scripts/tutorial-project.ts`. */
+const RESOURCE_DEFS = {
+  crew: { name: { nl: 'Timmerploeg', en: 'Carpentry crew' }, type: 'CREW', maxUnits: 1 },
+  bricklayer: { name: { nl: 'Metselaar', en: 'Bricklayer' }, type: 'LABOR', maxUnits: 1 },
+  crane: { name: { nl: 'Mobiele kraan', en: 'Mobile crane' }, type: 'EQUIPMENT', maxUnits: 1 },
+  plasterer: { name: { nl: 'Stukadoor', en: 'Plasterer' }, type: 'SUBCONTRACTOR', maxUnits: 2 },
+  concrete: { name: { nl: 'Beton', en: 'Concrete' }, type: 'MATERIAL', maxUnits: 50, unit: 'm³' },
+};
+const RESOURCE_ORDER = ['crew', 'bricklayer', 'crane', 'plasterer', 'concrete'];
+
+const resourceByKey = (api, key, resources = api.data.getResources()) =>
+  resources.find(r => hasName(r, RESOURCE_DEFS[key].name));
+
+function resourceOk(r, def) {
+  return !!r && r.type === def.type && Math.abs(r.maxUnits - def.maxUnits) < 1e-9
+    && (!def.unit || norm(r.unitOfMeasure) === norm(def.unit));
+}
+
+/** Staan alle vijf de resources er, met het juiste type en de juiste capaciteit? Extra resources tellen
+ *  niet mee (die kan Toon mij niet weghalen). */
+const resourcesDone = api => {
+  const resources = api.data.getResources();
+  return RESOURCE_ORDER.every(key => resourceOk(resourceByKey(api, key, resources), RESOURCE_DEFS[key]));
+};
+
+/** De twaalf toewijzingen in drie groepen, in de volgorde van de stappen: [taak, resource, inzet per dag].
+ *  Inzet `null` = elke inzet telt (het stucwerk gaat later van 1 naar 2 stukadoors). */
+const ASSIGN_GROUPS = {
+  bricklayer: [
+    ['foundBrick', 'bricklayer', 1], ['innerLeaf', 'bricklayer', 1], ['outerLeaf', 'bricklayer', 1], ['breakThrough', 'bricklayer', 1],
+  ],
+  crewCrane: [
+    ['rebar', 'crew', 1], ['floor', 'crew', 1], ['roofElements', 'crew', 1], ['frames', 'crew', 1],
+    ['floor', 'crane', 1], ['roofElements', 'crane', 1],
+  ],
+  other: [['plaster', 'plasterer', null], ['pour', 'concrete', 8]], // beton: 8 m³ per dag
+};
+const ALL_ASSIGNMENTS = Object.values(ASSIGN_GROUPS).flat();
+
+/** Bestaat deze toewijzing (taak, resource, inzet per dag)? */
+function assignmentDone(api, [taskKey, resourceKey, units]) {
+  const t = taskByKey(api, taskKey);
+  const r = resourceByKey(api, resourceKey);
+  return !!t && !!r && api.data.getAssignments().some(a => a.taskId === t.id && a.resourceId === r.id
+    && (units === null || Math.abs(a.unitsPerDay - units) < 1e-9));
+}
+const assignmentsDone = (api, group) => resourcesDone(api) && ASSIGN_GROUPS[group].every(a => assignmentDone(api, a));
+
+/** De werkregel van het stucwerk: Vast werk, twee stukadoors, dus 2 werkdagen (was 4). */
+const PLASTER = { units: 2, days: 2 };
+function workRuleDone(api) {
+  const t = taskByKey(api, 'plaster');
+  const r = resourceByKey(api, 'plasterer');
+  if (!t || !r) return false;
+  const a = api.data.getAssignments().find(x => x.taskId === t.id && x.resourceId === r.id);
+  return t.workRule === 'FIXED_WORK' && !!a && Math.abs(a.unitsPerDay - PLASTER.units) < 1e-9
+    && t.time.durationUnit !== 'hours' && Math.abs(t.time.scheduleDuration - PLASTER.days) < 1e-9;
+}
+
+/** Alles t/m de werkregel: resources, alle twaalf toewijzingen en het stucwerk op Vast werk. */
+const setUpDone = api => tasksPresent(api) && resourcesDone(api) && ALL_ASSIGNMENTS.every(a => assignmentDone(api, a)) && workRuleDone(api);
+
+/** Nivellering van het buitenspouwblad: de nivelleervertraging in werkdagen (5 in de tutorial). */
+const levelingDelayOf = (api, key) => {
+  const t = taskByKey(api, key);
+  return t && typeof t.levelingDelay === 'number' ? t.levelingDelay : 0;
+};
+const levelingApplied = api => setUpDone(api) && levelingDelayOf(api, 'outerLeaf') > 0;
+
+/** Haal alle nivelleervertragingen weg (zoals Resources › Nivellering › Nivellering wissen). */
+function clearLeveling(api) {
+  const delayed = api.data.getTasks().filter(t => (t.levelingDelay || 0) !== 0 || (t.levelingDelayMinutes || 0) !== 0);
+  if (delayed.length === 0) return;
+  api.data.batch(() => {
+    for (const t of delayed) api.data.updateTask(t.id, { levelingDelay: 0, levelingDelayMinutes: 0 });
+  });
+}
+
+/** De stand vóór het nivelleren: alles t/m de werkregel, berekend, zonder nivellering. De extensie kan geen
+ *  resources of werkregels aanmaken; ontbreekt er iets, dan opent Toon mij het resultaat van tutorial 5 (als
+ *  nieuw tabblad) en haalt daar de nivellering weer uit. */
+async function ensureBeforeLeveling(api) {
+  if (!setUpDone(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-5'));
+  clearLeveling(api);
+  api.data.recalculate();
+}
+
+/** De stand na het nivelleren is precies het resultaat van tutorial 5. */
+async function ensureLeveled(api) {
+  if (!levelingApplied(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-5'));
+  api.data.recalculate();
+}
+
+/** Staat het project na tutorial 4: de taken, met de drie taken in uren (de duur van de dakelementen mag de wat-als zijn)? */
+const afterTutorial4 = api => tasksPresent(api) && HOUR_ORDER.every(key => hourMinutes(api, key) !== null);
 
 // ── Tutorial 1: Je eerste planning — de tekst, één bron voor Help-artikel en paneel ────────────
 
@@ -838,11 +1017,11 @@ const TEXT_2 = {
         title: 'Wachttijd: een lag',
         task: [
           'Beton moet uitharden voordat de metselaar erop kan. Klik in de kolom Voorgangers op de cel van **Funderingsmetselwerk** (2.5) en typ `2.4 FS+3`. Druk op Enter. De `+3` is de **lag**: drie werkdagen wachttijd na het einde van de voorganger.',
-          'Een lag telt standaard in werkdagen. Beton hardt ook in het weekend uit; wil je dat laten meetellen, dan typ je `3ed` (kalenderdagen), zie [Relaties en lag](docs://uitleg-relaties). Hier houden we het bij werkdagen.',
+          'Een lag telt standaard in werkdagen. Beton hardt ook in het weekend uit; wil je dat laten meetellen, dan typ je `2.4 FS+3ed` (kalenderdagen), zie [Relaties en lag](docs://uitleg-relaties). Hier houden we het bij werkdagen.',
           'Druk daarna op F5, of klik op *Tabel › Planning › Bereken*.',
         ],
         explain: [
-          'De cel toont `2.4 FS+3d`. De kolommen Start en Einde laten zien wat de relaties tot nu toe doen: Fundering storten staat op 18-06-2027, vrijdag. Funderingsmetselwerk begint op 24-06-2027, donderdag. Daartussen liggen drie werkdagen wachttijd: maandag 21, dinsdag 22 en woensdag 23 juni. Het weekend telt hier niet mee, want de lag staat in werkdagen; met `3ed` begon het metselwerk op dinsdag 22 juni.',
+          'De cel toont `2.4 FS+3d`. De kolommen Start en Einde laten zien wat de relaties tot nu toe doen: Fundering storten staat op 18-06-2027, vrijdag. Funderingsmetselwerk begint op 24-06-2027, donderdag. Daartussen liggen drie werkdagen wachttijd: maandag 21, dinsdag 22 en woensdag 23 juni. Het weekend telt hier niet mee, want de lag staat in werkdagen; met `3ed` was het metselwerk op dinsdag 22 juni begonnen.',
           'Zonder lag was het metselwerk op maandag 21 juni begonnen, kort na het storten van het beton. De taken waar je nog geen relatie aan hangt, zoals Kanaalplaatvloer leggen, staan nog steeds op 07-06-2027.',
         ],
       },
@@ -978,7 +1157,7 @@ const TEXT_2 = {
         title: 'Waiting time: a lag',
         task: [
           'Concrete has to cure before the bricklayer can build on it. In the Predecessors column, click the cell of **Foundation brickwork** (2.5) and type `2.4 FS+3`. Press Enter. The `+3` is the **lag**: three working days of waiting time after the predecessor finishes.',
-          'A lag counts in working days by default. Concrete also cures over the weekend; if you want that to count, you type `3ed` (calendar days), see [Relations and lag](docs://uitleg-relaties). Here we stick to working days.',
+          'A lag counts in working days by default. Concrete also cures over the weekend; if you want that to count, you type `2.4 FS+3ed` (calendar days), see [Relations and lag](docs://uitleg-relaties). Here we stick to working days.',
           'Then press F5, or click *Table › Schedule › Calculate*.',
         ],
         explain: [
@@ -1093,7 +1272,7 @@ const TEXT_3 = {
         explain: [
           'In de Gantt is een grijs blok bijgekomen: *Bouwvak (Midden)*, van maandag 2 tot en met vrijdag 20 augustus 2027. Drie weken zonder werkdagen. Zie je het blok niet, klik dan op *Beeld › Tijdschaal › Passend maken op project*. Toepassen heeft de planning meteen opnieuw doorgerekend, dus de melding Verouderd blijft weg.',
           'De statusbalk zegt nu *Einde: 27-08-2027*: de oplevering staat drie weken later dan eerst. Het aantal werkdagen is hetzelfde gebleven, *Kritiek pad: 21 taken, 45 werkdagen*, want de bouwvak telt niet als werkdag.',
-          'Waarom schuift de oplevering precies drie weken op, terwijl het meeste werk vóór de bouwvak valt? Kijk naar Tegelwerk. Dat wacht vijf werkdagen op de dekvloer, die maandag 26 juli klaar is. Dinsdag 27 tot en met vrijdag 30 juli zijn vier van die vijf wachtdagen. De vijfde zou maandag 2 augustus zijn, maar dat is bouwvak: die dag telt niet. De tegelzetter begint daarom pas op dinsdag 24 augustus in plaats van dinsdag 3 augustus, en alles daarna schuift mee. Het schilderwerk valt vóór de bouwvak en verandert niet. Een lag in werkdagen slaat de bouwvak over, ook als het om droogtijd gaat die in werkelijkheid doorloopt; daarvoor is `5ed` bedoeld (zie [Relaties en lag](docs://uitleg-relaties)).',
+          'Waarom schuift de oplevering precies drie weken op, terwijl het meeste werk vóór de bouwvak valt? Kijk naar Tegelwerk. Dat wacht vijf werkdagen op de dekvloer, die maandag 26 juli klaar is. Dinsdag 27 tot en met vrijdag 30 juli zijn vier van die vijf wachtdagen. De vijfde zou maandag 2 augustus zijn, maar dat is bouwvak: die dag telt niet. De tegelzetter begint daarom pas op dinsdag 24 augustus in plaats van dinsdag 3 augustus, en alles daarna schuift mee. Het schilderwerk valt vóór de bouwvak en verandert niet. Een lag in werkdagen slaat de bouwvak over, ook als het om droogtijd gaat die in werkelijkheid doorloopt. Met `5ed` droogt de dekvloer ook in het weekend, maar de tegelzetter werkt in de bouwvak niet: het tegelwerk begint dan op maandag 23 augustus, één dag eerder (zie [Relaties en lag](docs://uitleg-relaties)).',
         ],
       },
       constraint: {
@@ -1114,7 +1293,7 @@ const TEXT_3 = {
         explain: [
           'Kozijnen plaatsen begint nu op woensdag 14 juli, drie werkdagen later dan de vrijdag 9 juli waarop de relaties het toelieten: vrijdag 9, maandag 12 en dinsdag 13 juli zijn wachtdagen. Alles wat op de kozijnen volgt, schuift drie werkdagen mee. Oplevering staat op woensdag 1 september 2027: *Einde: 01-09-2027*, drie werkdagen later dan 27 augustus.',
           'Het kritieke pad telt nu minder taken: *Kritiek pad: 8 taken, 48 werkdagen*. Die 48 werkdagen zijn de looptijd van het hele project, drie meer dan eerst. Het kritieke pad begint nu bij de constraint: van Kozijnen plaatsen tot en met de oplevering. De taken ervoor, van Start bouw tot en met Dakbedekking, zijn niet meer rood. Ze hebben 3 werkdagen speling, want de kozijnen wachten toch tot 14 juli. Buitenspouwblad heeft er nu 5.',
-          'Schilderwerk duurt 3 werkdagen, maar loopt van 29 juli tot en met 23 augustus: de bouwvak ligt er middenin. Een feestdag of bouwvak midden in een taak telt niet mee; de taak loopt er gewoon overheen. Klik je op Schilderwerk, dan meldt het paneel *Eigenschappen* bij *Duur*: *⚠ Deze taak loopt over Bouwvak (Midden) — een vrije periode van 23 dagen (31-07-2027 t/m 22-08-2027).*',
+          'Schilderwerk duurt 3 werkdagen, maar loopt van 29 juli tot en met 23 augustus: de bouwvak ligt er middenin. Een feestdag of bouwvak midden in een taak telt niet mee; de taak loopt er gewoon overheen. Klik je op Schilderwerk, dan meldt het paneel *Eigenschappen* onder de datums en de duur: *⚠ Deze taak loopt over Bouwvak (Midden) — een vrije periode van 23 dagen (31-07-2027 t/m 22-08-2027).*',
         ],
       },
       deadline: {
@@ -1194,7 +1373,7 @@ const TEXT_3 = {
         explain: [
           'A grey block has appeared in the Gantt: *Bouwvak (Midden)* (the app uses the Dutch name), from Monday 2 to Friday 20 August 2027. Three weeks without working days. If you cannot see the block, click *View › Time Scale › Fit to project*. Apply has recalculated the schedule straight away, so the Out of date message stays away.',
           'The status bar now says *End: 27-08-2027*: the handover is three weeks later than before. The number of work days is the same, *Critical path: 21 tasks, 45 work days*, because the construction holiday does not count as a working day.',
-          'Why does the handover move by exactly three weeks, when most of the work falls before the construction holiday? Look at Tiling. It waits five working days for the screed, which is finished on Monday 26 July. Tuesday 27 to Friday 30 July are four of those five waiting days. The fifth would be Monday 2 August, but that is construction holiday: that day does not count. So the tiler starts on Tuesday 24 August instead of Tuesday 3 August, and everything after that moves along. The painting falls before the construction holiday and does not change. A lag in working days skips the construction holiday, even when it is drying time that carries on in reality; that is what `5ed` is for (see [Relations and lag](docs://uitleg-relaties)).',
+          'Why does the handover move by exactly three weeks, when most of the work falls before the construction holiday? Look at Tiling. It waits five working days for the screed, which is finished on Monday 26 July. Tuesday 27 to Friday 30 July are four of those five waiting days. The fifth would be Monday 2 August, but that is construction holiday: that day does not count. So the tiler starts on Tuesday 24 August instead of Tuesday 3 August, and everything after that moves along. The painting falls before the construction holiday and does not change. A lag in working days skips the construction holiday, even when it is drying time that carries on in reality. With `5ed` the screed also dries over the weekend, but the tiler does not work during the construction holiday: tiling then starts on Monday 23 August, one day earlier (see [Relations and lag](docs://uitleg-relaties)).',
         ],
       },
       constraint: {
@@ -1215,7 +1394,7 @@ const TEXT_3 = {
         explain: [
           'Install window frames now starts on Wednesday 14 July, three working days later than the Friday 9 July the relationships allowed: Friday 9, Monday 12 and Tuesday 13 July are waiting days. Everything that follows the frames moves three working days along. The handover is on Wednesday 1 September 2027: *End: 01-09-2027*, three working days later than 27 August.',
           'The critical path now has fewer tasks: *Critical path: 8 tasks, 48 work days*. Those 48 work days are the duration of the whole project, three more than before. The critical path now starts at the constraint: from Install window frames up to and including the handover. The tasks before it, from Start of construction up to Apply roofing, are no longer red. They have 3 working days of float, because the frames wait until 14 July anyway. Build outer cavity leaf now has 5.',
-          'Painting takes 3 working days, but runs from 29 July up to and including 23 August: the construction holiday is in the middle of it. A holiday or construction holiday in the middle of a task does not count; the task simply runs across it. Click Painting and the *Properties* panel says at *Duration*: *⚠ This task runs through Bouwvak (Midden) — a 23-day non-working period (31-07-2027 to 22-08-2027).*',
+          'Painting takes 3 working days, but runs from 29 July up to and including 23 August: the construction holiday is in the middle of it. A holiday or construction holiday in the middle of a task does not count; the task simply runs across it. Click Painting and the *Properties* panel says below the dates and duration: *⚠ This task runs through Bouwvak (Midden) — a 23-day non-working period (31-07-2027 to 22-08-2027).*',
         ],
       },
       deadline: {
@@ -1250,6 +1429,492 @@ const TEXT_3 = {
         ],
         panelOnly: [
           'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). You can read more about the rules in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints).',
+        ],
+      },
+    },
+  },
+};
+
+// ── Tutorial 4: Plannen in uren ────────────────────────────────────────────────────────────────
+
+const TEXT_4 = {
+  nl: {
+    title: 'Plannen in uren',
+    whatLabel: '**Wat je nu ziet, en waarom**',
+    intro: [
+      '# Plannen in uren',
+      '## Wat je bouwt',
+      'Tot nu toe telde elke taak in hele werkdagen. Dat is te grof voor drie klussen: de betonstort is in zes uur klaar en de mobiele kraan legt de kanaalplaten in vijf uur en de dakelementen in zes uur. In deze tutorial zet je urenplanning aan en plan je die drie taken in uren. Daarna reken je en zie je hoe de app dagen en uren door elkaar rekent.',
+      'Aan het eind hebben de drie taken een kloktijd en blijft de oplevering op woensdag 1 september 2027 staan. Je hebt gezien waarom een dagtaak nooit midden op een dag begint en wat er gebeurt met de uren die daardoor ongebruikt blijven.',
+      '## Uitgangspunt',
+      'Je hebt tutorial 3 afgerond: de planning met de bouwvak, de constraint op de kozijnen en de deadline op de oplevering, berekend, met de oplevering op woensdag 1 september 2027. Heb je dat niet, [open dan het resultaat van tutorial 3](project://projects/nl/na-tut-3.ifc).',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 4*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. Alleen de instelling Urenplanning kan het paneel niet voor je aanzetten: dat doe je zelf in de tweede stap. **Opnieuw** in de stap *De betonstort: 6 uur* laadt het resultaat van tutorial 3 opnieuw.',
+    ],
+    outro: [
+      '## Wat je hebt geleerd',
+      '- **Urenplanning is een instelling van de app, de eenheid hoort bij de taak.** Je zette hem één keer aan en koos daarna per taak: drie taken in uren (6h, 5h en 6h), de rest in dagen. Dat is een gemengde planning. Je gebruikt uren alleen waar een dag te grof is; voor al het andere zijn dagen overzichtelijker.',
+      '- **Een urentaak telt werkminuten door de werktijdblokken heen.** De stort van 6 uur liep van 07:00 tot 14:00 met de pauze ertussen. Twaalf uur kraan liep door in de volgende dag, van dinsdag 07:00 tot woensdag 11:00.',
+      '- **Een dagtaak begint nooit midden op een dag.** Dakbedekking begon op de eerstvolgende werkdag na de dakelementen en niet om 14:00: woensdag 7 juli bij 6 uur kraan, donderdag 8 juli bij 12 uur.',
+      '- **Wat een dagtaak niet kan gebruiken, wordt speling.** De 2 uur van de middag na de stort, een kwart dag, werden speling: 3,25 dagen in plaats van 3. Bij 12 uur kraan kromp de speling van het dak met een dag, van 3 naar 2 werkdagen. De oplevering schuift pas als een keten geen speling meer heeft.',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). De regels achter deze tutorial staan in [Dagen en uren](docs://uitleg-dagen-en-uren).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'Het startpunt',
+        task: [
+          'Zorg dat het project *Aanbouw woning* openstaat zoals je het na tutorial 3 achterliet: met de bouwvak, de constraint op de kozijnen en de deadline op de oplevering. Heb je dat niet, [open dan het resultaat van tutorial 3](project://projects/nl/na-tut-3.ifc). Kijk in de statusbalk en in de kolom Duur van de takenlijst.',
+        ],
+        explain: [
+          'De statusbalk zegt *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*. Achter elke duur in de takenlijst staat een *d* van dag: 2d, 3d, 1d. Alles telt in hele werkdagen.',
+          'Voor drie klussen is dat te grof. De betonstort is in zes uur klaar. De mobiele kraan legt de kanaalplaten van de vloer in vijf uur en de dakelementen in zes uur. Als hele dagen telt de planning daar respectievelijk 2, 3 en 2 uur te veel. Daarom plan je ze in uren. Dat kan alleen als urenplanning aan staat; dat doe je in de volgende stap.',
+        ],
+      },
+      urenplanning: {
+        title: 'Urenplanning aanzetten',
+        task: [
+          'Klik op *Instellingen › Project › Instellingen* en open het tabblad **Planning**. Zet onder **Urenplanning** het vinkje bij **Urenplanning inschakelen** aan en sluit het venster met **Sluiten**.',
+          '(Staat het vinkje al aan, dan is deze stap meteen klaar.)',
+        ],
+        explain: [
+          'Onder **Urenplanning** staat nu een tweede vinkje: **Gemengde dag/uur-planning toestaan**, standaard aan. Daarmee kies je per taak of hij in dagen of in uren telt, en staan dagtaken en urentaken in één planning naast elkaar. Zo plan je zo meteen drie taken in uren en laat je de rest in dagen.',
+          'Zolang urenplanning uit staat, werkt de app volledig in dagen en neemt hij een duur in uren niet over: typ je `6h` in het veld Duur, dan meldt het veld *Schakel urenplanning in om deze urentaak te bewerken.* Het is een instelling van de app, niet van dit project: je zet hem één keer aan. Onder *Beeld › Tijdschaal* kun je nu ook de schaal **Uur** kiezen.',
+        ],
+      },
+      stort: {
+        title: 'De betonstort: 6 uur',
+        task: [
+          'Klik in de takenlijst op **Fundering storten** (2.4). Klik in het paneel *Eigenschappen* in het veld **Duur**, typ `6h` en druk op Enter. De h staat voor uur (*hour*).',
+        ],
+        explain: [
+          'In de takenlijst staat bij Fundering storten nu *6h* in plaats van 1d, en in *Eigenschappen* staat naast het veld Duur de eenheid **Uren**. Onderaan in de statusbalk staat weer *Verouderd — herbereken (F5)*: een nieuwe duur verandert de datums pas als je rekent.',
+          'Waarom 6 uur en niet 8? Een werkdag heeft in deze kalender 8 netto-uren: van 07:00 tot 12:00 en van 13:00 tot 16:00, met een uur pauze. Een stort van 6 uur beslaat daar 0,75 van. Als taak van 1d zou de planning de stort een hele werkdag laten bezetten.',
+        ],
+      },
+      'kraan-vloer': {
+        title: 'De kraan: 5 uur voor de kanaalplaten',
+        task: [
+          'Klik op **Kanaalplaatvloer leggen** (2.6). Typ in het veld **Duur** `5h` en druk op Enter. De kraan legt de kanaalplaten van de vloer in 5 uur.',
+        ],
+        explain: [
+          'Ook hier staat nu *5h* in de takenlijst. Een kraaninzet in uren is precies waar urenplanning voor dient: een kraan huur je per uur en niet per dag, en 5 uur is een ochtend. De rest van de taken blijft in dagen. Er is nog niets herberekend.',
+        ],
+      },
+      'kraan-dak': {
+        title: 'De kraan: 6 uur voor de dakelementen',
+        task: [
+          'Klik op **Dakelementen plaatsen** (3.3). Typ in het veld **Duur** `6h` en druk op Enter.',
+        ],
+        explain: [
+          'Je hebt nu drie taken in uren: Fundering storten (6h), Kanaalplaatvloer leggen (5h) en Dakelementen plaatsen (6h). Alle andere taken staan nog in dagen. Dat is een gemengde planning. Wat de app daarmee doet, zie je als je rekent.',
+        ],
+      },
+      berekenen: {
+        title: 'Rekenen en de klok lezen',
+        task: [
+          'Klik op *Start › Planning › Bereken*, of druk op F5.',
+          'Ga daarna naar het tabblad **Tabel**. De kolommen **Start** en **Einde** zijn te smal voor een kloktijd. Sleep de rechterrand van beide kolomkoppen ongeveer 40 pixels naar rechts.',
+        ],
+        explain: [
+          'De drie urentaken hebben nu een kloktijd. Fundering storten loopt op vrijdag 18 juni van 07:00 tot 14:00: 5 uur in de ochtend en 1 uur na de pauze van 12:00 tot 13:00. Kanaalplaatvloer leggen staat op maandag 28 juni van 07:00 tot 12:00 en Dakelementen plaatsen op dinsdag 6 juli van 07:00 tot 14:00.',
+          'De oplevering is niet verschoven: de statusbalk zegt nog steeds *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*. Geen van de drie urentaken ligt op het kritieke pad, dus de uren raken de einddatum niet.',
+          'Kijk in de kolom **Totale speling** (kop *Tot…*): 3,25d bij de stort en de dakelementen en 3,38d bij de vloer (3,375). De dagtaken eromheen hebben 3 dagen speling. Het verschil zijn de uren die de dagtaak erna niet kan gebruiken. Een dagtaak begint nooit midden op een dag, dus de stort die om 14:00 klaar is, laat de laatste 2 uur van die werkdag liggen: een kwart dag, de 0,25. De vloer is al om 12:00 klaar. De 3 uur van 13:00 tot 16:00 zijn 0,375 dag.',
+        ],
+      },
+      'langere-kraan': {
+        title: 'Wat als de kraan langer nodig is?',
+        task: [
+          'Het dak komt toch in twee ritten en de kraan is 12 uur nodig. Klik op **Dakelementen plaatsen** (3.3), typ in het paneel *Eigenschappen* in het veld **Duur** `12h`, druk op Enter en druk op F5.',
+        ],
+        explain: [
+          'Een werkdag heeft 8 uur, dus 12 uur past niet in één dag. Dakelementen plaatsen loopt nu van dinsdag 6 juli 07:00 tot woensdag 7 juli 11:00: 8 uur op dinsdag en 4 uur op woensdag.',
+          'Dakbedekking aanbrengen is een dagtaak. Die begint niet midden op woensdag, maar op de eerstvolgende werkdag: donderdag 8 juli, een dag later dan eerst, en loopt tot vrijdag 9 juli. De rest van woensdag, 4 netto-uren, kan geen dagtaak gebruiken en komt terug als speling: Dakelementen plaatsen heeft nu 2,5 dagen speling in plaats van 3,25.',
+          'De oplevering schuift niet: de statusbalk zegt nog steeds *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*. Wel is de speling van het dak kleiner geworden: het binnenspouwblad en de dakbedekking hebben 2 werkdagen speling in plaats van 3.',
+        ],
+      },
+      terugzetten: {
+        title: 'Terug naar 6 uur',
+        task: [
+          'Zet het veld **Duur** van Dakelementen plaatsen terug op `6h`, druk op Enter en druk op F5.',
+        ],
+        explain: [
+          'Alles staat weer zoals na het eerste rekenen: Dakelementen plaatsen op dinsdag 6 juli van 07:00 tot 14:00 met 3,25 dagen speling, Dakbedekking weer vanaf woensdag 7 juli, *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*.',
+          'Dit is het resultaat van tutorial 4 en het beginpunt van tutorial 5: daarin komen de kraan, de ploeg en de andere resources erbij.',
+        ],
+        panelOnly: [
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). Meer over de regels lees je in [Dagen en uren](docs://uitleg-dagen-en-uren).',
+        ],
+      },
+    },
+  },
+  en: {
+    title: 'Planning in hours',
+    whatLabel: '**What you see now, and why**',
+    intro: [
+      '# Planning in hours',
+      '## What you build',
+      'So far every task has counted in whole working days. That is too coarse for three jobs: the concrete pour is done in six hours, and the mobile crane places the hollow-core slabs in five hours and the roof elements in six. In this tutorial you turn on hour planning and plan those three tasks in hours. Then you calculate and see how the app mixes days and hours.',
+      'At the end the three tasks have a clock time and the handover stays on Wednesday 1 September 2027. You have seen why a day task never starts in the middle of a day and what happens to the hours that are left unused because of that.',
+      '## Starting point',
+      'You have finished tutorial 3: the schedule with the construction holiday, the constraint on the window frames and the deadline on the handover, calculated, with the handover on Wednesday 1 September 2027. If you have not, [open the result of tutorial 3](project://projects/en/na-tut-3.ifc).',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 4* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. Only the Hour planning setting cannot be turned on by the panel: you do that yourself in the second step. **Start over** in the step *The concrete pour: 6 hours* reloads the result of tutorial 3.',
+    ],
+    outro: [
+      '## What you have learned',
+      '- **Hour planning is a setting of the app, the unit belongs to the task.** You turned it on once and then chose per task: three tasks in hours (6h, 5h and 6h), the rest in days. That is a mixed schedule. You use hours only where a day is too coarse; for everything else days are clearer.',
+      '- **An hour task counts working minutes through the working-time blocks.** The 6-hour pour ran from 07:00 to 14:00 with the break in between. Twelve hours of crane carried on into the next day, from Tuesday 07:00 to Wednesday 11:00.',
+      '- **A day task never starts in the middle of a day.** Applying the roofing started on the first working day after the roof elements and not at 14:00: Wednesday 7 July with 6 hours of crane, Thursday 8 July with 12 hours.',
+      '- **What a day task cannot use becomes float.** The 2 hours of the afternoon after the pour, a quarter of a day, became float: 3.25 days instead of 3. With 12 hours of crane the float of the roof shrank by a day, from 3 to 2 working days. The handover only moves when a chain has no float left.',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). The rules behind this tutorial are in [Days and hours](docs://uitleg-dagen-en-uren).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'The starting point',
+        task: [
+          'Make sure the project *House extension* is open as you left it after tutorial 3: with the construction holiday, the constraint on the window frames and the deadline on the handover. If not, [open the result of tutorial 3](project://projects/en/na-tut-3.ifc). Look at the status bar and at the Duration column of the task list.',
+        ],
+        explain: [
+          'The status bar says *End: 01-09-2027* and *Critical path: 8 tasks, 48 work days*. Every duration in the task list ends in a *d* for day: 2d, 3d, 1d. Everything counts in whole working days.',
+          'For three jobs that is too coarse. The concrete pour is done in six hours. The mobile crane places the hollow-core slabs of the floor in five hours and the roof elements in six. Counted as whole days, the schedule counts 2, 3 and 2 hours too many for them. That is why you plan them in hours. That only works when hour planning is on; you do that in the next step.',
+        ],
+      },
+      urenplanning: {
+        title: 'Turning on hour planning',
+        task: [
+          'Click *Settings › Project › Settings* and open the **Planning** tab. Under **Hour planning**, tick **Enable hour planning** and close the window with **Close**.',
+          '(If the box is already ticked, this step is done straight away.)',
+        ],
+        explain: [
+          'Under **Hour planning** there is now a second box: **Allow mixed day/hour planning**, on by default. With it you choose per task whether it counts in days or in hours, and day tasks and hour tasks sit side by side in one schedule. That is how you plan three tasks in hours in a moment and leave the rest in days.',
+          'As long as hour planning is off, the app works entirely in days and does not accept a duration in hours: type `6h` in the Duration field and the field says *Enable hour planning to edit this hour task.* It is a setting of the app, not of this project: you turn it on once. Under *View › Time Scale* you can now also choose the scale **Hour**.',
+        ],
+      },
+      stort: {
+        title: 'The concrete pour: 6 hours',
+        task: [
+          'Click **Pour foundation** (2.4) in the task list. In the *Properties* panel, click the **Duration** field, type `6h` and press Enter. The h stands for hour.',
+        ],
+        explain: [
+          'In the task list Pour foundation now says *6h* instead of 1d, and in *Properties* the unit **Hours** sits next to the Duration field. At the bottom, the status bar says *Out of date — recalculate (F5)* again: a new duration only changes the dates when you calculate.',
+          'Why 6 hours and not 8? In this calendar a working day has 8 net hours: from 07:00 to 12:00 and from 13:00 to 16:00, with an hour of break. A 6-hour pour takes 0.75 of that. As a task of 1d the schedule would let the pour occupy a whole working day.',
+        ],
+      },
+      'kraan-vloer': {
+        title: 'The crane: 5 hours for the slabs',
+        task: [
+          'Click **Lay hollow-core floor** (2.6). Type `5h` in the **Duration** field and press Enter. The crane places the hollow-core slabs of the floor in 5 hours.',
+        ],
+        explain: [
+          'Here too the task list now says *5h*. Crane work in hours is exactly what hour planning is for: you hire a crane by the hour and not by the day, and 5 hours is a morning. The rest of the tasks stays in days. Nothing has been recalculated yet.',
+        ],
+      },
+      'kraan-dak': {
+        title: 'The crane: 6 hours for the roof elements',
+        task: [
+          'Click **Place roof elements** (3.3). Type `6h` in the **Duration** field and press Enter.',
+        ],
+        explain: [
+          'You now have three tasks in hours: Pour foundation (6h), Lay hollow-core floor (5h) and Place roof elements (6h). All other tasks are still in days. That is a mixed schedule. What the app does with it, you see when you calculate.',
+        ],
+      },
+      berekenen: {
+        title: 'Calculating and reading the clock',
+        task: [
+          'Click *Home › Schedule › Calculate*, or press F5.',
+          'Then go to the **Table** tab. The **Start** and **End** columns are too narrow for a clock time. Drag the right edge of both column headers about 40 pixels to the right.',
+        ],
+        explain: [
+          'The three hour tasks now have a clock time. Pour foundation runs on Friday 18 June from 07:00 to 14:00: 5 hours in the morning and 1 hour after the break from 12:00 to 13:00. Lay hollow-core floor is on Monday 28 June from 07:00 to 12:00 and Place roof elements on Tuesday 6 July from 07:00 to 14:00.',
+          'The handover has not moved: the status bar still says *End: 01-09-2027* and *Critical path: 8 tasks, 48 work days*. None of the three hour tasks is on the critical path, so the hours do not touch the finish date.',
+          'Look at the **Total float** column (header *Tot…*): 3.25d for the pour and the roof elements and 3.38d for the floor (3.375). The day tasks around them have 3 days of float. The difference is the hours that the day task after them cannot use. A day task never starts in the middle of a day, so the pour that is done at 14:00 leaves the last 2 hours of that working day unused: a quarter of a day, the 0.25. The floor is already done at 12:00. The 3 hours from 13:00 to 16:00 are 0.375 of a day.',
+        ],
+      },
+      'langere-kraan': {
+        title: 'What if the crane is needed longer?',
+        task: [
+          'The roof comes in two lifts after all and the crane is needed for 12 hours. Click **Place roof elements** (3.3), type `12h` in the **Duration** field in the *Properties* panel, press Enter and press F5.',
+        ],
+        explain: [
+          'A working day has 8 hours, so 12 hours does not fit in one day. Place roof elements now runs from Tuesday 6 July 07:00 to Wednesday 7 July 11:00: 8 hours on Tuesday and 4 hours on Wednesday.',
+          'Apply roofing is a day task. It does not start in the middle of Wednesday, but on the first working day after: Thursday 8 July, a day later than before, and it runs until Friday 9 July. The rest of Wednesday, 4 net hours, cannot be used by a day task and comes back as float: Place roof elements now has 2.5 days of float instead of 3.25.',
+          'The handover does not move: the status bar still says *End: 01-09-2027* and *Critical path: 8 tasks, 48 work days*. The float of the roof has become smaller, though: the inner cavity leaf and the roofing have 2 working days of float instead of 3.',
+        ],
+      },
+      terugzetten: {
+        title: 'Back to 6 hours',
+        task: [
+          'Set the **Duration** field of Place roof elements back to `6h`, press Enter and press F5.',
+        ],
+        explain: [
+          'Everything is back as after the first calculation: Place roof elements on Tuesday 6 July from 07:00 to 14:00 with 3.25 days of float, Apply roofing again from Wednesday 7 July, *End: 01-09-2027* and *Critical path: 8 tasks, 48 work days*.',
+          'This is the result of tutorial 4 and the starting point of tutorial 5: in that one the crane, the crew and the other resources are added.',
+        ],
+        panelOnly: [
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). You can read more about the rules in [Days and hours](docs://uitleg-dagen-en-uren).',
+        ],
+      },
+    },
+  },
+};
+
+// ── Tutorial 5: Resources en nivelleren ────────────────────────────────────────────────────────
+
+const TEXT_5 = {
+  nl: {
+    title: 'Resources en nivelleren',
+    whatLabel: '**Wat je nu ziet, en waarom**',
+    intro: [
+      '# Resources en nivelleren',
+      '## Wat je bouwt',
+      'Je zet de mensen en machines in de planning van de aanbouw: vijf resources en twaalf toewijzingen, van de timmerploeg tot het beton voor de stort. Daarna stel je de werkregel van het stucwerk in, lees je in het histogram wie wanneer werkt en ontdek je dat één metselaar op twee muren tegelijk staat. Die overbezetting los je op met nivelleren.',
+      'Aan het eind is er geen overbezetting meer. De oplevering staat op maandag 30 augustus 2027, twee werkdagen eerder dan in tutorial 4, doordat het stucwerk met twee stukadoors korter wordt. Je hebt gezien dat nivelleren het buitenspouwblad vijf werkdagen laat wachten zonder dat de oplevering schuift, en wat dat de taak kost.',
+      '## Uitgangspunt',
+      'Je hebt tutorial 4 afgerond: het project met de betonstort en de twee kraaninzetten in uren, berekend, met de oplevering op woensdag 1 september 2027. Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier niet overal: een extensie kan geen resources, toewijzingen of werkregels aanmaken. Toon mij staat daarom alleen bij de stappen vanaf het rekenen en opent daar, waar nodig, het resultaat van deze tutorial als nieuw tabblad. **Opnieuw** in de stap *Vijf resources aanmaken* laadt het resultaat van tutorial 4 opnieuw.',
+    ],
+    outro: [
+      '## Wat je hebt geleerd',
+      '- **Een resource heeft een capaciteit en een toewijzing zet hem op een taak.** De app legt per werkdag de vraag naast *Max. eenheden*. De metselaar, met capaciteit 1, kreeg op 5 dagen 2 gevraagd: dat is overbezetting.',
+      '- **Het histogram weegt uren mee.** De kraan stond op 28 juni en 6 juli voor 0,625 en 0,75 eenheid: 5 en 6 van de 8 werkuren van die dag.',
+      '- **De werkregel bepaalt wat meebeweegt als je de inzet wijzigt.** Met Vast werk werd het stucwerk met twee stukadoors 2 werkdagen in plaats van 4 en de oplevering twee werkdagen eerder, maandag 30 augustus. Met de standaardregel was het werk verdubbeld.',
+      '- **Relaties kennen geen capaciteit.** Volgens de relaties mochten het binnen- en buitenspouwblad tegelijk, maar met één metselaar kan dat niet. Dat zie je pas met resources.',
+      '- **Nivelleren laat taken later beginnen, meer niet, en gebruikt daarvoor speling.** Het buitenspouwblad wachtte 5 werkdagen en de oplevering bleef op 30 augustus, maar de taak is nu kritiek: loopt hij uit, dan schuift de oplevering.',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'Het startpunt',
+        task: [
+          'Zorg dat het project *Aanbouw woning* openstaat met de drie taken in uren uit tutorial 4: Fundering storten (6h), Kanaalplaatvloer leggen (5h) en Dakelementen plaatsen (6h). Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**. Kijk in de statusbalk.',
+        ],
+        explain: [
+          'De statusbalk zegt *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*, en er staat geen melding over resources.',
+          'De taken hebben een duur, maar niemand voert ze uit. De app weet niet wie de metselaar is, dat er maar één kraan is en dat die niet op twee plekken tegelijk kan staan. Die kennis zit in resources: mensen, machines en materiaal, elk met een capaciteit. Zodra ze er zijn, kan de app uitrekenen of de planning te veel van ze vraagt.',
+        ],
+      },
+      resources: {
+        title: 'Vijf resources aanmaken',
+        task: [
+          'Klik op *Resources › Beheer › Nieuwe resource*. Het resourcepaneel neemt de werkruimte over, met een lege rij onderaan de tabel. Typ de naam, kies het **Type** en druk op Enter: er opent dan direct een lege rij voor de volgende. Maak zo deze vijf resources:',
+          '- `Timmerploeg`, type **Ploeg**: de ploeg voor wapening, vloer, dak en kozijnen.\n- `Metselaar`, type **Arbeid**: metselt de fundering en de spouwmuren en breekt de achtergevel door.\n- `Mobiele kraan`, type **Materieel**: legt de kanaalplaten en de dakelementen.\n- `Stukadoor`, type **Onderaannemer**, **Max. eenheden** `2`: een onderaannemer die met twee man kan komen.\n- `Beton`, type **Materiaal**, **Max. eenheden** `50` en **Eenheid** `m³`: het beton voor de stort, in kubieke meter per dag.',
+          'Druk na de vijfde op Esc.',
+        ],
+        explain: [
+          'In het resourcepaneel staan vijf rijen. De **Max. eenheden** is de capaciteit per werkdag: 1 is één persoon of één machine, 2 zijn er twee en bij het beton zijn het 50 m³. Dat getal gebruikt de app straks als grens: vraagt de planning op één dag meer dan de capaciteit, dan is de resource overbezet.',
+          'Het type is vooral een etiket. Alleen **Materiaal** rekent anders: een materiaal stuurt de duur van een taak nooit en wordt niet genivelleerd. Een kraan en een metselaar behandelt de app hetzelfde. Er staat nog niets op een taak: de resources bestaan alleen nog.',
+        ],
+      },
+      'toewijzen-metselaar': {
+        title: 'De metselaar op vier taken',
+        task: [
+          'Sluit het resourcepaneel met het kruisje rechtsboven en selecteer in de takenlijst **Funderingsmetselwerk** (2.5). Klik op *Resources › Toewijzing › Toewijzen ▾*, laat **Eenh./dag** op 1 en **Curve** op Uniform staan en klik op **Metselaar**. Doe hetzelfde voor Binnenspouwblad metselen (3.1), Buitenspouwblad metselen (3.2) en Achtergevel doorbreken (3.6).',
+        ],
+        explain: [
+          'De metselaar staat nu op vier taken. Selecteer je een van die taken, dan staat in *Eigenschappen* onder **Toewijzingen**: Metselaar met Eenh./dag 1. Die inzet is hoeveel van de resource er per werkdag aan de taak werkt. De curve, hier Uniform, verdeelt het over de dagen van de taak: elke dag evenveel.',
+          'Onderaan in de statusbalk staat nu *⚠ 1 resource(s) overbezet*. Daar kom je in twee stappen op terug.',
+        ],
+      },
+      'toewijzen-ploeg-kraan': {
+        title: 'De timmerploeg en de kraan',
+        task: [
+          'Wijs op dezelfde manier de **Timmerploeg** toe aan Wapening en bekisting fundering (2.2), Kanaalplaatvloer leggen (2.6), Dakelementen plaatsen (3.3) en Kozijnen plaatsen (3.5). Wijs daarna de **Mobiele kraan** toe aan Kanaalplaatvloer leggen (2.6) en Dakelementen plaatsen (3.3). Een taak kan meer dan één resource hebben: de vloer en de dakelementen staan straks op ploeg én kraan.',
+        ],
+        explain: [
+          'De vloer en de dakelementen hebben nu twee resources. Selecteer Kanaalplaatvloer leggen: onder Toewijzingen staan de Timmerploeg en de Mobiele kraan, allebei met Eenh./dag 1. Dat is één ploeg en één kraan op een taak van 5 uur. Hoeveel dat per werkdag telt, zie je straks in het histogram.',
+        ],
+      },
+      'toewijzen-overig': {
+        title: 'De stukadoor en het beton',
+        task: [
+          'Wijs de **Stukadoor** toe aan Stucwerk (4.2). Wijs daarna het **Beton** toe aan Fundering storten (2.4): vul in het venster van Toewijzen ▾ eerst bij **Eenh./dag** `8` in en klik dan op **Beton**. Dat is 8 m³ beton per dag.',
+        ],
+        explain: [
+          'Je hebt nu twaalf toewijzingen: vier voor de metselaar, vier voor de timmerploeg, twee voor de kraan, en één voor de stukadoor en het beton. Bij Fundering storten staat onder Toewijzingen *Beton* met Eenh./dag 8.',
+          'Bij een materiaal is de inzet een hoeveelheid per dag: 8 m³. De stort duurt 6 uur, 0,75 werkdag, dus de app telt 6 m³ beton op de stortdag. Materiaal telt niet mee voor de duur van de taak: het beton kan de stort niet sneller of trager maken.',
+        ],
+      },
+      werkregel: {
+        title: 'De werkregel: een tweede stukadoor',
+        task: [
+          'Zet eerst de werkregel in beeld: klik op *Instellingen › Project › Instellingen*, open het tabblad **Planning** en zet onder **Berekenen** het vinkje bij **Toon werkregels en werk** aan. Sluit het venster met **Sluiten**.',
+          'Het stucwerk gaat met twee stukadoors werken. Selecteer **Stucwerk** (4.2). Kies in *Eigenschappen* bij **Werkregel** de regel **Vast werk**. Zet daarna in het blok **Toewijzingen** (onderaan, scroll zo nodig omlaag) de **Eenh./dag** van de Stukadoor op `2` en druk op Enter.',
+        ],
+        explain: [
+          'Stucwerk duurt nu 2d in plaats van 4d, en de statusbalk meldt weer *Verouderd — herbereken (F5)*. Het werk is gelijk gebleven: 4 dagen × 1 stukadoor × 8 uur is 32 uur, en met twee stukadoors per dag is dat 2 werkdagen.',
+          'De werkregel bepaalt wat de app aanpast als je de inzet wijzigt. Onder de standaardregel *Vaste duur en inzet* bleef het stucwerk 4 werkdagen duren en verdubbelde het werk naar 64 uur: je betaalt dan twee stukadoors voor hetzelfde werk. Onder **Vast werk** blijft het werk staan en volgt de duur de inzet. Meer: [Werkregels: duur, inzet en werk](docs://uitleg-werkregels).',
+        ],
+      },
+      berekenen: {
+        title: 'Rekenen',
+        task: [
+          'Klik op *Start › Planning › Bereken*, of druk op F5.',
+        ],
+        explain: [
+          'Stucwerk loopt nu van vrijdag 23 tot en met maandag 26 juli (2 werkdagen, het weekend telt niet) in plaats van tot woensdag 28 juli. Alles erna schuift twee werkdagen naar voren: de statusbalk zegt *Einde: 30-08-2027* en *Kritiek pad: 8 taken, 46 werkdagen*. De oplevering staat op maandag 30 augustus, twee werkdagen eerder dan op 1 september.',
+          'Maar in de statusbalk staat nog steeds *⚠ 1 resource(s) overbezet*. Het stucwerk was het eenvoudige deel. Dit is het lastige: de planning klopt op papier, maar vraagt van één resource meer dan hij kan leveren.',
+        ],
+      },
+      histogram: {
+        title: 'Het histogram: wie werkt wanneer',
+        task: [
+          'Klik op *Resources › Histogram › Histogram*. Onder de Gantt opent het histogram, met links een lijst van de resources. Klik op **Mobiele kraan**.',
+        ],
+        explain: [
+          'Het histogram toont per werkdag hoeveel van de resource gevraagd wordt, onder dezelfde tijdlijn als de Gantt. Bij de Mobiele kraan staan twee smalle balken: op maandag 28 juni (de kanaalplaten) en op dinsdag 6 juli (de dakelementen). Ze reiken niet tot de bovenkant van de schaal (*1 eenheden*): de balken zijn 5/8 en 6/8 van een eenheid hoog, 0,625 en 0,75.',
+          'Dat komt door de uren. Een kraaninzet van 5 uur is 5 van de 8 werkuren van die dag en telt dus voor 0,625 mee, 6 uur voor 0,75. Een urentaak weegt naar rato van zijn uren mee, ook als hij korter is dan een dag.',
+        ],
+      },
+      overbezetting: {
+        title: 'Overbezetting: de metselaar',
+        task: [
+          'Kijk in het lint bij *Resources › Overallocatie*: daar staat in het rood *1 resource*. Klik op de melding *⚠ 1 resource(s) overbezet* onderaan in de statusbalk. Rechts opent het paneel *Waarschuwingen*. Klik op de regel van de **Metselaar**.',
+        ],
+        explain: [
+          'Het paneel meldt bij de Metselaar *Overbezet op 5 dag(en) (29-06-2027 – 05-07-2027)*. De app zet het histogram op de Metselaar en selecteert de taken van de metselaar. Op die vijf dagen steken de balken rood uit boven de lijn van de capaciteit: de planning vraagt 2 eenheden van een metselaar die er 1 heeft.',
+          'De oorzaak zit in de relaties uit tutorial 2. Binnenspouwblad en Buitenspouwblad hangen allebei aan de kanaalplaatvloer, dus ze beginnen allebei op dinsdag 29 juni, en beide staan op dezelfde metselaar. Een relatie legt alleen een volgorde vast en weet niet hoeveel mensen er zijn. Dat zie je pas met resources.',
+        ],
+      },
+      nivelleren: {
+        title: 'Nivelleren',
+        task: [
+          'Klik op *Resources › Nivellering › Nivelleren…*. Het venster *Resources nivelleren* opent. Laat het vakje *Alleen binnen speling nivelleren (smoothing) — projecteinddatum blijft vast* uit staan. Onder **Resources** staan de resources die genivelleerd worden; het beton hoort er niet bij, want een materiaal wordt niet genivelleerd. Klik op **Berekenen**, lees het voorstel en klik op **Toepassen**.',
+        ],
+        explain: [
+          'Het voorstel meldt *Projecteinddatum: ongewijzigd (30-08-2027)* en toont één regel: **Buitenspouwblad metselen**, oude start 29-06-2027, nieuwe start 06-07-2027, *5 d*. Na Toepassen staat bij *Resources › Overallocatie* *Geen* en is de waarschuwing uit de statusbalk verdwenen. Het buitenspouwblad loopt nu van dinsdag 6 juli tot en met dinsdag 13 juli.',
+          'Waarom het buitenspouwblad en niet het binnenspouwblad? Beide hebben dezelfde prioriteit, en de app zet eerst de taak met de minste speling neer: het binnenspouwblad (3 werkdagen speling) blijft staan en het buitenspouwblad (5) wijkt. Het wijkt tot de eerste dag waarop de metselaar vrij is, 5 werkdagen later: de nivelleervertraging.',
+          'En waarom schuift de oplevering niet? Het buitenspouwblad had 5 werkdagen speling, omdat de kozijnen sinds tutorial 3 pas op 14 juli komen. Nivelleren gebruikt die speling op. Het buitenspouwblad heeft er nu 0 en is kritiek: de statusbalk zegt *Kritiek pad: 17 taken, 46 werkdagen*, tegen 8 taken ervoor. Loopt het buitenspouwblad nu uit, dan schuift de oplevering. Meer: [Nivelleren](docs://uitleg-nivelleren).',
+        ],
+        panelOnly: [
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren).',
+        ],
+      },
+    },
+  },
+  en: {
+    title: 'Resources and leveling',
+    whatLabel: '**What you see now, and why**',
+    intro: [
+      '# Resources and leveling',
+      '## What you build',
+      'You put the people and machines into the schedule for the extension: five resources and twelve assignments, from the carpentry crew to the concrete for the pour. Then you set the work rule of the plastering, read in the histogram who works when and find out that one bricklayer is standing on two walls at once. You solve that overallocation with leveling.',
+      'At the end there is no overallocation left. The handover is on Monday 30 August 2027, two working days earlier than in tutorial 4, because the plastering gets shorter with two plasterers. You have seen that leveling makes the outer cavity leaf wait five working days without the handover moving, and what that costs the task.',
+      '## Starting point',
+      'You have finished tutorial 4: the project with the concrete pour and the two crane jobs in hours, calculated, with the handover on Wednesday 1 September 2027. If you have not, [open the result of tutorial 4](project://projects/en/na-tut-4.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you, but that is not possible everywhere here: an extension cannot create resources, assignments or work rules. That is why Show me is only there for the steps from calculating onwards, where it opens the result of this tutorial as a new tab if needed. **Start over** in the step *Creating five resources* reloads the result of tutorial 4.',
+    ],
+    outro: [
+      '## What you have learned',
+      '- **A resource has a capacity and an assignment puts it on a task.** Per working day the app sets the demand against *Max units*. The bricklayer, with capacity 1, was asked for 2 on 5 days: that is overallocation.',
+      '- **The histogram counts hours.** The crane stood at 0.625 and 0.75 units on 28 June and 6 July: 5 and 6 of the 8 working hours of that day.',
+      '- **The work rule decides what moves when you change the units.** With Fixed work the plastering with two plasterers took 2 working days instead of 4 and the handover came two working days earlier, Monday 30 August. With the default rule the work would have doubled.',
+      '- **Relationships know no capacity.** According to the relationships the inner and outer cavity leaf could run at the same time, but not with one bricklayer. You only see that with resources.',
+      '- **Leveling makes tasks start later, nothing more, and uses float to do it.** The outer cavity leaf waited 5 working days and the handover stayed on 30 August, but the task is now critical: if it runs late, the handover moves.',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'The starting point',
+        task: [
+          'Make sure the project *House extension* is open with the three tasks in hours from tutorial 4: Pour foundation (6h), Lay hollow-core floor (5h) and Place roof elements (6h). If not, [open the result of tutorial 4](project://projects/en/na-tut-4.ifc). If the app says *This file contains hour-based planning.*, click **Enable hour planning**. Look at the status bar.',
+        ],
+        explain: [
+          'The status bar says *End: 01-09-2027* and *Critical path: 8 tasks, 48 work days*, and there is no message about resources.',
+          'The tasks have a duration, but nobody carries them out. The app does not know who the bricklayer is, that there is only one crane and that it cannot stand in two places at once. That knowledge sits in resources: people, machines and material, each with a capacity. Once they exist, the app can work out whether the schedule asks too much of them.',
+        ],
+      },
+      resources: {
+        title: 'Creating five resources',
+        task: [
+          'Click *Resources › Manage › New resource*. The resource panel takes over the workspace, with an empty row at the bottom of the table. Type the name, choose the **Type** and press Enter: an empty row for the next one then opens straight away. Create these five resources:',
+          '- `Carpentry crew`, type **Crew**: the crew for reinforcement, floor, roof and window frames.\n- `Bricklayer`, type **Labor**: builds the foundation brickwork and the cavity walls and breaks through the rear wall.\n- `Mobile crane`, type **Equipment**: places the hollow-core slabs and the roof elements.\n- `Plasterer`, type **Subcontractor**, **Max units** `2`: a subcontractor who can come with two people.\n- `Concrete`, type **Material**, **Max units** `50` and **Unit** `m³`: the concrete for the pour, in cubic metres per day.',
+          'Press Esc after the fifth.',
+        ],
+        explain: [
+          'The resource panel now has five rows. **Max units** is the capacity per working day: 1 is one person or one machine, 2 is two, and for the concrete it is 50 m³. The app uses that number as a limit in a moment: if the schedule asks more than the capacity on one day, the resource is overallocated.',
+          'The type is mostly a label. Only **Material** calculates differently: a material never drives the duration of a task and is not leveled. The app treats a crane and a bricklayer the same. Nothing is on a task yet: the resources only exist.',
+        ],
+      },
+      'toewijzen-metselaar': {
+        title: 'The bricklayer on four tasks',
+        task: [
+          'Close the resource panel with the cross at the top right and select **Foundation brickwork** (2.5) in the task list. Click *Resources › Assignment › Assign ▾*, leave **Units/day** on 1 and **Curve** on Uniform and click **Bricklayer**. Do the same for Build inner cavity leaf (3.1), Build outer cavity leaf (3.2) and Break through rear wall (3.6).',
+        ],
+        explain: [
+          'The bricklayer is now on four tasks. Select one of those tasks and in *Properties* under **Assignments** it says: Bricklayer with Units/day 1. That is how much of the resource works on the task per working day. The curve, Uniform here, spreads it over the days of the task: the same every day.',
+          'At the bottom, the status bar now says *⚠ 1 resource(s) overallocated*. You come back to that in two steps.',
+        ],
+      },
+      'toewijzen-ploeg-kraan': {
+        title: 'The carpentry crew and the crane',
+        task: [
+          'In the same way, assign the **Carpentry crew** to Foundation formwork and reinforcement (2.2), Lay hollow-core floor (2.6), Place roof elements (3.3) and Install window frames (3.5). Then assign the **Mobile crane** to Lay hollow-core floor (2.6) and Place roof elements (3.3). A task can have more than one resource: the floor and the roof elements will be on crew and crane.',
+        ],
+        explain: [
+          'The floor and the roof elements now have two resources. Select Lay hollow-core floor: under Assignments there are the Carpentry crew and the Mobile crane, both with Units/day 1. That is one crew and one crane on a 5-hour task. How much that counts per working day, you see in the histogram in a moment.',
+        ],
+      },
+      'toewijzen-overig': {
+        title: 'The plasterer and the concrete',
+        task: [
+          'Assign the **Plasterer** to Plastering (4.2). Then assign the **Concrete** to Pour foundation (2.4): in the Assign ▾ window first enter `8` at **Units/day** and then click **Concrete**. That is 8 m³ of concrete per day.',
+        ],
+        explain: [
+          'You now have twelve assignments: four for the bricklayer, four for the carpentry crew, two for the crane, and one each for the plasterer and the concrete. At Pour foundation, under Assignments, it says *Concrete* with Units/day 8.',
+          'For a material the units are a quantity per day: 8 m³. The pour takes 6 hours, 0.75 of a working day, so the app counts 6 m³ of concrete on the day of the pour. Material does not count for the duration of the task: the concrete cannot make the pour faster or slower.',
+        ],
+      },
+      werkregel: {
+        title: 'The work rule: a second plasterer',
+        task: [
+          'First make the work rule visible: click *Settings › Project › Settings*, open the **Planning** tab and tick **Show work rules and work** under **Calculation**. Close the window with **Close**.',
+          'The plastering is going to be done with two plasterers. Select **Plastering** (4.2). In *Properties*, choose the rule **Fixed work** at **Work rule**. Then, in the **Assignments** block (at the bottom, scroll down if needed), set the **Units/day** of the Plasterer to `2` and press Enter.',
+        ],
+        explain: [
+          'Plastering now takes 2d instead of 4d, and the status bar says *Out of date — recalculate (F5)* again. The work stayed the same: 4 days × 1 plasterer × 8 hours is 32 hours, and with two plasterers per day that is 2 working days.',
+          'The work rule decides what the app adjusts when you change the units. Under the default rule *Fixed duration and units* the plastering kept taking 4 working days and the work doubled to 64 hours: you would pay two plasterers for the same work. Under **Fixed work** the work stays put and the duration follows the units. More: [Work rules: duration, units and work](docs://uitleg-werkregels).',
+        ],
+      },
+      berekenen: {
+        title: 'Calculating',
+        task: [
+          'Click *Home › Schedule › Calculate*, or press F5.',
+        ],
+        explain: [
+          'Plastering now runs from Friday 23 up to and including Monday 26 July (2 working days, the weekend does not count) instead of up to Wednesday 28 July. Everything after it moves two working days forward: the status bar says *End: 30-08-2027* and *Critical path: 8 tasks, 46 work days*. The handover is on Monday 30 August, two working days earlier than on 1 September.',
+          'But the status bar still says *⚠ 1 resource(s) overallocated*. The plastering was the easy part. This is the hard one: the schedule works on paper, but asks more of one resource than it can deliver.',
+        ],
+      },
+      histogram: {
+        title: 'The histogram: who works when',
+        task: [
+          'Click *Resources › Histogram › Histogram*. The histogram opens below the Gantt, with a list of the resources on the left. Click **Mobile crane**.',
+        ],
+        explain: [
+          'The histogram shows per working day how much of the resource is asked, under the same timeline as the Gantt. For the Mobile crane there are two narrow bars: on Monday 28 June (the slabs) and on Tuesday 6 July (the roof elements). They do not reach the top of the scale (*1 units*): the bars are 5/8 and 6/8 of a unit high, 0.625 and 0.75.',
+          'That is because of the hours. Crane work of 5 hours is 5 of the 8 working hours of that day and so counts for 0.625, 6 hours for 0.75. An hour task counts in proportion to its hours, even when it is shorter than a day.',
+        ],
+      },
+      overbezetting: {
+        title: 'Overallocation: the bricklayer',
+        task: [
+          'On the ribbon, look at *Resources › Overallocation*: it says *1 resource* in red. Click the message *⚠ 1 resource(s) overallocated* at the bottom of the status bar. The *Warnings* panel opens on the right. Click the line of the **Bricklayer**.',
+        ],
+        explain: [
+          'The panel says for the Bricklayer *Overallocated on 5 day(s) (29-06-2027 – 05-07-2027)*. The app puts the histogram on the Bricklayer and selects the bricklayer\'s tasks. On those five days the bars stick out in red above the capacity line: the schedule asks 2 units of a bricklayer who has 1.',
+          'The cause is in the relationships from tutorial 2. The inner and the outer cavity leaf both hang on Lay hollow-core floor, so they both start on Tuesday 29 June, and both are on the same bricklayer. A relationship only fixes an order and does not know how many people there are. You only see that with resources.',
+        ],
+      },
+      nivelleren: {
+        title: 'Leveling',
+        task: [
+          'Click *Resources › Leveling › Level…*. The window *Level resources* opens. Leave the box *Level only within slack (smoothing) — project end date stays fixed* unticked. Under **Resources** are the resources that get leveled; the concrete is not one of them, because a material is not leveled. Click **Calculate**, read the proposal and click **Apply**.',
+        ],
+        explain: [
+          'The proposal says *Project end date: unchanged (30-08-2027)* and shows one line: **Build outer cavity leaf**, old start 29-06-2027, new start 06-07-2027, *5 d*. After Apply, *Resources › Overallocation* says *None* and the warning has gone from the status bar. The outer cavity leaf now runs from Tuesday 6 July up to and including Tuesday 13 July.',
+          'Why the outer and not the inner cavity leaf? They have the same priority, and the app places the task with the least float first: the inner leaf (3 working days of float) stays and the outer leaf (5) gives way. It gives way until the first day the bricklayer is free, 5 working days later: the leveling delay.',
+          'And why does the handover not move? The outer cavity leaf had 5 working days of float, because since tutorial 3 the window frames only arrive on 14 July. Leveling uses up that float. The outer leaf now has 0 and is critical: the status bar says *Critical path: 17 tasks, 46 work days*, against 8 tasks before. If the outer leaf runs late now, the handover moves. More: [Resource leveling](docs://uitleg-nivelleren).',
+        ],
+        panelOnly: [
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren).',
         ],
       },
     },
@@ -1463,11 +2128,131 @@ const STEP_LOGIC_3 = {
   },
 };
 
-/** De drie tutorials: één bron voor artikel, paneel, lintknop en host-verzoek. */
+// Tutorial 4. De instelling Urenplanning zit niet in het document en de extensie kan haar niet zetten: die
+// stap heeft een controle (de bewaarde instelling) maar geen Toon mij. `reset` staat bij de eerste stap die
+// het document verandert (`stort`): daar levert de generator een tussenstand (het resultaat van tutorial 3).
+// De stappen in Eigenschappen hebben geen anker (zie tutorial 3): een markering om dat paneel laat het
+// begeleidingspaneel naar links uitwijken, over de takenlijst waarin je de taak aanklikt.
+const STEP_ORDER_4 = [
+  'startpunt', 'urenplanning', 'stort', 'kraan-vloer', 'kraan-dak', 'berekenen', 'langere-kraan', 'terugzetten',
+];
+
+const STEP_LOGIC_4 = {
+  startpunt: {
+    check: afterTutorial3,
+    prepare: async (api) => {
+      if (!afterTutorial3(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-3'));
+    },
+  },
+  urenplanning: {
+    anchor: 'ribbon:instellingen:projectSettings',
+    check: hourPlanningOn,
+  },
+  stort: {
+    check: api => afterTutorial3(api) && stortDone(api),
+    prepare: api => ensureHours(api, 'pour'),
+    reset: 'na-tut-3',
+  },
+  'kraan-vloer': {
+    check: api => afterTutorial3(api) && floorDone(api),
+    prepare: api => ensureHours(api, 'floor'),
+  },
+  'kraan-dak': {
+    check: api => afterTutorial3(api) && roofDone(api),
+    prepare: api => ensureHours(api, 'roofElements'),
+  },
+  berekenen: {
+    anchor: 'ribbon:start:calc',
+    check: api => hoursDone(api) && isCalculated(api),
+    prepare: async (api) => {
+      await ensureHours(api, 'roofElements');
+      api.data.recalculate();
+    },
+  },
+  'langere-kraan': {
+    check: api => afterTutorial3(api) && stortDone(api) && floorDone(api) && roofIs(api, ROOF_LONG_MINUTES) && isCalculated(api),
+    prepare: async (api) => {
+      await ensureHours(api, 'roofElements', ROOF_LONG_MINUTES);
+      setHourMinutes(api, 'roofElements', ROOF_LONG_MINUTES);
+      api.data.recalculate();
+    },
+  },
+  terugzetten: {
+    check: api => hoursDone(api) && isCalculated(api),
+    prepare: async (api) => {
+      await ensureHours(api, 'roofElements');
+      setHourMinutes(api, 'roofElements', HOUR_MINUTES.roofElements);
+      api.data.recalculate();
+    },
+  },
+};
+
+// Tutorial 5. Resources, toewijzingen en werkregels zijn voor de extensie alleen te lezen. De checks volgen
+// dus elke stap; Toon mij bestaat alleen waar het resultaat van de stap een meegeleverd project is: de stand
+// vóór het nivelleren (na-tut-5 zonder de nivellering) en de stand erna (na-tut-5). `reset` staat bij de
+// eerste stap die het document verandert; voor de latere stappen levert de generator geen tussenstand.
+const STEP_ORDER_5 = [
+  'startpunt', 'resources', 'toewijzen-metselaar', 'toewijzen-ploeg-kraan', 'toewijzen-overig', 'werkregel',
+  'berekenen', 'histogram', 'overbezetting', 'nivelleren',
+];
+
+const STEP_LOGIC_5 = {
+  startpunt: {
+    check: afterTutorial4,
+    prepare: async (api) => {
+      if (!afterTutorial4(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-4'));
+    },
+  },
+  resources: {
+    anchor: 'ribbon:resources:newResource',
+    check: resourcesDone,
+    reset: 'na-tut-4',
+  },
+  'toewijzen-metselaar': {
+    anchor: 'ribbon:resources:resourceAssign',
+    check: api => assignmentsDone(api, 'bricklayer'),
+  },
+  'toewijzen-ploeg-kraan': {
+    anchor: 'ribbon:resources:resourceAssign',
+    check: api => assignmentsDone(api, 'crewCrane'),
+  },
+  'toewijzen-overig': {
+    anchor: 'ribbon:resources:resourceAssign',
+    check: api => assignmentsDone(api, 'other'),
+  },
+  werkregel: {
+    anchor: 'ribbon:instellingen:projectSettings',
+    check: workRuleDone,
+  },
+  berekenen: {
+    anchor: 'ribbon:start:calc',
+    check: api => workRuleDone(api) && isCalculated(api),
+    prepare: ensureBeforeLeveling,
+  },
+  // Stappen zonder controle: het histogram openen, een resource kiezen en de melding aanklikken laten geen
+  // sporen na in het document, en de extensie kan de weergave niet lezen. Daarom "Klaar, volgende".
+  histogram: {
+    anchor: 'ribbon:resources:toggleHistogram',
+    prepare: ensureBeforeLeveling,
+  },
+  overbezetting: {
+    anchor: 'ribbon:resources:overallocation',
+    prepare: ensureBeforeLeveling,
+  },
+  nivelleren: {
+    anchor: 'ribbon:resources:levelResources',
+    check: levelingApplied,
+    prepare: ensureLeveled,
+  },
+};
+
+/** De vijf tutorials: één bron voor artikel, paneel, lintknop en host-verzoek. */
 const TUTORIALS = [
   { id: TUTORIAL_1_ID, order: 1, label: 'Tutorial 1', text: TEXT_1, stepOrder: STEP_ORDER_1, logic: STEP_LOGIC_1 },
   { id: TUTORIAL_2_ID, order: 2, label: 'Tutorial 2', text: TEXT_2, stepOrder: STEP_ORDER_2, logic: STEP_LOGIC_2 },
   { id: TUTORIAL_3_ID, order: 3, label: 'Tutorial 3', text: TEXT_3, stepOrder: STEP_ORDER_3, logic: STEP_LOGIC_3 },
+  { id: TUTORIAL_4_ID, order: 4, label: 'Tutorial 4', text: TEXT_4, stepOrder: STEP_ORDER_4, logic: STEP_LOGIC_4 },
+  { id: TUTORIAL_5_ID, order: 5, label: 'Tutorial 5', text: TEXT_5, stepOrder: STEP_ORDER_5, logic: STEP_LOGIC_5 },
 ];
 
 const para = lines => lines.join('\n\n');
