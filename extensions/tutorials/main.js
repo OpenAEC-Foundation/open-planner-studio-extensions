@@ -826,7 +826,7 @@ const TEXT_2 = {
         title: 'De fundering, in de tabel',
         task: [
           'Ga naar het tabblad **Tabel**. Klik op de **+** rechts in de tabelkop (*Kolom toevoegen*), open het kopje **Relaties** en kies **Voorgangers**. De kolom Voorgangers staat nu rechts in de tabel.',
-          'Klik in die kolom op de cel van **Funderingssleuf ontgraven** (2.1) en begin meteen te typen: `1.4 FS`. Druk op Enter. Dat betekent: voorganger is taak 1.4, Aanbouw uitzetten, met een Eind-Start-relatie. Zet altijd een spatie tussen het nummer en het type: zonder spatie herkent de app de invoer niet. Druk je eerst op Enter, dan opent een ander invoerveld met een zoekvak; dat werkt ook, maar hier typ je gewoon. Enter brengt je naar de cel eronder, dus je kunt doortypen:',
+          'Klik in die kolom op de cel van **Funderingssleuf ontgraven** (2.1) en begin meteen te typen: `1.4 FS`. Druk op Enter. Dat betekent: voorganger is taak 1.4, Aanbouw uitzetten, met een Eind-Start-relatie. Zet altijd een spatie tussen het nummer en het type: zonder spatie herkent de app de invoer niet. Druk je eerst op Enter, dan opent een zoekvak waarin je de taak aanklikt en met Enter bevestigt; dat werkt ook, maar hier typ je gewoon. Enter brengt je naar de cel eronder, dus je kunt doortypen:',
           '- 2.1 Funderingssleuf ontgraven: `1.4 FS`\n- 2.2 Wapening en bekisting fundering: `2.1 FS`\n- 2.3 Inspectie wapening: `2.2 FS`\n- 2.4 Fundering storten: `2.3 FS`',
         ],
         explain: [
@@ -966,7 +966,7 @@ const TEXT_2 = {
         title: 'The foundations, in the table',
         task: [
           'Go to the **Table** tab. Click the **+** at the right of the table header (*Add column*), open the **Relations** heading and choose **Predecessors**. The Predecessors column is now at the right of the table.',
-          'In that column, click the cell of **Excavate foundation trench** (2.1) and start typing right away: `1.4 FS`. Press Enter. That means: the predecessor is task 1.4, Set out the extension, with a finish-start relationship. Always put a space between the number and the type: without the space the app does not recognise the input. If you press Enter first, a different input box with a search field opens; that works too, but here you simply type. Enter takes you to the cell below, so you can keep typing:',
+          'In that column, click the cell of **Excavate foundation trench** (2.1) and start typing right away: `1.4 FS`. Press Enter. That means: the predecessor is task 1.4, Set out the extension, with a finish-start relationship. Always put a space between the number and the type: without the space the app does not recognise the input. If you press Enter first, a search box opens in which you click the task and confirm with Enter; that works too, but here you simply type. Enter takes you to the cell below, so you can keep typing:',
           '- 2.1 Excavate foundation trench: `1.4 FS`\n- 2.2 Foundation formwork and reinforcement: `2.1 FS`\n- 2.3 Reinforcement inspection: `2.2 FS`\n- 2.4 Pour foundation: `2.3 FS`',
         ],
         explain: [
@@ -1133,7 +1133,7 @@ const TEXT_3 = {
           'Wat als de afspraak strakker is? Zet de deadline van **Oplevering** op vrijdag 27 augustus 2027, de datum waarop je zonder de constraint klaar was: typ `27`, `08` en `2027` en druk op Enter. Druk daarna op F5.',
         ],
         explain: [
-          'De balken blijven waar ze staan: Oplevering blijft op woensdag 1 september. Maar bij Oplevering staat op 27 augustus nu een rode pijl omlaag, links van het ruitje, en de statusbalk meldt *1 deadline(s) overschreden*. Klik op die melding in de statusbalk: het paneel *Waarschuwingen* opent met *Deadline 27-08-2027 overschreden — vroegste einde 01-09-2027*.',
+          'De balken blijven waar ze staan: Oplevering blijft op woensdag 1 september. Maar bij Oplevering staat op 27 augustus nu een rode pijl omlaag, links van het ruitje (scroll in de Gantt zo nodig een stukje naar links), en de statusbalk meldt *1 deadline(s) overschreden*. Klik op die melding in de statusbalk: het paneel *Waarschuwingen* opent met *Deadline 27-08-2027 overschreden — vroegste einde 01-09-2027*.',
           'Selecteer je Oplevering, dan zie je onder *CPM Resultaat* een *Totale speling* van -3 dagen: op papier ben je 3 werkdagen te laat. Dat geldt voor de hele keten van Kozijnen plaatsen tot en met de oplevering. De taken daarvoor, van Start bouw tot en met Dakbedekking, hebben 0 dagen speling: ze zijn kritiek zonder marge. Alleen Buitenspouwblad (2 dagen) en Schilderwerk (3 dagen) zijn niet kritiek. Zo komt de statusbalk op *Kritiek pad: 21 taken*. De app verschuift niets om de datum te halen. Hij laat zien dat de afspraak niet past.',
           'Wil je de deadline halen, dan maak je de keten korter of de afspraak ruimer, bijvoorbeeld een eerdere levering van de kozijnen. Dat is een keuze voor de planner, niet voor de rekenmotor.',
         ],
@@ -1234,7 +1234,7 @@ const TEXT_3 = {
           'What if the agreement is tighter? Set the deadline of **Handover** to Friday 27 August 2027, the date you were finished on without the constraint: type `27`, `08` and `2027` and press Enter. Then press F5.',
         ],
         explain: [
-          'The bars stay where they are: Handover stays on Wednesday 1 September. But at Handover there is now a red arrow pointing down on 27 August, to the left of the diamond, and the status bar says *1 deadline(s) missed*. Click that message in the status bar: the *Warnings* panel opens with *Deadline 27-08-2027 missed — early finish 01-09-2027*.',
+          'The bars stay where they are: Handover stays on Wednesday 1 September. But at Handover there is now a red arrow pointing down on 27 August, to the left of the diamond (scroll the Gantt a little to the left if needed), and the status bar says *1 deadline(s) missed*. Click that message in the status bar: the *Warnings* panel opens with *Deadline 27-08-2027 missed — early finish 01-09-2027*.',
           'Select Handover and under *CPM Result* you see a *Total float* of -3 days: on paper you are 3 working days late. That goes for the whole chain from Install window frames up to and including the handover. The tasks before it, from Start of construction up to Apply roofing, have 0 days of float: they are critical without any margin. Only Build outer cavity leaf (2 days) and Painting (3 days) are not critical. That is how the status bar gets to *Critical path: 21 tasks*. The app moves nothing to meet the date. It shows you that the agreement does not fit.',
           'To meet the deadline you make the chain shorter or the agreement looser, for example an earlier delivery of the window frames. That is a choice for the planner, not for the calculation engine.',
         ],
@@ -1408,6 +1408,7 @@ const networkOk = api => tasksPresent(api) && linksDone(api, ALL_LINKS);
 
 // De stappen die in Eigenschappen werken hebben bewust GEEN anker: een markering om het paneel laat het
 // begeleidingspaneel naar links uitwijken, en daar bedekt het de takenlijst waarin je de taak aanklikt.
+// Uitzondering: 'deadline-krap', waar je niets meer hoeft aan te klikken maar wel de rechterrail leest.
 const STEP_LOGIC_3 = {
   startpunt: {
     check: networkOk,
@@ -1441,7 +1442,12 @@ const STEP_LOGIC_3 = {
       api.data.recalculate();
     },
   },
+  // Anker op Eigenschappen, zoals tutorial 2 stap 9: het paneel Waarschuwingen opent onder Eigenschappen
+  // in de rechterrail en CPM Resultaat staat onderaan in Eigenschappen; rechtsonder zou het
+  // begeleidingspaneel ze allebei bedekken. Het paneel wijkt dan naar links; Oplevering staat nog
+  // geselecteerd uit de vorige stap en de Gantt blijft vrij.
   'deadline-krap': {
+    anchor: 'properties-panel',
     check: api => deadlineCalculated(api, DEADLINE.tight),
     prepare: async (api) => {
       await ensureDeadline(api, DEADLINE.tight);
