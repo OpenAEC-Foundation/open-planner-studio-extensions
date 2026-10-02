@@ -69,7 +69,7 @@ werkregels of nivellering. Gevolgen:
   geen Toon mij. De latere stappen zetten de uren wel klaar (`updateTask` met `durationUnit: 'hours'`).
 - **Tutorial 5.** Resources, toewijzingen en `workRule` zijn te lezen (`getResources`, `getAssignments`,
   `task.workRule`) en dus te controleren, maar niet te schrijven. **Toon mij** staat daarom alleen bij de
-  stappen vanaf het rekenen: de stand vóór het nivelleren is `na-tut-5` met de nivellering er weer uit
+  eerste stap (opent zo nodig `na-tut-4`) en bij de stappen vanaf het rekenen: de stand vóór het nivelleren is `na-tut-5` met de nivellering er weer uit
   (`levelingDelay: 0`, daarna herberekenen), de stand erna is `na-tut-5` zelf; ontbreekt er iets in het
   geopende project, dan opent Toon mij `na-tut-5` als nieuw tabblad. Voor de stappen *resources*,
   *toewijzen* en *werkregel* heeft Toon mij geen tussenstand. De histogramstappen en de overbezettingsstap

@@ -1675,7 +1675,7 @@ const TEXT_5 = {
       'Aan het eind is er geen overbezetting meer. De oplevering staat op maandag 30 augustus 2027, twee werkdagen eerder dan in tutorial 4, doordat het stucwerk met twee stukadoors korter wordt. Je hebt gezien dat nivelleren het buitenspouwblad vijf werkdagen laat wachten zonder dat de oplevering schuift, en wat dat de taak kost.',
       '## Uitgangspunt',
       'Je hebt tutorial 4 afgerond: het project met de betonstort en de twee kraaninzetten in uren, berekend, met de oplevering op woensdag 1 september 2027. Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
-      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier niet overal: een extensie kan geen resources, toewijzingen of werkregels aanmaken. Toon mij staat daarom alleen bij de stappen vanaf het rekenen en opent daar, waar nodig, het resultaat van deze tutorial als nieuw tabblad. **Opnieuw** in de stap *Vijf resources aanmaken* laadt het resultaat van tutorial 4 opnieuw.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier niet overal: een extensie kan geen resources, toewijzingen of werkregels aanmaken. Toon mij staat daarom alleen bij de eerste stap, waar het zo nodig het resultaat van tutorial 4 opent, en bij de stappen vanaf het rekenen, waar het zo nodig het resultaat van deze tutorial opent. Beide openen als nieuw tabblad. **Opnieuw** in de stap *Vijf resources aanmaken* laadt het resultaat van tutorial 4 opnieuw.',
     ],
     outro: [
       '## Wat je hebt geleerd',
@@ -1716,7 +1716,7 @@ const TEXT_5 = {
         ],
         explain: [
           'De metselaar staat nu op vier taken. Selecteer je een van die taken, dan staat in *Eigenschappen* onder **Toewijzingen**: Metselaar met Eenh./dag 1. Die inzet is hoeveel van de resource er per werkdag aan de taak werkt. De curve, hier Uniform, verdeelt het over de dagen van de taak: elke dag evenveel.',
-          'Onderaan in de statusbalk staat nu *⚠ 1 resource(s) overbezet*. Daar kom je in twee stappen op terug.',
+          'Onderaan in de statusbalk staat nu *⚠ 1 resource(s) overbezet*. Daar kom je later in deze tutorial op terug.',
         ],
       },
       'toewijzen-ploeg-kraan': {
@@ -1815,7 +1815,7 @@ const TEXT_5 = {
       'At the end there is no overallocation left. The handover is on Monday 30 August 2027, two working days earlier than in tutorial 4, because the plastering gets shorter with two plasterers. You have seen that leveling makes the outer cavity leaf wait five working days without the handover moving, and what that costs the task.',
       '## Starting point',
       'You have finished tutorial 4: the project with the concrete pour and the two crane jobs in hours, calculated, with the handover on Wednesday 1 September 2027. If you have not, [open the result of tutorial 4](project://projects/en/na-tut-4.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
-      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you, but that is not possible everywhere here: an extension cannot create resources, assignments or work rules. That is why Show me is only there for the steps from calculating onwards, where it opens the result of this tutorial as a new tab if needed. **Start over** in the step *Creating five resources* reloads the result of tutorial 4.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you, but that is not possible everywhere here: an extension cannot create resources, assignments or work rules. That is why Show me is only there for the first step, where it opens the result of tutorial 4 if needed, and for the steps from calculating onwards, where it opens the result of this tutorial if needed. Both open as a new tab. **Start over** in the step *Creating five resources* reloads the result of tutorial 4.',
     ],
     outro: [
       '## What you have learned',
@@ -1856,7 +1856,7 @@ const TEXT_5 = {
         ],
         explain: [
           'The bricklayer is now on four tasks. Select one of those tasks and in *Properties* under **Assignments** it says: Bricklayer with Units/day 1. That is how much of the resource works on the task per working day. The curve, Uniform here, spreads it over the days of the task: the same every day.',
-          'At the bottom, the status bar now says *⚠ 1 resource(s) overallocated*. You come back to that in two steps.',
+          'At the bottom, the status bar now says *⚠ 1 resource(s) overallocated*. You come back to that later in this tutorial.',
         ],
       },
       'toewijzen-ploeg-kraan': {
