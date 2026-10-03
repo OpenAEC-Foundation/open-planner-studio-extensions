@@ -64,7 +64,10 @@ stap *De bouwvak in de kalender* (`na-tut-2`) en stap *Een constraint* (`tussen-
 tutorial 4 stap *De betonstort: 6 uur* (`na-tut-3`) en tutorial 5 stap *Vijf resources aanmaken*
 (`na-tut-4`), *De metselaar op vier taken* (`tussen-tut-5-resources`), *De werkregel: Vast werk*
 (`tussen-tut-5-toegewezen`) en *Nivelleren* (`tussen-tut-5-werkregel`), en tutorial 6 stap *Een baseline
-opslaan* (`na-tut-5`). Tutorial 7 heeft geen Opnieuw: het verandert het project niet.
+opslaan* (`na-tut-5`), *De statusdatum* (`tussen-tut-6-baseline`), *De voorbereiding is klaar*
+(`tussen-tut-6-statusdatum`), *Het ontgraven liep uit* (`tussen-tut-6-voorbereiding`), *De wapening, de keuring
+en de stort* (`tussen-tut-6-ontgraven`) en *Het funderingsmetselwerk loopt* (`tussen-tut-6-fundering`).
+Tutorial 7 heeft geen Opnieuw: het verandert het project niet.
 
 ## Wat de extensie-API niet kan (en wat dat voor tutorial 4 en 5 betekent)
 
@@ -126,13 +129,19 @@ werkregels of nivellering. Gevolgen:
 Gecontroleerd in de app-code (`src/extensions/extTypes.ts`, `extensionApi.ts`) en in de draaiende app:
 
 - **Een baseline is niet te lezen en niet te schrijven.** `api.data` kent geen baselines, ook geen
-  host-event. De stap *Een baseline opslaan* heeft dus geen controle (*Klaar, volgende*) en geen Toon mij.
-- **De statusdatum is te lezen** (`getProject().statusDate`) **maar niet te schrijven**: controle ja, Toon
-  mij nee.
+  host-event. De stap *Een baseline opslaan* heeft dus geen controle (*Klaar, volgende*), en Toon mij opent
+  daar ALTIJD `tussen-tut-6-baseline`: het paneel kan niet zien of de baseline er al is.
+- **De statusdatum is te lezen** (`getProject().statusDate`) **maar niet te schrijven**: controle ja; Toon
+  mij opent zo nodig `tussen-tut-6-statusdatum`.
 - **Voortgang is te lezen** (`time.completion`, `time.actualStart`, `time.actualFinish`), dus elke
   invoerstap heeft een controle. Schrijven kan alleen met `updateTask`, de ruwe veldschrijfroute zonder de
   regels van de app (percentage ↔ werkelijke datums ↔ status, de startvraag, het weigeren van een datum
-  na de statusdatum). Daarop bouwt Toon mij niet: hij opent alleen een stand van de generator.
+  na de statusdatum). Daarop bouwt Toon mij niet: hij opent een stand van de generator.
+- **De app rekent een .ifc bij het openen altijd door** (`openExampleFromString` → herberekenen; de stand is
+  dan niet *Verouderd*). De `tussen-tut-6-*`-standen zijn vóór Bereken vastgelegd, zoals de lezer ze heeft,
+  maar na Toon mij of Opnieuw in stap 3–7 ziet de lezer een berekende planning, niet de oude berekening die de
+  uitleg van die stap beschrijft. De tekst bij Toon mij en de intro zeggen dat, met de getallen hieronder. Bij
+  Rekenen (stap 8) komt alles op `na-tut-6` uit.
 - **Een urentaak heeft kloktijden.** De stort (`Fundering storten`, 6 u) heeft in `na-tut-6` een werkelijke
   start `2027-06-21T07:00` en een werkelijk einde `2027-06-21T14:00`; de lezer typt `21-06-2027 07:00` en
   `21-06-2027 14:00` in de tabel. Alleen de datum geeft een andere uitkomst (vroege start 18-06T16:00,
@@ -151,26 +160,30 @@ geworden):
 | Stap | Controle | Toon mij | Opnieuw | Anker |
 |---|---|---|---|---|
 | T6 1 *Het startpunt* | project na tutorial 5 | opent `na-tut-5` | – | – |
-| T6 2 *Een baseline opslaan* | geen (niet leesbaar) | – | `na-tut-5` | `ribbon-group:planning:baselines` |
-| T6 3 *De statusdatum* | `statusDate` = 2027-06-28 | – | – | `ribbon-group:planning:baselines` |
-| T6 4 *De voorbereiding is klaar* | vier taken 100 % met de juiste datums | – | – | `ribbon:table:tableColumns` |
-| T6 5 *Het ontgraven liep uit* | ontgraven 11–15 jun, 100 % | – | – | `ribbon-tab:table` |
-| T6 6 *De wapening, de keuring en de stort* | drie taken, stort met kloktijd | – | – | `ribbon-tab:table` |
-| T6 7 *Het funderingsmetselwerk loopt* | start 25 jun, 50 %, geen einde | – | – | `ribbon-tab:table` |
+| T6 2 *Een baseline opslaan* | geen (niet leesbaar) | opent altijd `tussen-tut-6-baseline` | `na-tut-5` | `ribbon-group:planning:baselines` |
+| T6 3 *De statusdatum* | `statusDate` = 2027-06-28 | `tussen-tut-6-statusdatum` | `tussen-tut-6-baseline` | `ribbon-group:planning:baselines` |
+| T6 4 *De voorbereiding is klaar* | vier taken 100 % met de juiste datums | `tussen-tut-6-voorbereiding` | `tussen-tut-6-statusdatum` | `ribbon:table:tableColumns` |
+| T6 5 *Het ontgraven liep uit* | ontgraven 11–15 jun, 100 % | `tussen-tut-6-ontgraven` | `tussen-tut-6-voorbereiding` | `ribbon-tab:table` |
+| T6 6 *De wapening, de keuring en de stort* | drie taken, stort met kloktijd | `tussen-tut-6-fundering` | `tussen-tut-6-ontgraven` | `ribbon-tab:table` |
+| T6 7 *Het funderingsmetselwerk loopt* | start 25 jun, 50 %, geen einde | `tussen-tut-6-metselwerk` (ook stap 8) | `tussen-tut-6-fundering` | `ribbon-tab:table` |
 | T6 8 *Rekenen* | alles ingevuld én berekend na die invoer | `na-tut-6` of alleen berekenen | – | `ribbon:table:calc` |
 | T6 9 *De afwijking in de Gantt* | geen | idem | – | `ribbon-tab:start` |
 | T6 10 *De afwijking in cijfers* | geen | idem | – | `ribbon:table:tableColumns` |
 | T7 1 *Het startpunt* | project na tutorial 6 | opent `na-tut-6`, berekent | – | – |
 | T7 2 t/m 7 | geen | – | – | `ribbon-tab:report`, `report-panel` (4×), `ribbon-tab:file` |
 
-Toon mij vanaf *Rekenen* opent `na-tut-6` alleen als het geopende project de voortgang niet heeft; staat
-alles erin maar is het niet berekend, dan berekent Toon mij alleen (nagelopen).
+Toon mij in stap 3–7 opent de stand alleen als het geopende project (na tutorial 5) de stap en alles daarvoor
+nog niet heeft; anders laat hij het project met rust. Toon mij vanaf *Rekenen* opent `na-tut-6` alleen als het
+geopende project de voortgang niet heeft; staat alles erin maar is het niet berekend, dan berekent Toon mij
+alleen (nagelopen). Opnieuw staat niet bij *Rekenen*: de beginstand (`tussen-tut-6-metselwerk`) is na het
+openen al gerekend.
 
-**Gewenste extra standen uit de app-generator** (geen van allen bestaat nu), alle zonder berekening, dus
-zoals de lezer ze heeft vóór Bereken: `tussen-tut-6-baseline` (`na-tut-5` + baseline *Basisplanning*),
-`tussen-tut-6-statusdatum` (+ statusdatum 28 juni), `tussen-tut-6-voorbereiding`, `tussen-tut-6-ontgraven`,
-`tussen-tut-6-fundering` en `tussen-tut-6-metselwerk` (+ de voortgang tot en met die groep). Daarmee kunnen
-Toon mij en Opnieuw ook de stappen 3 t/m 7 van tutorial 6 doen. Voor tutorial 7 is geen extra stand nodig.
+De zes `tussen-tut-6-*`-standen komen uit de app-generator (PR OpenAEC-Foundation/open-planner-studio#280,
+branch `claude/tutorial-tussenstanden-tut6`); de getallen staan hieronder bij *De getallen in de tekst*. In de
+app nagelopen (nl en en, 1600×950 en 1366×768): Toon mij op elke stap, in keten en per stap vanaf een leeg nieuw
+project; Opnieuw op stap 2–7 (de stap staat daarna weer open); en een doorloop met echte invoer, ook na Opnieuw
+halverwege, die na Bereken exact op `na-tut-6` uitkomt. Ingevoegde tabelkolommen blijven staan als Toon mij of
+Opnieuw een nieuw tabblad opent.
 
 ## Ankers en de plek van het begeleidingspaneel
 
@@ -236,6 +249,16 @@ motor ze, dan wordt `tests/planning/check-tutorial-project.ts` in de app rood; p
   kraan op 28 jun en 6 jul voor 0,625 en 0,75 eenheid (5 en 6 van de 8 uur) en het beton op 18 jun voor 6
   m³. Na het nivelleren: buitenspouwblad nivelleervertraging 5 (di 6 – di 13 jul), niemand overbezet,
   oplevering ma 30 aug, *17 taken, 46 werkdagen*.
+- **`tussen-tut-6-*`** (vóór Bereken vastgelegd; in het bestand nog de planning van `na-tut-5`, einde 30 aug):
+  `-baseline` = `na-tut-5` + baseline *Basisplanning* (`Baseline` in de en-variant), `-statusdatum` + statusdatum
+  28 jun, `-voorbereiding`, `-ontgraven`, `-fundering` en `-metselwerk` + de voortgang tot en met die stap
+  (dezelfde datums als `na-tut-6`). Zo geopend (de app rekent dan) geeft de statusbalk:
+  `-baseline` *Einde: 30-08-2027*, *17 taken, 46 werkdagen*; `-statusdatum` *Einde: 20-09-2027*, *23 taken, 46
+  werkdagen*, *1 deadline(s) overschreden* (alles op of na 28 jun, Start bouw 28 jun); `-voorbereiding` *Einde:
+  14-09-2027*, *15 taken, 57 werkdagen*, deadline overschreden, Voorbereiding 100 %; `-ontgraven` *Einde:
+  10-09-2027*, *12 taken, 55 werkdagen*, wapening op 28 jun, Fundering 23,8 %; `-fundering` *Einde: 01-09-2027*,
+  *10 taken, 48 werkdagen*, funderingsmetselwerk 28–29 jun, Fundering 69 %; `-metselwerk` gelijk aan `na-tut-6`.
+  Gepind in `check-tutorial-project.ts` van de app (nl en en).
 - **`na-tut-6`**: `na-tut-5` + baseline *Basisplanning* (`Baseline` in de en-variant; oplevering ma 30 aug),
   statusdatum ma 28 jun 2027 en voortgang: Start bouw 7 jun, Bouwplaats 7–8 jun, Tuin 9 jun, Uitzetten 10 jun,
   Funderingssleuf ontgraven 11–15 jun (3 in plaats van 2 werkdagen), Wapening 16–18 jun, Inspectie 18 jun,
@@ -268,14 +291,17 @@ dev-build (ook 2026.9.0) weigeren.
 
 `projects/<taal>/start-tut-1.ifc`, `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc`,
 `na-tut-3.ifc`, `na-tut-4.ifc`, `tussen-tut-5-resources.ifc`, `tussen-tut-5-toegewezen.ifc`,
-`tussen-tut-5-werkregel.ifc`, `na-tut-5.ifc`, `na-tut-6.ifc` en `na-tut-7.ifc` zijn **gegenereerd**, niet met de hand gemaakt. Alle
+`tussen-tut-5-werkregel.ifc`, `na-tut-5.ifc`, `tussen-tut-6-baseline.ifc`, `tussen-tut-6-statusdatum.ifc`,
+`tussen-tut-6-voorbereiding.ifc`, `tussen-tut-6-ontgraven.ifc`, `tussen-tut-6-fundering.ifc`,
+`tussen-tut-6-metselwerk.ifc`, `na-tut-6.ifc` en `na-tut-7.ifc` zijn **gegenereerd**, niet met de hand gemaakt. Alle
 standen komen uit de generator van de app. In een checkout van de app:
 
 ```bash
 npm run gen:tutorial-project -- --out <map>
 # kopieer daarna <map>/<taal>/start-tut-1.ifc, na-tut-1.ifc, na-tut-2.ifc, tussen-tut-3-bouwvak.ifc,
 # na-tut-3.ifc, na-tut-4.ifc, tussen-tut-5-resources.ifc, tussen-tut-5-toegewezen.ifc,
-# tussen-tut-5-werkregel.ifc, na-tut-5.ifc, na-tut-6.ifc en na-tut-7.ifc naar projects/<taal>/
+# tussen-tut-5-werkregel.ifc, na-tut-5.ifc, de zes tussen-tut-6-*.ifc, na-tut-6.ifc en na-tut-7.ifc
+# naar projects/<taal>/
 ```
 
 `tussen-tut-3-bouwvak` is `na-tut-2` plus de bouwvak in de kalender. De extensie-API kan de kalender
@@ -283,7 +309,9 @@ niet wijzigen, dus **Toon mij** op de bouwvakstap opent dit project (als nieuw t
 kalender aan te passen; **Opnieuw** op de constraintstap laadt hem als beginstand van die stap.
 
 De drie `tussen-tut-5-*`-standen (app-generator, PR OpenAEC-Foundation/open-planner-studio#279, branch `claude/tutorial-tussenstanden-tut5`) zijn er
-om dezelfde reden: de API kan geen resources, toewijzingen of werkregels schrijven. De andere bestanden in
+om dezelfde reden: de API kan geen resources, toewijzingen of werkregels schrijven. De zes `tussen-tut-6-*`-standen
+(app-generator, branch `claude/tutorial-tussenstanden-tut6`) idem: de API kan geen baseline, statusdatum of (via
+de regels van de app) voortgang schrijven. De andere bestanden in
 `projects/` zijn niet opnieuw gegenereerd; ze verschillen van de huidige generatoruitvoer alleen in
 GUIDs, tijdstempels en (bij `start-tut-1` en `na-tut-1`) de schrijfversie en de STEP-codering van een
 gedachtestreepje.
