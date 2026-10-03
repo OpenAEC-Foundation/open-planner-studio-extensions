@@ -2483,7 +2483,7 @@ const TEXT_6 = {
       '- **De statusdatum is de grens tussen feit en voorspelling.** Alles vóór maandag 28 juni vulde je in als werkelijkheid; alles erna rekent de app vanaf die dag. Rekende je met alleen een statusdatum, dan schoof alles wat nog niet begonnen was naar die dag en kwam de oplevering op 20 september.',
       '- **Voortgang bestaat uit een werkelijke start, een werkelijk einde en een percentage, en ze hangen aan elkaar.** Een werkelijk einde maakt de taak 100% en een percentage boven 0 maakt hem *Bezig*. Vul daarom eerst de start in: zonder start neemt de app de geplande start, of bij een werkelijk einde die einddatum zelf.',
       '- **Een dag vertraging op het kritieke pad is een dag vertraging van de oplevering.** Het ontgraven duurde 3 in plaats van 2 werkdagen en lag op het kritieke pad: alles erachter schoof een werkdag op en de oplevering ging van 30 naar 31 augustus.',
-      '- **Afwijking lees je in werkdagen: een plus is later, een min is eerder.** Je zag haar onder de balken in de Gantt en in de kolommen Startafwijking en Eindafwijking. In tutorial 7 staat dezelfde afwijking in een rapport.',
+      '- **Afwijking lees je in werkdagen: een plus is later, een min is eerder.** Je zag haar onder de balken in de Gantt en in de kolom Eindafwijking. In tutorial 7 staat dezelfde afwijking in een rapport.',
       'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-6.ifc). De regels achter deze tutorial staan in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Een baseline opslaan en beheren](docs://howto-baseline-opslaan-en-beheren) en [Voortgang bijwerken](docs://howto-voortgang-bijwerken).',
     ],
     steps: {
@@ -2515,7 +2515,7 @@ const TEXT_6 = {
         ],
         explain: [
           'In de Gantt staat een oranje stippellijn op maandag 28 juni, met de datum bovenin, en de statusbalk zegt *Verouderd — herbereken (F5)*: de statusdatum is een wijziging die nog niet doorgerekend is. De lijn maakt uitstapjes naar links, naar de balken die vóór 28 juni gepland staan maar nog geen voortgang hebben.',
-          'De statusdatum is de dag waarop je de stand opneemt: alles daarvoor is een feit, alles erna moet nog gebeuren. De uitvoerder meldt de stand van vrijdag, jij neemt hem maandagochtend op, dus de statusdatum is maandag. De app doet er drie dingen mee: ze weigert een werkelijke datum na de statusdatum, ze schuift werk dat nog niet begonnen is niet het verleden in, en het restwerk van een taak die loopt begint op deze dag.',
+          'De statusdatum is de dag waarop je de stand opneemt: alles daarvoor is een feit, alles erna moet nog gebeuren. De uitvoerder meldt de stand van vrijdag, jij neemt hem maandagochtend op, dus de statusdatum is maandag. De app doet er drie dingen mee: ze weigert een werkelijke datum na de statusdatum, ze laat werk dat nog niet begonnen is niet in het verleden liggen (dat schuift naar de statusdatum), en het restwerk van een taak die loopt begint op deze dag.',
           'Dat laatste is waarom je nog niet rekent. Zou je nu op Bereken drukken, dan zou de app álles wat nog niet begonnen is naar 28 juni schuiven, ook de taken die volgens jou allang klaar zijn: Start bouw op 28 juni, de oplevering op 20 september, en de statusbalk meldt *1 deadline(s) overschreden*. Eerst de voortgang, dan rekenen.',
         ],
       },
@@ -2614,7 +2614,7 @@ const TEXT_6 = {
       '- **The status date is the boundary between fact and forecast.** Everything before Monday 28 June you entered as reality; everything after it the app calculates from that day. If you had calculated with only a status date, everything that had not started would have moved to that day and the handover would have landed on 20 September.',
       '- **Progress is an actual start, an actual finish and a percentage, and they depend on each other.** An actual finish makes the task 100% and a percentage above 0 makes it *In progress*. That is why you enter the start first: without a start the app takes the planned start, or, with an actual finish, that finish date itself.',
       '- **A day of delay on the critical path is a day of delay on the handover.** The excavation took 3 working days instead of 2 and was on the critical path: everything behind it moved a working day and the handover went from 30 to 31 August.',
-      '- **You read variance in working days: a plus is later, a minus is earlier.** You saw it below the bars in the Gantt and in the columns Start variance and Finish variance. In tutorial 7 the same variance is in a report.',
+      '- **You read variance in working days: a plus is later, a minus is earlier.** You saw it below the bars in the Gantt and in the column Finish variance. In tutorial 7 the same variance is in a report.',
       'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-6.ifc). The rules behind this tutorial are in [Progress, status date and baseline](docs://uitleg-voortgang) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Saving and managing a baseline](docs://howto-baseline-opslaan-en-beheren) and [Updating progress](docs://howto-voortgang-bijwerken).',
     ],
     steps: {
@@ -2646,7 +2646,7 @@ const TEXT_6 = {
         ],
         explain: [
           'The Gantt now has an orange dotted line on Monday 28 June, with the date at the top, and the status bar says *Out of date — recalculate (F5)*: the status date is a change that has not been calculated yet. The line makes excursions to the left, to the bars that are planned before 28 June but have no progress yet.',
-          'The status date is the day you take stock: everything before it is fact, everything after it still has to happen. The foreman reports the situation of Friday, you record it on Monday morning, so the status date is Monday. The app does three things with it: it refuses an actual date after the status date, it does not push work that has not started into the past, and the remaining work of a task that is under way starts on this day.',
+          'The status date is the day you take stock: everything before it is fact, everything after it still has to happen. The foreman reports the situation of Friday, you record it on Monday morning, so the status date is Monday. The app does three things with it: it refuses an actual date after the status date, it does not leave work that has not started in the past (that moves to the status date), and the remaining work of a task that is under way starts on this day.',
           'That last one is why you do not calculate yet. If you pressed Calculate now, the app would move everything that has not started to 28 June, including the tasks you consider long finished: Start of construction on 28 June, the handover on 20 September, and the status bar says *1 deadline(s) missed*. Progress first, then calculate.',
         ],
       },
@@ -2781,7 +2781,7 @@ const TEXT_7 = {
         ],
         explain: [
           'Het Variance-rapport zet de huidige planning naast de baseline. Per taak staan de datums uit de baseline, de huidige datums en het verschil in werkdagen, met de status *Op schema* of *Later*. Links staat bij Overzicht *Taken 23*, *Later 19*, *Eerder 0* en *Projecteinde: +1 werkdagen*.',
-          'De vier taken van de voorbereiding staan op *Op schema*. Funderingssleuf ontgraven staat op *Later* met 0 bij de start en +1 bij het einde, en alle taken daarna hebben +1 op start en einde, tot en met Oplevering: 30-08-2027 in de baseline, 31-08-2027 nu. Dat zijn dezelfde getallen als de kolommen Startafwijking en Eindafwijking uit tutorial 6. De 19 taken die later zijn: alles behalve de vier van de voorbereiding.',
+          'De vier taken van de voorbereiding staan op *Op schema*. Funderingssleuf ontgraven staat op *Later* met 0 bij de start en +1 bij het einde, en alle taken daarna hebben +1 op start en einde, tot en met Oplevering: 30-08-2027 in de baseline, 31-08-2027 nu. Dat zijn dezelfde getallen als de afwijkingskolommen uit tutorial 6: de Eindafwijking die je daar opende, en de Startafwijking ernaast. De 19 taken die later zijn: alles behalve de vier van de voorbereiding.',
         ],
       },
       voortgangsrapport: {
@@ -2801,7 +2801,7 @@ const TEXT_7 = {
           'Staat het Voortgangsrapport nog geselecteerd? Kies dan bij **Papier:** de maat **A4**. Laat **Orientatie:** op Liggend staan.',
         ],
         explain: [
-          'Op het scherm verandert er niets: een tabelrapport staat als lange tabel in het voorbeeld, zonder pagina\'s. De keuze telt in de PDF, die dan uit A4-pagina\'s in de breedte bestaat. Standaard staat het papier op A3 liggend, wat voor een bouwplanning handig is, maar niet elke printer drukt A3 af. Kies je het formaat nu, dan legt de app de pagina\'s direct voor A4 op, in plaats van dat je ze later moet laten krimpen.',
+          'Op het scherm verandert er niets: een tabelrapport staat als lange tabel in het voorbeeld, zonder pagina\'s. De keuze telt in de PDF: die bestaat dan uit A4-pagina\'s, liggend. Standaard staat het papier op A3 liggend, wat voor een bouwplanning handig is, maar niet elke printer drukt A3 af. Kies je het formaat nu, dan legt de app de pagina\'s direct voor A4 op, in plaats van dat je ze later moet laten krimpen.',
           'Papier en oriëntatie gelden voor alle rapporten, ook voor de Variance, en de app onthoudt ze op dit apparaat, voor al je projecten.',
         ],
       },
@@ -2876,7 +2876,7 @@ const TEXT_7 = {
         ],
         explain: [
           'The Variance report puts the current schedule next to the baseline. Per task it shows the baseline dates, the current dates and the difference in working days, with the status *On schedule* or *Later*. On the left the Summary says *Tasks 23*, *Later 19*, *Earlier 0* and *Project end: +1 work days*.',
-          'The four preparation tasks are *On schedule*. Excavate foundation trench is *Later* with 0 at the start and +1 at the finish, and all tasks after it have +1 at start and finish, up to and including Handover: 30-08-2027 in the baseline, 31-08-2027 now. Those are the same numbers as the columns Start variance and Finish variance from tutorial 6. The 19 tasks that are later: everything except the four of the preparation.',
+          'The four preparation tasks are *On schedule*. Excavate foundation trench is *Later* with 0 at the start and +1 at the finish, and all tasks after it have +1 at start and finish, up to and including Handover: 30-08-2027 in the baseline, 31-08-2027 now. Those are the same numbers as the variance columns from tutorial 6: the Finish variance you opened there, and the Start variance next to it. The 19 tasks that are later: everything except the four of the preparation.',
         ],
       },
       voortgangsrapport: {
@@ -2896,7 +2896,7 @@ const TEXT_7 = {
           'Is the Progress report still selected? Then choose the size **A4** at **Paper:**. Leave **Orientation:** on Landscape.',
         ],
         explain: [
-          'Nothing changes on the screen: a table report is a long table in the preview, without pages. The choice counts in the PDF, which then consists of A4 pages. The paper is on A3 landscape by default, which is handy for a construction schedule, but not every printer prints A3. If you choose the size now, the app lays out the pages for A4 straight away, instead of you having to shrink them later.',
+          'Nothing changes on the screen: a table report is a long table in the preview, without pages. The choice counts in the PDF: it then consists of A4 pages, landscape. The paper is on A3 landscape by default, which is handy for a construction schedule, but not every printer prints A3. If you choose the size now, the app lays out the pages for A4 straight away, instead of you having to shrink them later.',
           'Paper and orientation apply to all reports, including the Variance, and the app remembers them on this device, for all your projects.',
         ],
       },
