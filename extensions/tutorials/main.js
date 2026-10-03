@@ -2847,14 +2847,14 @@ const TEXT_7 = {
           'Klik op het tabblad *Rapport*, of druk op Ctrl+P.',
         ],
         explain: [
-          'Links staat de kolom **Rapportage** met de keuzelijst **Rapporttype**, daaronder een overzicht en de instellingen. Rechts staat het voorbeeld, en wat je daar ziet komt in de PDF. Het rapporttype staat op *Gantt-afdruk*, de planning als balkenplan voor op papier; staat hij op een ander rapport, dan is dat geen probleem.',
+          'Links staat de kolom **Rapportage** met bovenaan een keuzelijst voor het rapporttype, daaronder een overzicht en de instellingen. Rechts staat het voorbeeld, en wat je daar ziet komt in de PDF. Het rapporttype staat op *Gantt-afdruk*, de planning als balkenplan voor op papier; staat hij op een ander rapport, dan is dat geen probleem.',
           'Bij **Overzicht** staat *Taken: 27*, *Bladtaken: 23*, *Kritiek: 10* en *Relaties: 24*. De 27 taken zijn de 23 bladtaken, de taken zonder onderliggende taken, plus de vier fasen. De 10 kritieke taken zijn dezelfde 10 als in de statusbalk.',
         ],
       },
       variance: {
         title: 'De Variance: wat is er verschoven?',
         task: [
-          'Kies bij **Rapporttype** het rapport **Variance**.',
+          'Kies in de keuzelijst bovenaan de kolom **Rapportage** het rapport **Variance**.',
         ],
         explain: [
           'Het Variance-rapport zet de huidige planning naast de baseline. Per taak staan de datums uit de baseline, de huidige datums en het verschil in werkdagen, met de status *Op schema* of *Later*. Links staat bij Overzicht *Taken 23*, *Later 19*, *Eerder 0* en *Projecteinde: +1 werkdagen*.',
@@ -2864,7 +2864,7 @@ const TEXT_7 = {
       voortgangsrapport: {
         title: 'Het Voortgangsrapport: waar staan we?',
         task: [
-          'Kies bij **Rapporttype** het **Voortgangsrapport**.',
+          'Kies in de keuzelijst bovenaan de kolom **Rapportage** het **Voortgangsrapport**.',
         ],
         explain: [
           'Links en bovenaan het rapport staan de kerncijfers. *Statusdatum 28-06-2027*, *Baseline-einde 30-08-2027*, *Prognose-einde 31-08-2027* en *Δ einde (wd) +1*: de oplevering staat een werkdag later dan afgesproken. Daaronder *Voltooid 8 / 23*, *In uitvoering 1* en *Niet gestart 14*, en lijsten met de taken per groep.',
@@ -2942,14 +2942,14 @@ const TEXT_7 = {
           'Click the *Report* tab, or press Ctrl+P.',
         ],
         explain: [
-          'On the left is the **Report** column with the **Report type** list, below it a summary and the settings. On the right is the preview, and what you see there ends up in the PDF. The report type is on *Gantt chart*, the schedule as a bar chart for paper; if it is on another report, that is no problem.',
+          'On the left is the **Report** column with a list for the report type at the top, below it a summary and the settings. On the right is the preview, and what you see there ends up in the PDF. The report type is on *Gantt chart*, the schedule as a bar chart for paper; if it is on another report, that is no problem.',
           'Under **Summary** it says *Tasks: 27*, *Leaf tasks: 23*, *Critical: 10* and *Relations: 24*. The 27 tasks are the 23 leaf tasks, the tasks without subtasks, plus the four phases. The 10 critical tasks are the same 10 as in the status bar.',
         ],
       },
       variance: {
         title: 'The Variance: what has moved?',
         task: [
-          'Under **Report type**, choose the report **Variance**.',
+          'In the list at the top of the **Report** column, choose the report **Variance**.',
         ],
         explain: [
           'The Variance report puts the current schedule next to the baseline. Per task it shows the baseline dates, the current dates and the difference in working days, with the status *On schedule* or *Later*. On the left the Summary says *Tasks 23*, *Later 19*, *Earlier 0* and *Project end: +1 work days*.',
@@ -2959,7 +2959,7 @@ const TEXT_7 = {
       voortgangsrapport: {
         title: 'The Progress report: where do we stand?',
         task: [
-          'Under **Report type**, choose the **Progress report**.',
+          'In the list at the top of the **Report** column, choose the **Progress report**.',
         ],
         explain: [
           'On the left and at the top of the report are the key figures. *Status date 28-06-2027*, *Baseline finish 30-08-2027*, *Forecast finish 31-08-2027* and *Δ finish (wd) +1*: the handover is a working day later than agreed. Below that *Complete 8 / 23*, *In progress 1* and *Not started 14*, and lists of the tasks per group.',
