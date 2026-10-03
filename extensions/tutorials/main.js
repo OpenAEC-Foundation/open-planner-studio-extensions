@@ -41,7 +41,10 @@
  *
  * Tutorial 6 en 7 komen uit `na-tut-6` (basisplanning, statusdatum 28 juni 2027, voortgang; oplevering 31 augustus
  * 2027, 10 kritieke taken, 47 werkdagen); `na-tut-7` is gelijk aan `na-tut-6` (een rapport is geen projectdata).
- * Kopieer ook `na-tut-6.ifc` en `na-tut-7.ifc` per taal naar `projects/<taal>/`.
+ * Toon mij en Opnieuw van tutorial 6 stap 2–7 openen de tussenstanden `tussen-tut-6-baseline`, `-statusdatum`,
+ * `-voorbereiding`, `-ontgraven`, `-fundering` en `-metselwerk` (vóór Bereken vastgelegd; de app rekent ze bij het
+ * openen door: einde 30 augustus, 20 september, 14 september, 10 september, 1 september en 31 augustus 2027).
+ * Kopieer ook `na-tut-6.ifc`, `na-tut-7.ifc` en de zes `tussen-tut-6-*.ifc` per taal naar `projects/<taal>/`.
  */
 
 const sdk = require('open-planner-studio');
@@ -2410,13 +2413,21 @@ const STEP_LOGIC_5 = {
 //
 // WAT DE EXTENSIE-API HIER NIET KAN, en wat daarvan het gevolg is:
 //   • Een baseline is niet te lezen (`api.data` kent geen baselines, ook geen event) en niet te schrijven. De stap
-//     "Een baseline opslaan" heeft dus geen controle en geen Toon mij: "Klaar, volgende".
+//     "Een baseline opslaan" heeft dus geen controle ("Klaar, volgende"), en zijn Toon mij opent ALTIJD de stand
+//     `tussen-tut-6-baseline`: het paneel kan niet zien of de baseline er al is.
 //   • De statusdatum is wel te lezen (`getProject().statusDate`) maar niet te schrijven (er is geen project-update).
-//     Controle ja, Toon mij nee.
+//     Controle ja; Toon mij opent zo nodig `tussen-tut-6-statusdatum`.
 //   • Voortgang (`time.completion`, `time.actualStart`, `time.actualFinish`) is te lezen, dus elke invoerstap heeft een
 //     controle. Schrijven kan alleen via `updateTask`, de ruwe veldschrijfroute zonder de regels van de app
 //     (percentage ↔ werkelijke datums ↔ status, de startvraag, het weigeren van een datum na de statusdatum): daar
-//     bouwen we geen Toon mij op. Toon mij opent alleen een stand van de generator (`na-tut-5`, `na-tut-6`).
+//     bouwen we geen Toon mij op. Toon mij opent zo nodig de stand van de generator waarin de stap gedaan is
+//     (`tussen-tut-6-voorbereiding`, `-ontgraven`, `-fundering`, `-metselwerk`).
+//   • De generator legt die tussenstanden vast vóór Bereken, zoals de lezer ze heeft. Maar de app rekent een .ifc bij
+//     het openen altijd door (en zet hem dan niet op "Verouderd"). Na Toon mij of Opnieuw in stap 3–7 ziet de lezer
+//     dus een BEREKENDE planning: met alleen de statusdatum einde 20 september (alles op 28 juni, deadline
+//     overschreden), na de voorbereiding 14 september, na het ontgraven 10 september, na de fundering 1 september, na
+//     het metselwerk 31 augustus (= na-tut-6, en stap 8 is dan al gedaan). De tekst bij Toon mij zegt dat. De app-check
+//     `check-tutorial-project.ts` pint die getallen.
 //   • De kolommen van de tabel, het gekozen rapport, het papierformaat, de PDF-export en het exportvenster laten niets
 //     achter in het document en zijn niet te lezen: die stappen zijn "Klaar, volgende". Tutorial 7 verandert het
 //     project niet, dus ook geen Opnieuw.
@@ -2495,6 +2506,19 @@ async function ensureAfterTutorial5(api) {
   if (!startFromTutorial5(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-5'));
 }
 
+/** De voortgangsgroepen van tutorial 6 in de volgorde van de stappen. */
+const PROGRESS_ORDER = ['voorbereiding', 'ontgraven', 'fundering'];
+/** De voortgang t/m `group` (cumulatief) is ingevuld. */
+const progressUpTo = (api, group) => PROGRESS_ORDER.slice(0, PROGRESS_ORDER.indexOf(group) + 1)
+  .every(g => progressGroupDone(api, g));
+
+/** Toon mij, tutorial 6 stap 3–7: heeft het project (na tutorial 5) de stap en alles daarvoor nog niet, dan opent
+ *  Toon mij de stand van de generator waarin dat gedaan is, als nieuw tabblad. De extensie kan geen statusdatum en
+ *  (via de regels van de app) geen voortgang zetten. De app rekent de stand bij het openen door. */
+async function ensureTut6Stage(api, done, stand) {
+  if (!(startFromTutorial5(api) && done(api))) await api.help.openBundledProject(projectAsset(uiLang(), stand));
+}
+
 /** Toon mij, tutorial 6 vanaf het rekenen en tutorial 7 stap 1: het project na tutorial 6, berekend. De extensie kan
  *  geen baseline, statusdatum of voortgang zetten; ontbreekt er iets, dan opent Toon mij het resultaat van tutorial 6
  *  (als nieuw tabblad). Staat alles er al, dan rekent Toon mij alleen. */
@@ -2516,7 +2540,7 @@ const TEXT_6 = {
       'Aan het eind staat de oplevering op dinsdag 31 augustus 2027, één werkdag later dan de baseline. Je hebt gezien waarom die ene dag van het ontgraven de hele oplevering laat opschuiven, en waar je de afwijking leest: onder de balken in de Gantt en in de tabel.',
       '## Uitgangspunt',
       'Je hebt tutorial 5 afgerond: het project *Aanbouw woning* met vijf resources, de werkregel van het stucwerk en het genivelleerde buitenspouwblad, met de oplevering op maandag 30 augustus 2027. Heb je dat niet, [open dan het resultaat van tutorial 5](project://projects/nl/na-tut-5.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
-      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 6*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier niet overal: een extensie kan geen baseline opslaan, geen statusdatum zetten en geen voortgang invoeren. Toon mij staat daarom alleen bij de eerste stap, waar het zo nodig het resultaat van tutorial 5 opent, en bij de stappen vanaf het rekenen, waar het zo nodig het resultaat van deze tutorial opent. Beide openen als nieuw tabblad. De stap *Een baseline opslaan* kan het paneel niet zien: daar staat **Klaar, volgende**. **Opnieuw** in die stap laadt het resultaat van tutorial 5 opnieuw.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 6*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. Een extensie kan geen baseline opslaan, geen statusdatum zetten en geen voortgang invoeren; daarom opent Toon mij in deze tutorial zo nodig een meegeleverd project als nieuw tabblad, waarin de stap al gedaan is: bij de eerste stap het resultaat van tutorial 5, bij de stappen daarna dat resultaat met de baseline, de statusdatum en de voortgang tot en met die stap, en vanaf het rekenen het resultaat van deze tutorial. Let op: de app rekent een project bij het openen altijd door, ook als je in de tutorial nog niet zou rekenen. Na Toon mij in de stappen 3 tot en met 7 zie je dus een berekende planning, niet de oude berekening die de tekst beschrijft; bij het rekenen in stap 8 komt alles op hetzelfde uit. De stap *Een baseline opslaan* kan het paneel niet zien: daar staat **Klaar, volgende**. **Opnieuw** laadt de beginstand van een stap opnieuw: in *Een baseline opslaan* het resultaat van tutorial 5, en in de stappen 3 tot en met 7 het project zoals het na de vorige stap is (ook dat rekent de app bij het openen door).',
     ],
     outro: [
       '## Wat je hebt geleerd',
@@ -2543,6 +2567,7 @@ const TEXT_6 = {
         task: [
           'Leg eerst de afspraak vast. Klik op *Planning › Baselines & voortgang › Baselines beheren…*. Het venster **Baselines** opent. Onder **Nieuwe baseline opslaan** staat een voorstel voor de naam. Vervang dat door `Basisplanning`, klik op **Opslaan** en dan op **Sluiten**.',
           'Staat er in het venster *Planning is verouderd — herbereken eerst (F5)*? Sluit het venster dan, druk op F5 en begin opnieuw: een baseline legt de datums vast die op dat moment berekend zijn.',
+          '**Toon mij** opent hier, als nieuw tabblad, het resultaat van tutorial 5 met de baseline *Basisplanning* erin. Een baseline opslaan kan het paneel zelf niet, en het kan ook niet zien of je dat al deed: Toon mij opent dit project daarom altijd.',
         ],
         explain: [
           'Het venster toont nu één baseline, *Basisplanning*, met een bolletje onder **Actief**. Sluit je het venster, dan staat in de Gantt onder de taakbalken een dunne grijze balk, en onder de mijlpalen een klein ruitje. Dat is de baseline. Hij valt nu precies onder de balken, want er is nog niets veranderd.',
@@ -2553,6 +2578,7 @@ const TEXT_6 = {
         title: 'De statusdatum',
         task: [
           'Klik bij *Planning › Baselines & voortgang* in het veld **Statusdatum** en typ `28`, `06` en `2027` in de vakjes voor dag, maand en jaar (in de volgorde van je datumnotatie). De app springt zelf naar het volgende vakje. Druk op Enter. Druk **nog niet** op Bereken.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project met de baseline en de statusdatum 28 juni 2027. Een statusdatum zetten kan het paneel zelf niet. De app rekent het project bij het openen door: na Toon mij staat er dus geen *Verouderd* in de statusbalk, maar zie je meteen wat de laatste alinea hieronder beschrijft: Start bouw op 28 juni, *Einde: 20-09-2027* en *1 deadline(s) overschreden*. Dat komt goed zodra je de voortgang hebt ingevuld en in stap 8 rekent.',
         ],
         explain: [
           'In de Gantt staat een oranje stippellijn op maandag 28 juni, met de datum bovenin, en de statusbalk zegt *Verouderd — herbereken (F5)*: de statusdatum is een wijziging die nog niet doorgerekend is. De lijn maakt uitstapjes naar links, naar de balken die vóór 28 juni gepland staan maar nog geen voortgang hebben.',
@@ -2567,6 +2593,7 @@ const TEXT_6 = {
           'Dubbelklik dan op een cel, typ de datum en druk op Enter. Vul in:',
           '- `Start bouw`: bij **Werkelijke einde** `07-06-2027`. Een mijlpaal heeft één datum; de app vult de start zelf in.\n- `Bouwplaats inrichten`: **Werkelijke start** `07-06-2027`, **Werkelijke einde** `08-06-2027`.\n- `Tuin en bestrating verwijderen`: start en einde allebei `09-06-2027`.\n- `Aanbouw uitzetten`: start en einde allebei `10-06-2027`.',
           'Vul bij elke taak eerst de start in en dan het einde. Staat *Automatisch berekenen* aan, dan rekent de app na elke invoer mee: je eindresultaat is hetzelfde, maar de balken springen tussendoor.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project met de baseline, de statusdatum en de voortgang van deze vier taken. Voortgang invoeren kan het paneel zelf niet, en de kolommen zet je zelf in de tabel. De app rekent het project bij het openen door: na Toon mij staat in de statusbalk *Einde: 14-09-2027* (nog steeds *1 deadline(s) overschreden*) en de fase Voorbereiding op 100%, niet de oude berekening die hieronder staat.',
         ],
         explain: [
           'De vier taken staan op 100% in de kolom Voortgang: een werkelijk einde maakt de taak voltooid. De fase Voorbereiding staat nog op 0%. Een fase heeft geen eigen voortgang, ze rekent die uit haar taken, en dat gebeurt pas bij Bereken. De statusbalk zegt nog steeds *Einde: 30-08-2027*: dat is de oude berekening.',
@@ -2577,6 +2604,7 @@ const TEXT_6 = {
         title: 'Het ontgraven liep uit',
         task: [
           'Het grondwater stond hoger dan gedacht: de funderingssleuf was pas na 3 werkdagen klaar in plaats van 2. Vul bij `Funderingssleuf ontgraven` in: **Werkelijke start** `11-06-2027` en **Werkelijke einde** `15-06-2027`.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project met de voortgang tot en met het ontgraven. De app rekent het bij het openen door: na Toon mij zegt de statusbalk *Einde: 10-09-2027*, en de taken na het ontgraven staan al op de nieuwe berekening, met de wapening op de statusdatum.',
         ],
         explain: [
           'Funderingssleuf ontgraven staat op 100%, met start 11-06-2027 en einde 15-06-2027. Gepland waren 2 werkdagen, vrijdag 11 en maandag 14 juni; werkelijk waren het er 3: vrijdag 11, maandag 14 en dinsdag 15 juni. Dat is de afwijking waar deze tutorial om draait.',
@@ -2588,6 +2616,7 @@ const TEXT_6 = {
         task: [
           'Vul in:',
           '- `Wapening en bekisting fundering`: **Werkelijke start** `16-06-2027`, **Werkelijke einde** `18-06-2027`. De wapening kon pas beginnen toen het ontgraven klaar was.\n- `Inspectie wapening`: bij **Werkelijke einde** `18-06-2027`.\n- `Fundering storten`: **Werkelijke start** `21-06-2027 07:00`, **Werkelijke einde** `21-06-2027 14:00`. De stort is een taak in uren, dus typ de kloktijd mee.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project met de voortgang tot en met de stort. De app rekent het bij het openen door: na Toon mij zegt de statusbalk *Einde: 01-09-2027*, en het funderingsmetselwerk, dat nog niet begonnen is, staat op 28 en 29 juni.',
         ],
         explain: [
           'Alle drie staan op 100%. De keuring was vrijdag 18 juni en de stort volgt op de keuring: na het weekend is dat maandag 21 juni, van 07:00 tot 14:00 (6 uur, met de pauze van 12 tot 13).',
@@ -2598,6 +2627,7 @@ const TEXT_6 = {
         title: 'Het funderingsmetselwerk loopt',
         task: [
           'Het funderingsmetselwerk begon vrijdag 25 juni en is op de statusdatum voor de helft klaar. Vul bij `Funderingsmetselwerk` eerst bij **Werkelijke start** `25-06-2027` in en dan bij **Voortgang** `50`.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project met alle voortgang van deze tutorial. De app rekent het bij het openen door, dus dan is ook de volgende stap, Rekenen, al gedaan: de statusbalk zegt *Einde: 31-08-2027*.',
         ],
         explain: [
           'De taak staat op 50% met een werkelijke start en nog geen werkelijk einde: hij loopt. Het restwerk is de duur maal wat er nog te doen is: 2 werkdagen × (1 − 0,5) = 1 werkdag. Dat restwerk begint op de statusdatum, maandag 28 juni.',
@@ -2647,7 +2677,7 @@ const TEXT_6 = {
       'At the end the handover is on Tuesday 31 August 2027, one working day later than the baseline. You have seen why that one day of excavation moves the whole handover, and where you read the variance: below the bars in the Gantt and in the table.',
       '## Starting point',
       'You have finished tutorial 5: the project *House extension* with five resources, the work rule of the plastering and the leveled outer cavity leaf, with the handover on Monday 30 August 2027. If you have not, [open the result of tutorial 5](project://projects/en/na-tut-5.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
-      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 6* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you, but that is not possible everywhere here: an extension cannot save a baseline, set a status date or enter progress. That is why Show me is only there for the first step, where it opens the result of tutorial 5 if needed, and for the steps from calculating onwards, where it opens the result of this tutorial if needed. Both open as a new tab. The panel cannot see the step *Saving a baseline*: it says **Done, next**. **Start over** in that step reloads the result of tutorial 5.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 6* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. An extension cannot save a baseline, set a status date or enter progress; that is why in this tutorial Show me opens a bundled project as a new tab if needed, in which the step has been done: for the first step the result of tutorial 5, for the steps after that this result with the baseline, the status date and the progress up to and including that step, and from calculating onwards the result of this tutorial. Note: the app always calculates a project when it opens it, even when the tutorial would not calculate yet. After Show me in steps 3 to 7 you therefore see a calculated schedule, not the old calculation the text describes; when you calculate in step 8 everything comes out the same. The panel cannot see the step *Saving a baseline*: it says **Done, next**. **Start over** reloads the starting point of a step: in *Saving a baseline* the result of tutorial 5, and in steps 3 to 7 the project as it is after the previous step (the app calculates that one too when it opens it).',
     ],
     outro: [
       '## What you have learned',
@@ -2674,6 +2704,7 @@ const TEXT_6 = {
         task: [
           'First record the agreement. Click *Planning › Baselines & progress › Manage baselines…*. The **Baselines** window opens. Under **Save new baseline** there is a suggested name. Replace it with `Baseline` and click **Save**, then **Close**.',
           'Does the window say *Schedule is out of date — recalculate first (F5)*? Then close the window, press F5 and start again: a baseline records the dates that were calculated at that moment.',
+          '**Show me** opens, as a new tab, the result of tutorial 5 with the baseline *Baseline* in it. The panel cannot save a baseline itself, and it cannot see whether you already did: that is why Show me always opens this project.',
         ],
         explain: [
           'The window now shows one baseline, *Baseline*, with a dot under **Active**. When you close the window, the Gantt has a thin grey bar below the task bars, and a small diamond below the milestones. That is the baseline. It sits exactly below the bars for now, because nothing has changed yet.',
@@ -2684,6 +2715,7 @@ const TEXT_6 = {
         title: 'The status date',
         task: [
           'In *Planning › Baselines & progress*, click the **Status date** field and type `28`, `06` and `2027` in the boxes for day, month and year (in the order of your date notation). The app jumps to the next box by itself. Press Enter. Do **not** press Calculate yet.',
+          '**Show me** opens, as a new tab, the project with the baseline and the status date 28 June 2027. The panel cannot set a status date itself. The app calculates the project when it opens it: after Show me the status bar does not say *Out of date*, and you see right away what the last paragraph below describes: Start of construction on 28 June, *End: 20-09-2027* and *1 deadline(s) missed*. That is put right once you have entered the progress and calculate in step 8.',
         ],
         explain: [
           'The Gantt now has an orange dotted line on Monday 28 June, with the date at the top, and the status bar says *Out of date — recalculate (F5)*: the status date is a change that has not been calculated yet. The line makes excursions to the left, to the bars that are planned before 28 June but have no progress yet.',
@@ -2698,6 +2730,7 @@ const TEXT_6 = {
           'Then double-click a cell, type the date and press Enter. Enter:',
           '- `Start of construction`: at **Actual finish** `07-06-2027`. A milestone has one date; the app fills in the start itself.\n- `Set up site`: **Actual start** `07-06-2027`, **Actual finish** `08-06-2027`.\n- `Clear garden and paving`: start and finish both `09-06-2027`.\n- `Set out the extension`: start and finish both `10-06-2027`.',
           'For every task, enter the start first and then the finish. If *Calculate automatically* is on, the app calculates along after every entry: your end result is the same, but the bars jump around in between.',
+          '**Show me** opens, as a new tab, the project with the baseline, the status date and the progress of these four tasks. The panel cannot enter progress itself, and you add the columns to the table yourself. The app calculates the project when it opens it: after Show me the status bar says *End: 14-09-2027* (still *1 deadline(s) missed*) and the phase Preparation is at 100%, not the old calculation described below.',
         ],
         explain: [
           'The four tasks show 100% in the Progress column: an actual finish makes the task complete. The phase Preparation is still at 0%. A phase has no progress of its own, it works that out from its tasks, and that only happens at Calculate. The status bar still says *End: 30-08-2027*: that is the old calculation.',
@@ -2708,6 +2741,7 @@ const TEXT_6 = {
         title: 'The excavation ran late',
         task: [
           'The groundwater was higher than expected: the foundation trench was only finished after 3 working days instead of 2. For `Excavate foundation trench`, enter **Actual start** `11-06-2027` and **Actual finish** `15-06-2027`.',
+          '**Show me** opens, as a new tab, the project with the progress up to and including the excavation. The app calculates it when it opens it: after Show me the status bar says *End: 10-09-2027*, and the tasks after the excavation are already on the new calculation, with the reinforcement on the status date.',
         ],
         explain: [
           'Excavate foundation trench is at 100%, with start 11-06-2027 and finish 15-06-2027. It was planned for 2 working days, Friday 11 and Monday 14 June; in reality it took 3: Friday 11, Monday 14 and Tuesday 15 June. That is the variance this tutorial is about.',
@@ -2719,6 +2753,7 @@ const TEXT_6 = {
         task: [
           'Enter:',
           '- `Foundation formwork and reinforcement`: **Actual start** `16-06-2027`, **Actual finish** `18-06-2027`. The reinforcement could only start when the excavation was finished.\n- `Reinforcement inspection`: at **Actual finish** `18-06-2027`.\n- `Pour foundation`: **Actual start** `21-06-2027 07:00`, **Actual finish** `21-06-2027 14:00`. The pour is a task in hours, so type the clock time as well.',
+          '**Show me** opens, as a new tab, the project with the progress up to and including the pour. The app calculates it when it opens it: after Show me the status bar says *End: 01-09-2027*, and the foundation brickwork, which has not started yet, is on 28 and 29 June.',
         ],
         explain: [
           'All three show 100%. The inspection was on Friday 18 June and the pour follows the inspection: after the weekend that is Monday 21 June, from 07:00 to 14:00 (6 hours, with the break from 12 to 13).',
@@ -2729,6 +2764,7 @@ const TEXT_6 = {
         title: 'The foundation brickwork is under way',
         task: [
           'The foundation brickwork started on Friday 25 June and is half finished on the status date. For `Foundation brickwork`, first enter `25-06-2027` at **Actual start** and then `50` at **Progress**.',
+          '**Show me** opens, as a new tab, the project with all the progress of this tutorial. The app calculates it when it opens it, so the next step, Calculating, is then done as well: the status bar says *End: 31-08-2027*.',
         ],
         explain: [
           'The task is at 50% with an actual start and no actual finish yet: it is under way. The remaining work is the duration times what is still to do: 2 working days × (1 − 0.5) = 1 working day. That remaining work starts on the status date, Monday 28 June.',
@@ -2966,12 +3002,14 @@ const TEXT_7 = {
 };
 
 // Tutorial 6. De statusdatum en de voortgang zijn te lezen (controle), maar niet te schrijven door de extensie, en een
-// baseline niet te lezen en niet te schrijven. Toon mij bestaat daarom alleen bij `startpunt` (het resultaat van
-// tutorial 5) en vanaf `berekenen` (het resultaat van tutorial 6): dat zijn standen van de generator. `reset` staat
-// alleen bij `baseline`, de eerste stap die het document verandert: de beginstand van die stap is `na-tut-5`. Voor
-// de stappen daarna levert de generator geen beginstand (geen "na-tut-5 + baseline", geen "+ statusdatum" of "+
-// voortgang tot en met …"), dus daar geen Opnieuw. `baseline` heeft geen controle: een baseline laat geen spoor na
-// in `api.data` ("Klaar, volgende").
+// baseline niet te lezen en niet te schrijven. Toon mij opent daarom per stap een stand van de generator: bij
+// `startpunt` het resultaat van tutorial 5, bij `baseline` t/m `metselwerk` de tussenstand waarin die stap gedaan is
+// (`tussen-tut-6-*`, zie de helpers hierboven; de app rekent ze bij het openen door) en vanaf `berekenen` het
+// resultaat van tutorial 6. `reset` staat bij elke stap die het document verandert, want de generator levert van
+// elk daarvan de beginstand: `baseline` (na-tut-5), `statusdatum` (tussen-tut-6-baseline), `voorbereiding`
+// (-statusdatum), `ontgraven` (-voorbereiding), `fundering` (-ontgraven) en `metselwerk` (-fundering). Niet bij
+// `berekenen`: zijn beginstand (`tussen-tut-6-metselwerk`) is na het openen al gerekend. `baseline` heeft geen
+// controle: een baseline laat geen spoor na in `api.data` ("Klaar, volgende").
 //
 // Ankers: alle stappen met invoer in de tabel wijzen een lintitem aan, geen paneel (zie tutorial 2 en 3: een anker
 // in Eigenschappen laat het begeleidingspaneel naar links uitwijken). De lintgroep Baselines & voortgang bevat
@@ -2986,29 +3024,41 @@ const STEP_LOGIC_6 = {
     check: startFromTutorial5,
     prepare: ensureAfterTutorial5,
   },
+  // Geen controle (een baseline is voor de extensie onzichtbaar), dus Toon mij opent altijd de stand met baseline.
   baseline: {
     anchor: 'ribbon-group:planning:baselines',
+    prepare: api => api.help.openBundledProject(projectAsset(uiLang(), 'tussen-tut-6-baseline')),
     reset: 'na-tut-5',
   },
   statusdatum: {
     anchor: 'ribbon-group:planning:baselines',
     check: statusDateIsSet,
+    prepare: api => ensureTut6Stage(api, statusDateIsSet, 'tussen-tut-6-statusdatum'),
+    reset: 'tussen-tut-6-baseline',
   },
   voorbereiding: {
     anchor: 'ribbon:table:tableColumns',
     check: api => progressGroupDone(api, 'voorbereiding'),
+    prepare: api => ensureTut6Stage(api, a => statusDateIsSet(a) && progressUpTo(a, 'voorbereiding'), 'tussen-tut-6-voorbereiding'),
+    reset: 'tussen-tut-6-statusdatum',
   },
   ontgraven: {
     anchor: 'ribbon-tab:table',
     check: api => progressGroupDone(api, 'ontgraven'),
+    prepare: api => ensureTut6Stage(api, a => statusDateIsSet(a) && progressUpTo(a, 'ontgraven'), 'tussen-tut-6-ontgraven'),
+    reset: 'tussen-tut-6-voorbereiding',
   },
   fundering: {
     anchor: 'ribbon-tab:table',
     check: api => progressGroupDone(api, 'fundering'),
+    prepare: api => ensureTut6Stage(api, a => statusDateIsSet(a) && progressUpTo(a, 'fundering'), 'tussen-tut-6-fundering'),
+    reset: 'tussen-tut-6-ontgraven',
   },
   metselwerk: {
     anchor: 'ribbon-tab:table',
     check: brickworkRunning,
+    prepare: api => ensureTut6Stage(api, allProgressEntered, 'tussen-tut-6-metselwerk'),
+    reset: 'tussen-tut-6-fundering',
   },
   berekenen: {
     anchor: 'ribbon:table:calc',
