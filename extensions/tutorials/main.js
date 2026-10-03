@@ -2907,6 +2907,9 @@ const TEXT_7 = {
           'Het exportscherm toont de formaten: *Voortgangsblad (Excel)*, *Voortgangsblad (CSV)*, *CSV (puntkomma-gescheiden)*, *MS Project XML* (met de toelichting *Te openen in Microsoft Project. Volledige WBS-structuur.*), *Primavera P6 XML* en *IFC 4x3*. Na je keuze komt het bestand *Aanbouw woning.xml*: in de browser meldt de app dat het in je downloadmap staat, of je krijgt een opslagdialoog; in de desktopapp kies je zelf waar het komt. Het project zelf verandert niet.',
           'In het bestand staan de statusdatum, de voortgang en de baseline: de collega ziet dus niet alleen de planning, maar ook wat er sinds 7 juni gebeurd is. Het *Voortgangsblad* is er voor de andere kant op: een slank blad met alleen id, WBS, naam, datums en voltooiing, dat de uitvoerder kan invullen en dat je terugleest met *Voortgang bijwerken uit een blad*. Zo hoef je volgende week niet alles zelf te typen. Dat doe je in [Voortgang uit een spreadsheet importeren](docs://howto-voortgang-importeren).',
         ],
+        panelOnly: [
+          'Wil je je project vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-7.ifc), dat hetzelfde is als dat van tutorial 6. De regels en opties staan in [Een rapport maken en afdrukken](docs://howto-rapport-maken-en-afdrukken), [Rapporttypes](docs://ref-rapporttypes), [De rapportageperiode kiezen](docs://howto-rapportageperiode-kiezen) en [Exporteren](docs://howto-exporteren). Wat de getallen betekenen, lees je in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang). Het voortgangsblad voor de uitvoerder staat in [Voortgang uit een spreadsheet importeren](docs://howto-voortgang-importeren).',
+        ],
       },
     },
   },
@@ -3001,6 +3004,9 @@ const TEXT_7 = {
         explain: [
           'The export screen shows the formats: *Progress sheet (Excel)*, *Progress sheet (CSV)*, *CSV (semicolon-separated)*, *MS Project XML* (described as *Opens in Microsoft Project. Full WBS structure.*), *Primavera P6 XML* and *IFC 4x3*. After your choice the file *House extension.xml* appears: in the browser the app reports that it is in your downloads folder, or you get a save dialog; in the desktop app you choose where it goes. The project itself does not change.',
           'The file holds the status date, the progress and the baseline: your colleague sees not only the schedule, but also what has happened since 7 June. The *Progress sheet* is for the other direction: a slim sheet with only id, WBS, name, dates and completion, which the foreman can fill in and which you read back with *Update progress from a spreadsheet*. That way you do not have to type everything yourself next week. You do that in [Importing progress from a spreadsheet](docs://howto-voortgang-importeren).',
+        ],
+        panelOnly: [
+          'Want to compare your project? [Open the end result of this tutorial](project://projects/en/na-tut-7.ifc), which is the same as that of tutorial 6. The rules and options are in [Making and printing a report](docs://howto-rapport-maken-en-afdrukken), [Report types](docs://ref-rapporttypes), [Choosing the reporting period](docs://howto-rapportageperiode-kiezen) and [Exporting](docs://howto-exporteren). What the numbers mean is in [Progress, status date and baseline](docs://uitleg-voortgang). The progress sheet for the foreman is in [Importing progress from a spreadsheet](docs://howto-voortgang-importeren).',
         ],
       },
     },
