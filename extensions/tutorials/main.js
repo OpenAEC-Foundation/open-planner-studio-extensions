@@ -1061,7 +1061,7 @@ const TEXT_2 = {
       '- **Het kritieke pad is de langste keten van taken.** Elke taak erop bepaalt de einddatum: 21 taken, 45 werkdagen. Loopt er één een dag uit, dan schuift de oplevering een dag.',
       '- **Speling is de ruimte van een taak buiten het kritieke pad.** Het buitenspouwblad heeft 2 werkdagen speling omdat de keten binnenspouwblad, dakelementen en dakbedekking (8 werkdagen) 2 werkdagen langer duurt dan het buitenspouwblad (6); de kozijnen wachten op beide. Loopt hij meer dan 2 werkdagen uit, dan schuift de oplevering.',
       '- **Het kritieke pad staat niet vast.** Met 9 werkdagen metselen liep het kritieke pad ineens door het buitenspouwblad, niet meer door het binnenspouwblad. Reken daarom na elke wijziging opnieuw.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). De regels achter deze tutorial staan in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). De regels achter deze tutorial staan in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Relaties leggen](docs://howto-relaties-leggen). Elke kolom van de tabel, ook Voorgangers, staat in [Tabelkolommen](docs://ref-tabelkolommen).',
     ],
     steps: {
       startpunt: {
@@ -1177,7 +1177,7 @@ const TEXT_2 = {
           'Dit is het resultaat van tutorial 2, en het beginpunt van tutorial 3: daarin komen de bouwvak en twee datumafspraken erbij.',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). Meer over de regels lees je in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-2.ifc). Meer over de regels lees je in [Relaties en lag](docs://uitleg-relaties) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Relaties leggen](docs://howto-relaties-leggen). Elke kolom van de tabel, ook Voorgangers, staat in [Tabelkolommen](docs://ref-tabelkolommen).',
         ],
       },
     },
@@ -1201,7 +1201,7 @@ const TEXT_2 = {
       '- **The critical path is the longest chain of tasks.** Every task on it decides the finish date: 21 tasks, 45 work days. If one of them runs a day late, the handover moves a day.',
       '- **Float is the room a task has outside the critical path.** The outer cavity leaf has 2 working days of float because the chain inner cavity leaf, roof elements and roofing (8 working days) takes 2 working days longer than the outer leaf (6); the window frames wait for both. If it runs more than 2 working days late, the handover moves.',
       '- **The critical path is not fixed.** With 9 working days of bricklaying the critical path suddenly ran through the outer leaf, no longer through the inner leaf. So recalculate after every change.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). The rules behind this tutorial are in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). The rules behind this tutorial are in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Adding relations](docs://howto-relaties-leggen). Every column of the table, including Predecessors, is in [Table columns](docs://ref-tabelkolommen).',
     ],
     steps: {
       startpunt: {
@@ -1317,7 +1317,7 @@ const TEXT_2 = {
           'This is the result of tutorial 2, and the starting point of tutorial 3: in that one the construction holiday and two date agreements are added.',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). You can read more about the rules in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-2.ifc). You can read more about the rules in [Relations and lag](docs://uitleg-relaties) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Adding relations](docs://howto-relaties-leggen). Every column of the table, including Predecessors, is in [Table columns](docs://ref-tabelkolommen).',
         ],
       },
     },
@@ -1345,7 +1345,7 @@ const TEXT_3 = {
       '- **Een constraint is een datumgrens op één taak, naast de relaties.** Start niet eerder dan 14 juli hield de kozijnen 3 werkdagen tegen. Alles erna schoof mee: de oplevering ging van 27 augustus naar 1 september.',
       '- **Een constraint legt het kritieke pad soms opnieuw neer.** Het begon bij de kozijnen, en de taken ervoor kregen 3 werkdagen speling omdat het werk toch op de kozijnen moest wachten.',
       '- **Een deadline bewaakt en duwt niets.** Met 10 september haalde de oplevering hem met 7 werkdagen marge. Met 27 augustus bleef de oplevering staan op 1 september, en meldde de app dat je 3 werkdagen te laat bent.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-3.ifc). De regels achter deze tutorial staan in [Kalenders en werkdagen](docs://uitleg-kalenders) en [Constraints en deadlines](docs://uitleg-constraints).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-3.ifc). De regels achter deze tutorial staan in [Kalenders en werkdagen](docs://uitleg-kalenders) en [Constraints en deadlines](docs://uitleg-constraints). Hoe je het in je eigen project doet, lees je in [Feestdagen en bouwvak genereren](docs://howto-feestdagen-genereren) en [Een constraint of deadline zetten](docs://howto-constraint-deadline-zetten). Elk veld van het venster Kalenders en van het paneel Eigenschappen staat in [Kalendervensters](docs://ref-kalenders) en [Taakdialoog en eigenschappenpaneel](docs://ref-taak-eigenschappen).',
     ],
     steps: {
       startpunt: {
@@ -1423,7 +1423,7 @@ const TEXT_3 = {
           'Dit is het resultaat van tutorial 3: een planning met de bouwvak in de kalender, een constraint op de kozijnen en een deadline op de oplevering.',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-3.ifc). Meer over de regels lees je in [Kalenders en werkdagen](docs://uitleg-kalenders) en [Constraints en deadlines](docs://uitleg-constraints).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-3.ifc). Meer over de regels lees je in [Kalenders en werkdagen](docs://uitleg-kalenders) en [Constraints en deadlines](docs://uitleg-constraints). Hoe je het in je eigen project doet, lees je in [Feestdagen en bouwvak genereren](docs://howto-feestdagen-genereren) en [Een constraint of deadline zetten](docs://howto-constraint-deadline-zetten). Elk veld van het venster Kalenders en van het paneel Eigenschappen staat in [Kalendervensters](docs://ref-kalenders) en [Taakdialoog en eigenschappenpaneel](docs://ref-taak-eigenschappen).',
         ],
       },
     },
@@ -1446,7 +1446,7 @@ const TEXT_3 = {
       '- **A constraint is a date limit on one task, next to the relationships.** Start no earlier than 14 July held the window frames back by 3 working days. Everything after them moved along: the handover went from 27 August to 1 September.',
       '- **A constraint sometimes lays the critical path down anew.** It started at the window frames, and the tasks before them got 3 working days of float because the work had to wait for the frames anyway.',
       '- **A deadline guards and pushes nothing.** With 10 September the handover met it with 7 working days to spare. With 27 August the handover stayed on 1 September, and the app reported that you are 3 working days late.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). The rules behind this tutorial are in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). The rules behind this tutorial are in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints). How to do it in your own project is in [Generating holidays and the construction holiday](docs://howto-feestdagen-genereren) and [Setting a constraint or deadline](docs://howto-constraint-deadline-zetten). Every field of the Calendars window and of the Properties panel is in [Calendar windows](docs://ref-kalenders) and [Task dialog and properties panel](docs://ref-taak-eigenschappen).',
     ],
     steps: {
       startpunt: {
@@ -1524,7 +1524,7 @@ const TEXT_3 = {
           'This is the result of tutorial 3: a schedule with the construction holiday in the calendar, a constraint on the window frames and a deadline on the handover.',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). You can read more about the rules in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-3.ifc). You can read more about the rules in [Calendars and working days](docs://uitleg-kalenders) and [Constraints and deadlines](docs://uitleg-constraints). How to do it in your own project is in [Generating holidays and the construction holiday](docs://howto-feestdagen-genereren) and [Setting a constraint or deadline](docs://howto-constraint-deadline-zetten). Every field of the Calendars window and of the Properties panel is in [Calendar windows](docs://ref-kalenders) and [Task dialog and properties panel](docs://ref-taak-eigenschappen).',
         ],
       },
     },
@@ -1552,7 +1552,7 @@ const TEXT_4 = {
       '- **Een urentaak telt werkminuten door de werktijdblokken heen.** De stort van 6 uur liep van 07:00 tot 14:00 met de pauze ertussen. Twaalf uur kraan liep door in de volgende dag, van dinsdag 07:00 tot woensdag 11:00.',
       '- **Een dagtaak begint nooit midden op een dag.** Dakbedekking begon op de eerstvolgende werkdag na de dakelementen en niet om 14:00: woensdag 7 juli bij 6 uur kraan, donderdag 8 juli bij 12 uur.',
       '- **Wat een dagtaak niet kan gebruiken, wordt speling.** De 2 uur van de middag na de stort, een kwart dag, werden speling: 3,25 dagen in plaats van 3. Bij 12 uur kraan kromp de speling van het dak met een dag, van 3 naar 2 werkdagen. De oplevering schuift pas als een keten geen speling meer heeft.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). De regels achter deze tutorial staan in [Dagen en uren](docs://uitleg-dagen-en-uren).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). De regels achter deze tutorial staan in [Dagen en uren](docs://uitleg-dagen-en-uren). Hoe je het in je eigen project doet, lees je in [Urenplanning aanzetten](docs://howto-urenplanning-aanzetten). Wat de instelling Urenplanning inschakelen nog meer verandert, staat in [Instellingen](docs://ref-instellingen-lijst).',
     ],
     steps: {
       startpunt: {
@@ -1637,7 +1637,7 @@ const TEXT_4 = {
           'Dit is het resultaat van tutorial 4 en het beginpunt van tutorial 5: daarin komen de kraan, de ploeg en de andere resources erbij.',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). Meer over de regels lees je in [Dagen en uren](docs://uitleg-dagen-en-uren).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). Meer over de regels lees je in [Dagen en uren](docs://uitleg-dagen-en-uren). Hoe je het in je eigen project doet, lees je in [Urenplanning aanzetten](docs://howto-urenplanning-aanzetten). Wat de instelling Urenplanning inschakelen nog meer verandert, staat in [Instellingen](docs://ref-instellingen-lijst).',
         ],
       },
     },
@@ -1660,7 +1660,7 @@ const TEXT_4 = {
       '- **An hour task counts working minutes through the working-time blocks.** The 6-hour pour ran from 07:00 to 14:00 with the break in between. Twelve hours of crane carried on into the next day, from Tuesday 07:00 to Wednesday 11:00.',
       '- **A day task never starts in the middle of a day.** Applying the roofing started on the first working day after the roof elements and not at 14:00: Wednesday 7 July with 6 hours of crane, Thursday 8 July with 12 hours.',
       '- **What a day task cannot use becomes float.** The 2 hours of the afternoon after the pour, a quarter of a day, became float: 3.25 days instead of 3. With 12 hours of crane the float of the roof shrank by a day, from 3 to 2 working days. The handover only moves when a chain has no float left.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). The rules behind this tutorial are in [Days and hours](docs://uitleg-dagen-en-uren).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). The rules behind this tutorial are in [Days and hours](docs://uitleg-dagen-en-uren). How to do it in your own project is in [Turning on hour planning](docs://howto-urenplanning-aanzetten). What else the setting Enable hour planning changes is in [Settings](docs://ref-instellingen-lijst).',
     ],
     steps: {
       startpunt: {
@@ -1745,7 +1745,7 @@ const TEXT_4 = {
           'This is the result of tutorial 4 and the starting point of tutorial 5: in that one the crane, the crew and the other resources are added.',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). You can read more about the rules in [Days and hours](docs://uitleg-dagen-en-uren).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). You can read more about the rules in [Days and hours](docs://uitleg-dagen-en-uren). How to do it in your own project is in [Turning on hour planning](docs://howto-urenplanning-aanzetten). What else the setting Enable hour planning changes is in [Settings](docs://ref-instellingen-lijst).',
         ],
       },
     },
@@ -1774,7 +1774,7 @@ const TEXT_5 = {
       '- **De werkregel bepaalt wat meebeweegt als je de inzet wijzigt.** Met Vast werk werd het stucwerk met twee stukadoors 2 werkdagen in plaats van 4 en de oplevering twee werkdagen eerder, maandag 30 augustus. Met de standaardregel was het werk verdubbeld.',
       '- **Relaties kennen geen capaciteit.** Volgens de relaties mochten het binnen- en buitenspouwblad tegelijk, maar met één metselaar kan dat niet. Dat zie je pas met resources.',
       '- **Nivelleren laat taken later beginnen, meer niet, en gebruikt daarvoor speling.** Het buitenspouwblad wachtte 5 werkdagen en de oplevering bleef op 30 augustus, maar de taak is nu kritiek: loopt hij uit, dan schuift de oplevering.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Werkregel kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
     ],
     steps: {
       startpunt: {
@@ -1896,7 +1896,7 @@ const TEXT_5 = {
           'En waarom schuift de oplevering niet? Het buitenspouwblad had 5 werkdagen speling, omdat de kozijnen sinds tutorial 3 pas op 14 juli komen. Nivelleren gebruikt die speling op. Het buitenspouwblad heeft er nu 0 en is kritiek: de statusbalk zegt *Kritiek pad: 17 taken, 46 werkdagen*, tegen 8 taken ervoor. Loopt het buitenspouwblad nu uit, dan schuift de oplevering. Meer: [Nivelleren](docs://uitleg-nivelleren).',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Werkregel kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
         ],
       },
     },
@@ -1920,7 +1920,7 @@ const TEXT_5 = {
       '- **The work rule decides what moves when you change the units.** With Fixed work the plastering with two plasterers took 2 working days instead of 4 and the handover came two working days earlier, Monday 30 August. With the default rule the work would have doubled.',
       '- **Relationships know no capacity.** According to the relationships the inner and outer cavity leaf could run at the same time, but not with one bricklayer. You only see that with resources.',
       '- **Leveling makes tasks start later, nothing more, and uses float to do it.** The outer cavity leaf waited 5 working days and the handover stayed on 30 August, but the task is now critical: if it runs late, the handover moves.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a work rule](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
     ],
     steps: {
       startpunt: {
@@ -2042,7 +2042,7 @@ const TEXT_5 = {
           'And why does the handover not move? The outer cavity leaf had 5 working days of float, because since tutorial 3 the window frames only arrive on 14 July. Leveling uses up that float. The outer leaf now has 0 and is critical: the status bar says *Critical path: 17 tasks, 46 work days*, against 8 tasks before. If the outer leaf runs late now, the handover moves. More: [Resource leveling](docs://uitleg-nivelleren).',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a work rule](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
         ],
       },
     },
@@ -2549,7 +2549,7 @@ const TEXT_6 = {
       '- **Voortgang bestaat uit een werkelijke start, een werkelijk einde en een percentage, en ze hangen aan elkaar.** Een werkelijk einde maakt de taak 100% en een percentage boven 0 maakt hem *Bezig*. Vul daarom eerst de start in: zonder start neemt de app de geplande start, of bij een werkelijk einde die einddatum zelf.',
       '- **Een dag vertraging op het kritieke pad is een dag vertraging van de oplevering.** Het ontgraven duurde 3 in plaats van 2 werkdagen en lag op het kritieke pad: alles erachter schoof een werkdag op en de oplevering ging van 30 naar 31 augustus.',
       '- **Afwijking lees je in werkdagen: een plus is later, een min is eerder.** Je zag haar onder de balken in de Gantt en in de kolom Eindafwijking. In tutorial 7 staat dezelfde afwijking in een rapport.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-6.ifc). De regels achter deze tutorial staan in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Een baseline opslaan en beheren](docs://howto-baseline-opslaan-en-beheren) en [Voortgang bijwerken](docs://howto-voortgang-bijwerken).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-6.ifc). De regels achter deze tutorial staan in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Een baseline opslaan en beheren](docs://howto-baseline-opslaan-en-beheren) en [Voortgang bijwerken](docs://howto-voortgang-bijwerken). Elke kolom die je gebruikte, ook die van de baseline, staat in [Tabelkolommen](docs://ref-tabelkolommen).',
     ],
     steps: {
       startpunt: {
@@ -2596,8 +2596,8 @@ const TEXT_6 = {
           '**Toon mij** opent hier, als nieuw tabblad, het project met de baseline, de statusdatum en de voortgang van deze vier taken. Voortgang invoeren kan het paneel zelf niet, en de kolommen zet je zelf in de tabel. De app rekent het project bij het openen door: na Toon mij staat in de statusbalk *Einde: 14-09-2027* (nog steeds *1 deadline(s) overschreden*) en de fase Voorbereiding op 100%, niet de oude berekening die hieronder staat.',
         ],
         explain: [
-          'De vier taken staan op 100% in de kolom Voortgang: een werkelijk einde maakt de taak voltooid. De fase Voorbereiding staat nog op 0%. Een fase heeft geen eigen voortgang, ze rekent die uit haar taken, en dat gebeurt pas bij Bereken. De statusbalk zegt nog steeds *Einde: 30-08-2027*: dat is de oude berekening.',
-          'Deze vier taken verliepen volgens planning, dus de datums die je intypte zijn dezelfde als de geplande. Toch typ je ze in: de werkelijke datums zijn de feiten, de berekende datums blijven de voorspelling. Daarom eerst de start: vul je bij een taak van twee dagen alleen het einde in, dan neemt de app dezelfde dag als start.',
+          'De vier taken staan op 100% in de kolom Voortgang: een werkelijk einde maakt de taak voltooid. De fase Voorbereiding staat nog op 0%. Een fase heeft geen eigen voortgang, ze rekent die uit haar taken, en dat gebeurt pas bij Bereken. De statusbalk toont nog de einddatum van de vorige berekening, met *Verouderd* erachter: *Einde: 30-08-2027*, of *Einde: 20-09-2027* als je de statusdatum via **Toon mij** of **Opnieuw** kreeg (die stand rekent de app bij het openen door).',
+          'Deze vier taken verliepen volgens planning, dus de datums die je intypte zijn dezelfde als in de baseline. Toch typ je ze in: de werkelijke datums zijn de feiten, de berekende datums blijven de voorspelling. Daarom eerst de start: vul je bij een taak van twee dagen alleen het einde in, dan neemt de app dezelfde dag als start.',
         ],
       },
       ontgraven: {
@@ -2631,7 +2631,7 @@ const TEXT_6 = {
         ],
         explain: [
           'De taak staat op 50% met een werkelijke start en nog geen werkelijk einde: hij loopt. Het restwerk is de duur maal wat er nog te doen is: 2 werkdagen × (1 − 0,5) = 1 werkdag. Dat restwerk begint op de statusdatum, maandag 28 juni.',
-          'Waarom eerst de start? Typ je alleen het percentage, dan neemt de app de geplande start, donderdag 24 juni, als werkelijke start. Maar het metselwerk begon vrijdag, na de wachttijd van 3 werkdagen na de stort uit tutorial 2 (22, 23 en 24 juni).',
+          'Waarom eerst de start? Typ je alleen het percentage, dan neemt de app de datum in de kolom Start als werkelijke start: donderdag 24 juni als je alles zelf hebt ingevuld, een latere dag na **Toon mij** of **Opnieuw**. Maar het metselwerk begon vrijdag, na de wachttijd van 3 werkdagen na de stort uit tutorial 2 (22, 23 en 24 juni).',
         ],
       },
       berekenen: {
@@ -2664,6 +2664,9 @@ const TEXT_6 = {
           'Bij de eerste vier taken staat 0 in de kolom: ze liepen volgens afspraak. Bij Funderingssleuf ontgraven staat 1, bij alle taken daarna ook 1, tot en met Oplevering. De afwijking staat in werkdagen: een positief getal is later, een negatief getal eerder.',
           'Eén taak, één dag, en de hele keten erachter schuift mee. Ook het schilderwerk, dat 6 werkdagen speling heeft, staat op 1: speling zorgt er niet voor dat een taak niet verschuift, alleen dat de oplevering er niet door schuift. De kolom *Basisplanning — Startafwijking* laat zien dat het ontgraven zelf op tijd begon, en dat de wapening een dag te laat begon omdat ze op het ontgraven wachtte. In tutorial 7 staat dezelfde afwijking in een rapport, klaar om uit te delen.',
         ],
+        panelOnly: [
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-6.ifc). De regels achter deze tutorial staan in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Een baseline opslaan en beheren](docs://howto-baseline-opslaan-en-beheren) en [Voortgang bijwerken](docs://howto-voortgang-bijwerken). Elke kolom die je gebruikte, ook die van de baseline, staat in [Tabelkolommen](docs://ref-tabelkolommen).',
+        ],
       },
     },
   },
@@ -2686,7 +2689,7 @@ const TEXT_6 = {
       '- **Progress is an actual start, an actual finish and a percentage, and they depend on each other.** An actual finish makes the task 100% and a percentage above 0 makes it *In progress*. That is why you enter the start first: without a start the app takes the planned start, or, with an actual finish, that finish date itself.',
       '- **A day of delay on the critical path is a day of delay on the handover.** The excavation took 3 working days instead of 2 and was on the critical path: everything behind it moved a working day and the handover went from 30 to 31 August.',
       '- **You read variance in working days: a plus is later, a minus is earlier.** You saw it below the bars in the Gantt and in the column Finish variance. In tutorial 7 the same variance is in a report.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-6.ifc). The rules behind this tutorial are in [Progress, status date and baseline](docs://uitleg-voortgang) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Saving and managing a baseline](docs://howto-baseline-opslaan-en-beheren) and [Updating progress](docs://howto-voortgang-bijwerken).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-6.ifc). The rules behind this tutorial are in [Progress, status date and baseline](docs://uitleg-voortgang) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Saving and managing a baseline](docs://howto-baseline-opslaan-en-beheren) and [Updating progress](docs://howto-voortgang-bijwerken). Every column you used, including those of the baseline, is in [Table columns](docs://ref-tabelkolommen).',
     ],
     steps: {
       startpunt: {
@@ -2733,8 +2736,8 @@ const TEXT_6 = {
           '**Show me** opens, as a new tab, the project with the baseline, the status date and the progress of these four tasks. The panel cannot enter progress itself, and you add the columns to the table yourself. The app calculates the project when it opens it: after Show me the status bar says *End: 14-09-2027* (still *1 deadline(s) missed*) and the phase Preparation is at 100%, not the old calculation described below.',
         ],
         explain: [
-          'The four tasks show 100% in the Progress column: an actual finish makes the task complete. The phase Preparation is still at 0%. A phase has no progress of its own, it works that out from its tasks, and that only happens at Calculate. The status bar still says *End: 30-08-2027*: that is the old calculation.',
-          'These four tasks went according to plan, so the dates you typed are the same as the planned ones. You still type them: the actual dates are the facts, the calculated dates remain the forecast. That is also why you enter the start first: if you enter only the finish for a two-day task, the app takes the same day as the start.',
+          'The four tasks show 100% in the Progress column: an actual finish makes the task complete. The phase Preparation is still at 0%. A phase has no progress of its own, it works that out from its tasks, and that only happens at Calculate. The status bar still shows the end date of the previous calculation, followed by *Out of date*: *End: 30-08-2027*, or *End: 20-09-2027* if you got the status date through **Show me** or **Start over** (the app calculates that project when it opens it).',
+          'These four tasks went according to plan, so the dates you typed are the same as in the baseline. You still type them: the actual dates are the facts, the calculated dates remain the forecast. That is also why you enter the start first: if you enter only the finish for a two-day task, the app takes the same day as the start.',
         ],
       },
       ontgraven: {
@@ -2768,7 +2771,7 @@ const TEXT_6 = {
         ],
         explain: [
           'The task is at 50% with an actual start and no actual finish yet: it is under way. The remaining work is the duration times what is still to do: 2 working days × (1 − 0.5) = 1 working day. That remaining work starts on the status date, Monday 28 June.',
-          'Why the start first? If you type only the percentage, the app takes the planned start, Thursday 24 June, as the actual start. But the brickwork started on Friday, after the 3 working days of waiting after the pour from tutorial 2 (22, 23 and 24 June).',
+          'Why the start first? If you type only the percentage, the app takes the date in the Start column as the actual start: Thursday 24 June if you entered everything yourself, a later day after **Show me** or **Start over**. But the brickwork started on Friday, after the 3 working days of waiting after the pour from tutorial 2 (22, 23 and 24 June).',
         ],
       },
       berekenen: {
@@ -2800,6 +2803,9 @@ const TEXT_6 = {
         explain: [
           'For the first four tasks the column shows 0: they went as agreed. For Excavate foundation trench it shows 1, and for every task after that also 1, up to and including Handover. The variance is in working days: a positive number is later, a negative number earlier.',
           'One task, one day, and the whole chain behind it moves along. So does the painting, which has 6 working days of float, and also shows 1: float does not stop a task from moving, it only stops the handover from moving with it. The column *Baseline — Start variance* shows that the excavation itself started on time, and that the reinforcement started a day late because it waited for the excavation. In tutorial 7 the same variance is in a report, ready to hand out.',
+        ],
+        panelOnly: [
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-6.ifc). The rules behind this tutorial are in [Progress, status date and baseline](docs://uitleg-voortgang) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Saving and managing a baseline](docs://howto-baseline-opslaan-en-beheren) and [Updating progress](docs://howto-voortgang-bijwerken). Every column you used, including those of the baseline, is in [Table columns](docs://ref-tabelkolommen).',
         ],
       },
     },
