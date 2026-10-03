@@ -119,6 +119,12 @@ Het begeleidingspaneel staat rechtsonder en is hoog zodra de uitleg zichtbaar is
   wijst tutorial 5 de lintgroep aan (`ribbon-group:resources:resourceAssignment`,
   `ribbon-group:resources:overallocationIndicator`). Het item-anker raakt kwijt zodra er een extensie met
   lintknoppen actief is en de taakselectie wisselt; de markering viel dan terug op de linttab.
+- Tutorial 5 *histogram*: vanaf *tweede-stukadoor* (anker `properties-panel`) staat het paneel links, en op
+  1366×768 bedekt het dan de resourcelijst onder de Gantt. Bovendien toont het histogram bij een geselecteerde
+  taak alleen de resources van die taak, en het Stucwerk is na stap 6–7 nog geselecteerd. De tekst zegt daarom:
+  eerst Esc, dan *Mobiele kraan* in de lijst of via *Resources › Histogram › Volgende* (in de app nagelopen:
+  Esc heft de selectie op, drie keer Volgende geeft de kraan). Geen anker kan het paneel hier naar rechts
+  zetten: het wijkt alleen uit voor een anker dat eronder ligt.
 
 ## De getallen in de tekst
 

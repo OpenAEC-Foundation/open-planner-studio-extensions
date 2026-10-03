@@ -1814,7 +1814,7 @@ const TEXT_5 = {
       histogram: {
         title: 'Het histogram: wie werkt wanneer',
         task: [
-          'Klik op *Resources › Histogram › Histogram*. Onder de Gantt opent het histogram, met links een lijst van de resources. Klik op **Mobiele kraan**.',
+          'Klik op *Resources › Histogram › Histogram*. Onder de Gantt opent het histogram, met links een lijst van de resources. Staat er nog een taak geselecteerd (het Stucwerk uit de vorige stappen), druk dan eerst op Esc: met een geselecteerde taak toont het histogram alleen de resources van die taak. Klik daarna in de lijst op **Mobiele kraan**. Bedekt dit paneel de lijst, kies de kraan dan met *Resources › Histogram › Volgende*.',
         ],
         explain: [
           'Het histogram toont per werkdag hoeveel van de resource gevraagd wordt, onder dezelfde tijdlijn als de Gantt. Bij de Mobiele kraan staan twee smalle balken: op maandag 28 juni (de kanaalplaten) en op dinsdag 6 juli (de dakelementen). Ze reiken niet tot de bovenkant van de schaal (*1 eenheden*): de balken zijn 5/8 en 6/8 van een eenheid hoog, 0,625 en 0,75.',
@@ -1960,7 +1960,7 @@ const TEXT_5 = {
       histogram: {
         title: 'The histogram: who works when',
         task: [
-          'Click *Resources › Histogram › Histogram*. The histogram opens below the Gantt, with a list of the resources on the left. Click **Mobile crane**.',
+          'Click *Resources › Histogram › Histogram*. The histogram opens below the Gantt, with a list of the resources on the left. If a task is still selected (Plastering from the previous steps), first press Esc: with a task selected, the histogram only shows the resources of that task. Then click **Mobile crane** in the list. If this panel covers the list, choose the crane with *Resources › Histogram › Next*.',
         ],
         explain: [
           'The histogram shows per working day how much of the resource is asked, under the same timeline as the Gantt. For the Mobile crane there are two narrow bars: on Monday 28 June (the slabs) and on Tuesday 6 July (the roof elements). They do not reach the top of the scale (*1 units*): the bars are 5/8 and 6/8 of a unit high, 0.625 and 0.75.',
