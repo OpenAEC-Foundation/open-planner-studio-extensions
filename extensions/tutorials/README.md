@@ -73,9 +73,17 @@ werkregels of nivellering. Gevolgen:
 
 - **Tutorial 4, stap *Urenplanning aanzetten*.** Urenplanning is een instelling van de app (niet van het
   document) en de API kent geen instellingen. De controle leest de bewaarde instelling,
-  `localStorage['ops-enableHourPlanning']` (de `ops-<naam>`-sleutels uit `settingsRegistry.ts` van de app);
-  geblokkeerde opslag laat de controle gooien, waarna de begeleiding terugvalt op *Klaar, volgende*. Er is
-  geen Toon mij. De latere stappen zetten de uren wel klaar (`updateTask` met `durationUnit: 'hours'`).
+  `localStorage['ops-enableHourPlanning']` (de `ops-<naam>`-sleutels uit `settingsRegistry.ts` van de app).
+  In de app nagelopen: standaard is hij uit en ontbreekt de sleutel; elke route die Urenplanning aanzet
+  (Instellingen, de melding *Urenplanning aanzetten*, het veld Duur) schrijft `true`, uitzetten `false`.
+  Een ontbrekende sleutel is dus "nooit veranderd" óf "door de app hernoemd". **Vangnet**: staat de sleutel
+  niet op `true` maar is sinds de vorige controle (of de start van tutorial 4) een ándere `ops-`-schakelaar
+  op `true` gesprongen, dan gooit de controle met uitleg; de app meldt dat en de stap valt terug op *Klaar, volgende*. Zonder zo'n
+  sprong blijft hij wachten, zodat de controle voor een gewone lezer betekenis houdt (in de app: openen van
+  Instellingen en het tabblad Planning schrijft geen `ops-`-sleutel). Stond de hernoemde schakelaar al
+  aan, dan springt hij pas bij uit- en weer aanzetten; de stap-tekst zegt dat ("Gaat het paneel dan niet
+  verder, zet het vinkje uit en weer aan"). Geblokkeerde opslag laat de controle ook gooien. Er is geen Toon mij. De latere stappen zetten de uren wel klaar (`updateTask` met
+  `durationUnit: 'hours'`).
 - **Tutorial 5.** Resources, toewijzingen en `workRule` zijn te lezen (`getResources`, `getAssignments`,
   `task.workRule`) en dus te controleren, maar niet te schrijven. **Toon mij** opent daarom per stap, als
   het geopende project de stap nog niet heeft, een stand van de generator waarin hij gedaan is (als nieuw

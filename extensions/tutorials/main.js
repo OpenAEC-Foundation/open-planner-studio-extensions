@@ -560,11 +560,52 @@ function hourMinutes(api, key) {
   return t && t.time.durationUnit === 'hours' && typeof t.time.durationMinutes === 'number' ? t.time.durationMinutes : null;
 }
 
-/** Staat urenplanning aan? Een instelling van de app, geen projectdata: de extensie-API kent geen
- *  instellingen, dus lezen we de bewaarde instelling (`ops-<naam>` in localStorage). Kan dat niet (geblokkeerde
- *  opslag), dan gooit dit: de begeleiding meldt het en valt terug op "Klaar, volgende". */
+/** De bewaarde instelling Urenplanning in de app (`settingsRegistry.ts`/`settingsStore.ts`: `ops-<naam>`). */
+const HOUR_PLANNING_KEY = 'ops-enableHourPlanning';
+
+/** De `ops-`-sleutels die nu op `true` staan (de vorm waarin de app een aangezette schakelaar bewaart). */
+function trueSettingKeys() {
+  const keys = new Set();
+  const storage = window.localStorage;
+  for (let i = 0; i < storage.length; i++) {
+    const key = storage.key(i);
+    if (key && key.startsWith('ops-') && storage.getItem(key) === 'true') keys.add(key);
+  }
+  return keys;
+}
+
+/** Vangnet voor de controle hieronder: de schakelaars die bij de vorige blik (of de start van tutorial 4) aan
+ *  stonden. Bijgewerkt bij elke controle, zodat ook uit- en weer aanzetten van een schakelaar telt. */
+let trueSettingsSeen = null;
+
+/**
+ * Staat urenplanning aan? Een instelling van de app, geen projectdata: de extensie-API kent geen
+ * instellingen, dus lezen we de bewaarde instelling. Wat de app daarover vastlegt (nagelopen in de app):
+ * de standaard is uit en de sleutel ontbreekt dan; élke route die Urenplanning aanzet (Instellingen, de
+ * melding "Urenplanning aanzetten", het veld Duur) schrijft `ops-enableHourPlanning` = `true`, en uitzetten
+ * schrijft `false`. Een ontbrekende sleutel betekent dus "nooit veranderd, dus uit", of dat de app de
+ * sleutel hernoemd heeft. Dat laatste mag een lezer niet laten vastlopen.
+ *
+ * Vangnet: staat de sleutel niet op `true`, maar is sinds de vorige controle (of de start van tutorial 4)
+ * een ándere `ops-`-schakelaar op `true` gesprongen, dan heeft de lezer een instelling aangezet die wij niet
+ * lezen. Dan gooit de controle met uitleg: de app meldt dat en de stap valt terug op "Klaar, volgende".
+ * Zonder zo'n sprong blijft de controle gewoon wachten, zodat hij voor een gewone lezer betekenis houdt.
+ * Stond de hernoemde schakelaar al aan, dan springt hij pas bij uit- en weer aanzetten; dat zegt de tekst.
+ * Kan de opslag niet gelezen worden (geblokkeerd), dan gooit `localStorage` zelf, met hetzelfde gevolg.
+ */
 function hourPlanningOn() {
-  return window.localStorage.getItem('ops-enableHourPlanning') === 'true';
+  if (window.localStorage.getItem(HOUR_PLANNING_KEY) === 'true') return true;
+  if (trueSettingsSeen) {
+    const now = trueSettingKeys();
+    const switchedOn = [...now].filter(key => key !== HOUR_PLANNING_KEY && !trueSettingsSeen.has(key));
+    trueSettingsSeen = now;
+    if (switchedOn.length > 0) {
+      throw new Error(uiLang() === 'nl'
+        ? `De instelling Urenplanning is niet te lezen (${HOUR_PLANNING_KEY}; wel aangezet: ${switchedOn.join(', ')}). Staat Urenplanning aan, klik dan op Klaar, volgende.`
+        : `The Hour planning setting cannot be read (${HOUR_PLANNING_KEY}; switched on instead: ${switchedOn.join(', ')}). If Hour planning is on, click Done, next.`);
+    }
+  }
+  return false;
 }
 
 /** Zet een taak op `minutes` werkminuten in uren (zoals het veld Duur bij invoer "6h"). */
@@ -1525,7 +1566,7 @@ const TEXT_4 = {
         title: 'Urenplanning aanzetten',
         task: [
           'Klik op *Instellingen › Project › Instellingen* en open het tabblad **Planning**. Zet onder **Urenplanning** het vinkje bij **Urenplanning inschakelen** aan en sluit het venster met **Sluiten**.',
-          '(Staat het vinkje al aan, dan is deze stap meteen klaar.)',
+          '(Staat het vinkje al aan, dan is deze stap meteen klaar. Gaat het paneel dan niet verder, zet het vinkje uit en weer aan.)',
         ],
         explain: [
           'Onder **Urenplanning** staat nu een tweede vinkje: **Gemengde dag/uur-planning toestaan**, standaard aan. Daarmee kies je per taak of hij in dagen of in uren telt, en staan dagtaken en urentaken in één planning naast elkaar. Zo plan je zo meteen drie taken in uren en laat je de rest in dagen.',
@@ -1633,7 +1674,7 @@ const TEXT_4 = {
         title: 'Turning on hour planning',
         task: [
           'Click *Settings › Project › Settings* and open the **Planning** tab. Under **Hour planning**, tick **Enable hour planning** and close the window with **Close**.',
-          '(If the box is already ticked, this step is done straight away.)',
+          '(If the box is already ticked, this step is done straight away. If the panel does not move on, untick the box and tick it again.)',
         ],
         explain: [
           'Under **Hour planning** there is now a second box: **Allow mixed day/hour planning**, on by default. With it you choose per task whether it counts in days or in hours, and day tasks and hour tasks sit side by side in one schedule. That is how you plan three tasks in hours in a moment and leave the rest in days.',
@@ -3063,6 +3104,11 @@ function buildGuide(def) {
  * dan staan, en de gebruiker krijgt uitleg in plaats van een stille klik.
  */
 function startTutorial(api, def) {
+  if (def.id === TUTORIAL_4_ID) {
+    // Vangnet van de urenplanningstap: onthoud welke schakelaars al aan stonden. Geblokkeerde opslag laat
+    // dit leeg; de controle gooit dan zelf (en valt terug op "Klaar, volgende").
+    try { trueSettingsSeen = trueSettingKeys(); } catch { trueSettingsSeen = null; }
+  }
   try {
     api.help.startGuide(buildGuide(def));
   } catch (error) {
