@@ -204,7 +204,7 @@ npm run gen:tutorial-project -- --out <map>
 niet wijzigen, dus **Toon mij** op de bouwvakstap opent dit project (als nieuw tabblad) in plaats van de
 kalender aan te passen; **Opnieuw** op de constraintstap laadt hem als beginstand van die stap.
 
-De drie `tussen-tut-5-*`-standen (app-generator, branch `claude/tutorial-tussenstanden-tut5`) zijn er
+De drie `tussen-tut-5-*`-standen (app-generator, PR OpenAEC-Foundation/open-planner-studio#279, branch `claude/tutorial-tussenstanden-tut5`) zijn er
 om dezelfde reden: de API kan geen resources, toewijzingen of werkregels schrijven. De andere bestanden in
 `projects/` zijn niet opnieuw gegenereerd; ze verschillen van de huidige generatoruitvoer alleen in
 GUIDs, tijdstempels en (bij `start-tut-1` en `na-tut-1`) de schrijfversie en de STEP-codering van een
