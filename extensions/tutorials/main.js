@@ -1,11 +1,12 @@
 /**
  * Tutorials voor Open Planner Studio — tutorial 1 "Je eerste planning", tutorial 2 "Relaties en het
- * kritieke pad", tutorial 3 "De kalender en datumafspraken", tutorial 4 "Plannen in uren" en tutorial 5
- * "Resources en nivelleren" (contract 1.4.0, permissies `help`, `ribbon` en `events`).
+ * kritieke pad", tutorial 3 "De kalender en datumafspraken", tutorial 4 "Plannen in uren", tutorial 5
+ * "Resources en nivelleren", tutorial 6 "Voortgang en afwijking" en tutorial 7 "Rapporteren en delen"
+ * (contract 1.4.0, permissies `help`, `ribbon` en `events`).
  *
  * Wat deze extensie doet:
  *   • api.help.registerArticles(...)  → de leesversies van de tutorials in Help › Tutorials;
- *   • api.ui.addRibbonButton(...)     → Start › Tutorials › "Tutorial 1" t/m "Tutorial 5"
+ *   • api.ui.addRibbonButton(...)     → Start › Tutorials › "Tutorial 1" t/m "Tutorial 7"
  *                                       starten de begeleiding (permissie "ribbon"; een Help-artikel
  *                                       kan zelf geen begeleiding starten, alleen een `project://`-
  *                                       bestand openen);
@@ -21,8 +22,9 @@
  * ("wat je nu ziet, en waarom"); het artikel en de paneelstappen worden hieronder uit die ene bron
  * samengesteld. De extensielader kent één bestand (`require()` geeft alleen `open-planner-studio`
  * terug), dus dit bestand heeft duidelijke secties: het project en het lezen van de documenttoestand;
- * tutorial 1 (Toon mij); de logica van tutorial 2 en 3; die van tutorial 4 en 5; de vijf teksten; de stappen
- * en `onLoad`.
+ * tutorial 1 (Toon mij); de logica van tutorial 2 en 3; die van tutorial 4 en 5; de teksten `TEXT_1` t/m
+ * `TEXT_5`; de stappen van tutorial 1 t/m 5; één blok voor tutorial 6 en 7 (logica, `TEXT_6`, `TEXT_7` en hun
+ * stappen); en `onLoad`.
  *
  * De projectbestanden in `projects/<taal>/` zijn GEGENEREERD, niet met de hand gemaakt: in een
  * checkout van de app `npm run gen:tutorial-project -- --out <map>` en daarna `start-tut-1.ifc`,
@@ -36,6 +38,10 @@
  * stort en de kraan, 3,25 en 3,38 dagen speling) en tutorial 5 uit `tussen-tut-5-werkregel` (30 augustus
  * 2027, 8 kritieke taken, 46 werkdagen, metselaar 5 dagen overbezet) en `na-tut-5` (17 kritieke taken,
  * nivelleervertraging 5).
+ *
+ * Tutorial 6 en 7 komen uit `na-tut-6` (basisplanning, statusdatum 28 juni 2027, voortgang; oplevering 31 augustus
+ * 2027, 10 kritieke taken, 47 werkdagen); `na-tut-7` is gelijk aan `na-tut-6` (een rapport is geen projectdata).
+ * Kopieer ook `na-tut-6.ifc` en `na-tut-7.ifc` per taal naar `projects/<taal>/`.
  */
 
 const sdk = require('open-planner-studio');
@@ -52,6 +58,10 @@ const TUTORIAL_3_ID = 'tut-3-kalender';
 const TUTORIAL_4_ID = 'tut-4-uren';
 /** Id van tutorial 5. */
 const TUTORIAL_5_ID = 'tut-5-resources';
+/** Id van tutorial 6. */
+const TUTORIAL_6_ID = 'tut-6-uitvoering';
+/** Id van tutorial 7. */
+const TUTORIAL_7_ID = 'tut-7-rapport';
 
 // ── Het project ──────────────────────────────────────────────────────────────────────────────
 
@@ -2348,13 +2358,664 @@ const STEP_LOGIC_5 = {
   },
 };
 
-/** De vijf tutorials: één bron voor artikel, paneel, lintknop en host-verzoek. */
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+// TUTORIAL 6 EN 7 — de logica: baseline, statusdatum, voortgang en rapporten
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+//
+// Tutorial 6 werkt op `na-tut-5`, tutorial 7 op `na-tut-6`. De getallen in de tekst (28 juni, 31 augustus, 10 taken,
+// 47 werkdagen, 81 %, 28,7 % en 25 %, …) komen uit de stand `na-tut-6` van de generator en uit de rapporten van de
+// draaiende app (zie README). De voortgang die tutorial 6 laat invullen is precies die van `na-tut-6`: in de doorloop
+// geeft hij na Bereken voor alle 23 taken dezelfde vroege datums, speling en kritiekheid als dat bestand.
+//
+// WAT DE EXTENSIE-API HIER NIET KAN, en wat daarvan het gevolg is:
+//   • Een baseline is niet te lezen (`api.data` kent geen baselines, ook geen event) en niet te schrijven. De stap
+//     "Een baseline opslaan" heeft dus geen controle en geen Toon mij: "Klaar, volgende".
+//   • De statusdatum is wel te lezen (`getProject().statusDate`) maar niet te schrijven (er is geen project-update).
+//     Controle ja, Toon mij nee.
+//   • Voortgang (`time.completion`, `time.actualStart`, `time.actualFinish`) is te lezen, dus elke invoerstap heeft een
+//     controle. Schrijven kan alleen via `updateTask`, de ruwe veldschrijfroute zonder de regels van de app
+//     (percentage ↔ werkelijke datums ↔ status, de startvraag, het weigeren van een datum na de statusdatum): daar
+//     bouwen we geen Toon mij op. Toon mij opent alleen een stand van de generator (`na-tut-5`, `na-tut-6`).
+//   • De kolommen van de tabel, het gekozen rapport, het papierformaat, de PDF-export en het exportvenster laten niets
+//     achter in het document en zijn niet te lezen: die stappen zijn "Klaar, volgende". Tutorial 7 verandert het
+//     project niet, dus ook geen Opnieuw.
+
+/** De statusdatum van tutorial 6: maandag 28 juni 2027 (STATUS_DATE in `scripts/tutorial-project.ts`). */
+const TUT6_STATUS_DATE = '2027-06-28';
+
+/** Heeft deze werkelijke datum de verwachte waarde (voor een urentaak met kloktijd, een dag en tijd)? */
+const actualIs = (actual, expected) => typeof actual === 'string' && actual.startsWith(expected);
+
+/**
+ * De voortgang die tutorial 6 laat invullen, gelijk aan DONE_TASKS, LATE_TASK en IN_PROGRESS van de generator (stand
+ * `na-tut-6`): [taak, werkelijke start, werkelijk einde]. Een mijlpaal heeft één datum; de app zet start en einde dan
+ * allebei. De stort is een urentaak: zijn werkelijke datums hebben een kloktijd.
+ */
+const PROGRESS_GROUPS = {
+  voorbereiding: [
+    ['msStart', '2027-06-07', '2027-06-07'],
+    ['site', '2027-06-07', '2027-06-08'],
+    ['garden', '2027-06-09', '2027-06-09'],
+    ['setout', '2027-06-10', '2027-06-10'],
+  ],
+  ontgraven: [['excavate', '2027-06-11', '2027-06-15']],
+  fundering: [
+    ['rebar', '2027-06-16', '2027-06-18'],
+    ['inspection', '2027-06-18', '2027-06-18'],
+    ['pour', '2027-06-21T07:00', '2027-06-21T14:00'],
+  ],
+};
+/** Het funderingsmetselwerk: begonnen op vrijdag 25 juni, voor de helft klaar, nog geen einde. */
+const BRICKWORK_PROGRESS = { start: '2027-06-25', completion: 0.5 };
+
+/** Is de taak voltooid met precies deze werkelijke datums? */
+function progressRowDone(api, [key, start, finish], tasks = api.data.getTasks()) {
+  const t = taskByKey(api, key, tasks);
+  return !!t && t.time.completion === 1 && actualIs(t.time.actualStart, start) && actualIs(t.time.actualFinish, finish);
+}
+const progressGroupDone = (api, group) => {
+  const tasks = api.data.getTasks();
+  return PROGRESS_GROUPS[group].every(row => progressRowDone(api, row, tasks));
+};
+/** Het funderingsmetselwerk loopt: gestart op 25 juni, 50 %, niet klaar. */
+const brickworkRunning = (api) => {
+  const t = taskByKey(api, 'foundBrick');
+  return !!t && Math.abs(t.time.completion - BRICKWORK_PROGRESS.completion) < 1e-9
+    && actualIs(t.time.actualStart, BRICKWORK_PROGRESS.start) && !t.time.actualFinish;
+};
+const statusDateIsSet = api => dayOf(api.data.getProject().statusDate) === TUT6_STATUS_DATE;
+/** Alle voortgang van tutorial 6 is ingevuld. */
+const allProgressEntered = api => statusDateIsSet(api)
+  && Object.keys(PROGRESS_GROUPS).every(group => progressGroupDone(api, group)) && brickworkRunning(api);
+
+/** Het project zoals tutorial 5 het achterlaat: de taken, de vijf resources en het genivelleerde buitenspouwblad. */
+const startFromTutorial5 = api => tasksPresent(api) && resourcesDone(api) && levelingApplied(api);
+/** Het project zoals tutorial 6 het achterlaat: tutorial 5 plus statusdatum en voortgang (berekend of niet). */
+const startFromTutorial6 = api => startFromTutorial5(api) && allProgressEntered(api);
+
+/** Vingerafdruk van de voortgang (statusdatum, percentage en werkelijke datums van de bladtaken). `scheduleSignature`
+ *  dekt de voortgang niet: zonder deze tweede afdruk zou een berekening van vóór de voortgangsinvoer als "berekend"
+ *  tellen. Fasen blijven erbuiten: hun percentage volgt uit de berekening zelf. */
+function progressSignature(api) {
+  return JSON.stringify([
+    api.data.getProject().statusDate || '',
+    api.data.getTasks().filter(t => t.childIds.length === 0)
+      .map(t => [t.id, t.time.completion, t.time.actualStart || '', t.time.actualFinish || '']),
+  ]);
+}
+let calculatedProgressSignature = null;
+/** Berekend na de voortgangsinvoer? De laatste berekening was er een van precies deze planning én deze voortgang. */
+const progressCalculated = api => isCalculated(api) && calculatedProgressSignature !== null
+  && calculatedProgressSignature === progressSignature(api);
+
+/** Toon mij, tutorial 6 stap 1: het project na tutorial 5. Ontbreekt iets, dan opent Toon mij het resultaat van
+ *  tutorial 5 als nieuw tabblad. */
+async function ensureAfterTutorial5(api) {
+  if (!startFromTutorial5(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-5'));
+}
+
+/** Toon mij, tutorial 6 vanaf het rekenen en tutorial 7 stap 1: het project na tutorial 6, berekend. De extensie kan
+ *  geen baseline, statusdatum of voortgang zetten; ontbreekt er iets, dan opent Toon mij het resultaat van tutorial 6
+ *  (als nieuw tabblad). Staat alles er al, dan rekent Toon mij alleen. */
+async function ensureAfterTutorial6(api) {
+  if (!startFromTutorial6(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-6'));
+  api.data.recalculate();
+}
+
+// ── Tutorial 6: Voortgang en afwijking ────────────────────────────────────────────────────────
+
+const TEXT_6 = {
+  nl: {
+    title: 'Voortgang en afwijking',
+    whatLabel: '**Wat je nu ziet, en waarom**',
+    intro: [
+      '# Voortgang en afwijking',
+      '## Wat je bouwt',
+      'Je zet de planning van de aanbouw om van voorspelling naar werkelijkheid. Je legt de planning vast als baseline, een afspraak om later aan te meten, zet de statusdatum op maandag 28 juni 2027 en vult in wat er in de eerste drie weken werkelijk is gebeurd: acht taken klaar, één taak halverwege en een ontgraving die een dag langer duurde dan gepland. Daarna reken je en lees je de afwijking af.',
+      'Aan het eind staat de oplevering op dinsdag 31 augustus 2027, één werkdag later dan de baseline. Je hebt gezien waarom die ene dag van het ontgraven de hele oplevering laat opschuiven, en waar je de afwijking leest: onder de balken in de Gantt en in de tabel.',
+      '## Uitgangspunt',
+      'Je hebt tutorial 5 afgerond: het project *Aanbouw woning* met vijf resources, de werkregel van het stucwerk en het genivelleerde buitenspouwblad, met de oplevering op maandag 30 augustus 2027. Heb je dat niet, [open dan het resultaat van tutorial 5](project://projects/nl/na-tut-5.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 6*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier niet overal: een extensie kan geen baseline opslaan, geen statusdatum zetten en geen voortgang invoeren. Toon mij staat daarom alleen bij de eerste stap, waar het zo nodig het resultaat van tutorial 5 opent, en bij de stappen vanaf het rekenen, waar het zo nodig het resultaat van deze tutorial opent. Beide openen als nieuw tabblad. De stap *Een baseline opslaan* kan het paneel niet zien: daar staat **Klaar, volgende**. **Opnieuw** in die stap laadt het resultaat van tutorial 5 opnieuw.',
+    ],
+    outro: [
+      '## Wat je hebt geleerd',
+      '- **Een baseline is een foto van de afspraak.** Je legde hem vast voordat er voortgang was; daardoor liet de afwijking zien wat er sindsdien veranderde. Een baseline die je ná de voortgang opslaat, legt de werkelijke stand vast en laat een afwijking van 0 zien.',
+      '- **De statusdatum is de grens tussen feit en voorspelling.** Alles vóór maandag 28 juni vulde je in als werkelijkheid; alles erna rekent de app vanaf die dag. Rekende je met alleen een statusdatum, dan schoof alles wat nog niet begonnen was naar die dag en kwam de oplevering op 20 september.',
+      '- **Voortgang bestaat uit een werkelijke start, een werkelijk einde en een percentage, en ze hangen aan elkaar.** Een werkelijk einde maakt de taak 100% en een percentage boven 0 maakt hem *Bezig*. Vul daarom eerst de start in: zonder start neemt de app de geplande start, of bij een werkelijk einde die einddatum zelf.',
+      '- **Een dag vertraging op het kritieke pad is een dag vertraging van de oplevering.** Het ontgraven duurde 3 in plaats van 2 werkdagen en lag op het kritieke pad: alles erachter schoof een werkdag op en de oplevering ging van 30 naar 31 augustus.',
+      '- **Afwijking lees je in werkdagen: een plus is later, een min is eerder.** Je zag haar onder de balken in de Gantt en in de kolommen Startafwijking en Eindafwijking. In tutorial 7 staat dezelfde afwijking in een rapport.',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-6.ifc). De regels achter deze tutorial staan in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang) en [Kritiek pad en speling](docs://uitleg-kritiek-pad). Hoe je het in je eigen project doet, lees je in [Een baseline opslaan en beheren](docs://howto-baseline-opslaan-en-beheren) en [Voortgang bijwerken](docs://howto-voortgang-bijwerken).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'Het startpunt',
+        task: [
+          'Zorg dat het project *Aanbouw woning* openstaat zoals tutorial 5 het achterliet: met de vijf resources, het stucwerk op Vast werk met twee stukadoors en het genivelleerde buitenspouwblad. Heb je dat niet, [open dan het resultaat van tutorial 5](project://projects/nl/na-tut-5.ifc). Meldt de app *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**. Kijk in de statusbalk.',
+        ],
+        explain: [
+          'De statusbalk zegt *Einde: 30-08-2027* en *Kritiek pad: 17 taken, 46 werkdagen*. Dat is de planning zoals je hem in tutorial 5 afrondde: de oplevering op maandag 30 augustus.',
+          'Maar dit is een voorspelling. De app rekende uit wat er volgens jouw taken, relaties en resources zou moeten gebeuren, niet wat er op de bouwplaats gebeurd is. Zodra het werk loopt, wil je weten wat er klaar is en wat dat voor de oplevering betekent. Daarvoor heb je drie dingen nodig: een baseline om aan te meten, een statusdatum en de voortgang zelf.',
+        ],
+      },
+      baseline: {
+        title: 'Een baseline opslaan',
+        task: [
+          'Leg eerst de afspraak vast. Klik op *Planning › Baselines & voortgang › Baselines beheren…*. Het venster **Baselines** opent. Onder **Nieuwe baseline opslaan** staat een voorstel voor de naam. Vervang dat door `Basisplanning`, klik op **Opslaan** en dan op **Sluiten**.',
+          'Staat er in het venster *Planning is verouderd — herbereken eerst (F5)*? Sluit het venster dan, druk op F5 en begin opnieuw: een baseline legt de datums vast die op dat moment berekend zijn.',
+        ],
+        explain: [
+          'Het venster toont nu één baseline, *Basisplanning*, met een bolletje onder **Actief**. Sluit je het venster, dan staat in de Gantt onder elke taakbalk een dunne grijze balk, en onder elke mijlpaal een klein ruitje. Dat is de baseline. Hij valt nu precies onder de balken, want er is nog niets veranderd.',
+          'Een baseline is een foto van de planning op dit moment: van elke taak zonder onderliggende taken legt de app de start, het einde en de duur vast. Wat je daarna wijzigt, raakt de foto niet. Zo kun je straks zien hoeveel de uitvoering afwijkt van de afspraak. Leg hem daarom vast voordat je voortgang invult: een baseline die al de werkelijke datums bevat, laat een afwijking van 0 zien.',
+        ],
+      },
+      statusdatum: {
+        title: 'De statusdatum',
+        task: [
+          'Klik bij *Planning › Baselines & voortgang* in het veld **Statusdatum** en typ `28`, `06` en `2027` in de vakjes voor dag, maand en jaar (in de volgorde van je datumnotatie). De app springt zelf naar het volgende vakje. Druk op Enter. Druk **nog niet** op Bereken.',
+        ],
+        explain: [
+          'In de Gantt staat een oranje stippellijn op maandag 28 juni, met de datum bovenin, en de statusbalk zegt *Verouderd — herbereken (F5)*: de statusdatum is een wijziging die nog niet doorgerekend is. De lijn maakt uitstapjes naar links, naar de balken die vóór 28 juni gepland staan maar nog geen voortgang hebben.',
+          'De statusdatum is de dag waarop je de stand opneemt: alles daarvoor is een feit, alles erna moet nog gebeuren. De uitvoerder meldt de stand van vrijdag, jij neemt hem maandagochtend op, dus de statusdatum is maandag. De app doet er drie dingen mee: ze weigert een werkelijke datum na de statusdatum, ze schuift werk dat nog niet begonnen is niet het verleden in, en het restwerk van een taak die loopt begint op deze dag.',
+          'Dat laatste is waarom je nog niet rekent. Zou je nu op Bereken drukken, dan zou de app álles wat nog niet begonnen is naar 28 juni schuiven, ook de taken die volgens jou allang klaar zijn: Start bouw op 28 juni, de oplevering op 20 september, en de statusbalk meldt *1 deadline(s) overschreden*. Eerst de voortgang, dan rekenen.',
+        ],
+      },
+      voorbereiding: {
+        title: 'De voorbereiding is klaar',
+        task: [
+          'De uitvoerder meldt wat er sinds de start gebeurd is. Dat vul je in de tabel in. Klik op het tabblad *Tabel* en dan op *Tabel › Kolommen › Kolommen…* (of op de **+** rechts in de kop van de takenlijst). Kies onder **Voortgang** de kolom **Werkelijke start**; het menu sluit zich. Open het opnieuw en kies **Werkelijke einde**. De kolom **Voortgang** staat er al.',
+          'Dubbelklik dan op een cel, typ de datum en druk op Enter. Vul in:',
+          '- `Start bouw`: bij **Werkelijke einde** `07-06-2027`. Een mijlpaal heeft één datum; de app vult de start zelf in.\n- `Bouwplaats inrichten`: **Werkelijke start** `07-06-2027`, **Werkelijke einde** `08-06-2027`.\n- `Tuin en bestrating verwijderen`: start en einde allebei `09-06-2027`.\n- `Aanbouw uitzetten`: start en einde allebei `10-06-2027`.',
+          'Vul bij elke taak eerst de start in en dan het einde. Staat *Automatisch berekenen* aan, dan rekent de app na elke invoer mee: je eindresultaat is hetzelfde, maar de balken springen tussendoor.',
+        ],
+        explain: [
+          'De vier taken staan op 100% in de kolom Voortgang: een werkelijk einde maakt de taak voltooid. De fase Voorbereiding staat nog op 0%. Een fase heeft geen eigen voortgang, ze rekent die uit haar taken, en dat gebeurt pas bij Bereken. De statusbalk zegt nog steeds *Einde: 30-08-2027*: dat is de oude berekening.',
+          'Deze vier taken verliepen volgens planning, dus de datums die je intypte zijn dezelfde als de geplande. Toch typ je ze in: de werkelijke datums zijn de feiten, de berekende datums blijven de voorspelling. Daarom eerst de start: vul je bij een taak van twee dagen alleen het einde in, dan neemt de app dezelfde dag als start.',
+        ],
+      },
+      ontgraven: {
+        title: 'Het ontgraven liep uit',
+        task: [
+          'Het grondwater stond hoger dan gedacht: de funderingssleuf was pas na 3 werkdagen klaar in plaats van 2. Vul bij `Funderingssleuf ontgraven` in: **Werkelijke start** `11-06-2027` en **Werkelijke einde** `15-06-2027`.',
+        ],
+        explain: [
+          'Funderingssleuf ontgraven staat op 100%, met start 11-06-2027 en einde 15-06-2027. Gepland waren 2 werkdagen, vrijdag 11 en maandag 14 juni; werkelijk waren het er 3: vrijdag 11, maandag 14 en dinsdag 15 juni. Dat is de afwijking waar deze tutorial om draait.',
+          'De rest van de planning weet het nog niet: het ontgraven staat nu op 15 juni, maar alles erachter staat nog op zijn oude plek. Pas bij Bereken schuift het door.',
+        ],
+      },
+      fundering: {
+        title: 'De wapening, de keuring en de stort',
+        task: [
+          'Vul in:',
+          '- `Wapening en bekisting fundering`: **Werkelijke start** `16-06-2027`, **Werkelijke einde** `18-06-2027`. De wapening kon pas beginnen toen het ontgraven klaar was.\n- `Inspectie wapening`: bij **Werkelijke einde** `18-06-2027`.\n- `Fundering storten`: **Werkelijke start** `21-06-2027 07:00`, **Werkelijke einde** `21-06-2027 14:00`. De stort is een taak in uren, dus typ de kloktijd mee.',
+        ],
+        explain: [
+          'Alle drie staan op 100%. De keuring was vrijdag 18 juni en de stort volgt op de keuring: na het weekend is dat maandag 21 juni, van 07:00 tot 14:00 (6 uur, met de pauze van 12 tot 13).',
+          'Waarom de kloktijd? Bij een taak in uren hoort een werkelijke start en een werkelijk einde met een tijdstip. Typ je alleen de datum, dan staat de stort er in de kolommen als `21-06-2027`, de app weet niet hoe laat hij begon en rekent daarna met een andere tijd: het resultaat klopt dan niet meer met de rest van deze tutorial.',
+        ],
+      },
+      metselwerk: {
+        title: 'Het funderingsmetselwerk loopt',
+        task: [
+          'Het funderingsmetselwerk begon vrijdag 25 juni en is op de statusdatum voor de helft klaar. Vul bij `Funderingsmetselwerk` eerst bij **Werkelijke start** `25-06-2027` in en dan bij **Voortgang** `50`.',
+        ],
+        explain: [
+          'De taak staat op 50% met een werkelijke start en nog geen werkelijk einde: hij loopt. Het restwerk is de duur maal wat er nog te doen is: 2 werkdagen × (1 − 0,5) = 1 werkdag. Dat restwerk begint op de statusdatum, maandag 28 juni.',
+          'Waarom eerst de start? Typ je alleen het percentage, dan neemt de app de geplande start, donderdag 24 juni, als werkelijke start. Maar het metselwerk begon vrijdag, na de wachttijd van 3 werkdagen na de stort uit tutorial 2 (22, 23 en 24 juni).',
+        ],
+      },
+      berekenen: {
+        title: 'Rekenen',
+        task: [
+          'Klik op *Tabel › Planning › Bereken*, of druk op F5. Staat *Automatisch berekenen* aan, dan heeft de app al gerekend en is deze stap al gedaan.',
+        ],
+        explain: [
+          'De statusbalk zegt *Einde: 31-08-2027* en *Kritiek pad: 10 taken, 47 werkdagen*. De oplevering staat op dinsdag 31 augustus, één werkdag later dan de baseline van maandag 30 augustus. In de tabel staan de acht voltooide taken op 100% en niet meer op kritiek: een voltooide taak staat vast op zijn werkelijke datums en kan de oplevering niet meer bepalen. De fase Voorbereiding staat nu op 100% en Fundering op 81%.',
+          'Waarom één dag? Het ontgraven lag op het kritieke pad: elke taak erachter wachtte op zijn einde. Het duurde een dag langer, dus schuift alles erachter een werkdag op. Het funderingsmetselwerk begon zo op vrijdag 25 juni: 3 werkdagen wachttijd na de stort van maandag 21 juni, dus 22, 23 en 24 juni. Zijn balk loopt van de werkelijke start tot maandag 28 juni, de statusdatum: het restwerk van 1 werkdag. De kanaalplaatvloer volgt op dinsdag 29 juni, een dag later dan de maandag 28 juni die de baseline had.',
+          'De 81% van Fundering is een gewogen gemiddelde: de taken erin wegen samen 8,375 werkdagen (2 + 3 + 0,75 + 2 + 0,625; een mijlpaal weegt 0 en een taak in uren telt naar rato van de werkdag van 8 uur) en daarvan is 6,75 gedaan (2 + 3 + 0,75 + de helft van 2).',
+        ],
+      },
+      'afwijking-gantt': {
+        title: 'De afwijking in de Gantt',
+        task: [
+          'Klik op het tabblad *Start*. Kijk in de Gantt onder de balken van Funderingssleuf ontgraven en de taken daarna. Scroll de Gantt naar rechts en omlaag om ook Oplevering te zien.',
+        ],
+        explain: [
+          'Onder elke balk staat nog de dunne grijze balk van de baseline, en nu zie je het verschil. Het ontgraven is aan het eind een dag langer dan zijn baseline, en vanaf de wapening begint en eindigt elke taak een werkdag rechts van zijn baseline. Bij Oplevering staat het ruitje van de baseline een werkdag links van de mijlpaal zelf. De acht voltooide taken zijn niet meer rood.',
+          'De oranje lijn op 28 juni is nu bijna recht: alles links ervan is klaar, op het halve funderingsmetselwerk na. De lijn buigt daar naar het punt in de balk dat het percentage aangeeft. Hij laat in één blik zien wie voor of achter op de planning loopt.',
+        ],
+      },
+      'afwijking-tabel': {
+        title: 'De afwijking in cijfers',
+        task: [
+          'Klik op het tabblad *Tabel*. Open *Tabel › Kolommen › Kolommen…* en klap onder **Baseline** de kolommen van je baseline open. Kies **Basisplanning — Eindafwijking**. Staat de kolom buiten beeld, scroll de tabel dan naar rechts.',
+        ],
+        explain: [
+          'Bij de eerste vier taken staat 0 in de kolom: ze liepen volgens afspraak. Bij Funderingssleuf ontgraven staat 1, bij alle taken daarna ook 1, tot en met Oplevering. De afwijking staat in werkdagen: een positief getal is later, een negatief getal eerder.',
+          'Eén taak, één dag, en de hele keten erachter schuift mee. Ook het schilderwerk, dat 6 werkdagen speling heeft, staat op 1: speling zorgt er niet voor dat een taak niet verschuift, alleen dat de oplevering er niet door schuift. De kolom *Basisplanning — Startafwijking* laat zien dat het ontgraven zelf op tijd begon, en dat de wapening een dag te laat begon omdat ze op het ontgraven wachtte. In tutorial 7 staat dezelfde afwijking in een rapport, klaar om uit te delen.',
+        ],
+      },
+    },
+  },
+  en: {
+    title: 'Progress and variance',
+    whatLabel: '**What you see now, and why**',
+    intro: [
+      '# Progress and variance',
+      '## What you build',
+      'You turn the schedule for the house extension from a forecast into reality. You save the schedule as a baseline, an agreement to measure against later, set the status date to Monday 28 June 2027 and enter what really happened in the first three weeks: eight tasks finished, one task halfway and an excavation that took a day longer than planned. Then you calculate and read the variance.',
+      'At the end the handover is on Tuesday 31 August 2027, one working day later than the baseline. You have seen why that one day of excavation moves the whole handover, and where you read the variance: below the bars in the Gantt and in the table.',
+      '## Starting point',
+      'You have finished tutorial 5: the project *House extension* with five resources, the work rule of the plastering and the leveled outer cavity leaf, with the handover on Monday 30 August 2027. If you have not, [open the result of tutorial 5](project://projects/en/na-tut-5.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 6* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you, but that is not possible everywhere here: an extension cannot save a baseline, set a status date or enter progress. That is why Show me is only there for the first step, where it opens the result of tutorial 5 if needed, and for the steps from calculating onwards, where it opens the result of this tutorial if needed. Both open as a new tab. The panel cannot see the step *Saving a baseline*: it says **Done, next**. **Start over** in that step reloads the result of tutorial 5.',
+    ],
+    outro: [
+      '## What you have learned',
+      '- **A baseline is a photo of the agreement.** You saved it before there was any progress; that is why the variance showed what had changed since. A baseline saved after the progress records the actual situation and shows a variance of 0.',
+      '- **The status date is the boundary between fact and forecast.** Everything before Monday 28 June you entered as reality; everything after it the app calculates from that day. If you had calculated with only a status date, everything that had not started would have moved to that day and the handover would have landed on 20 September.',
+      '- **Progress is an actual start, an actual finish and a percentage, and they depend on each other.** An actual finish makes the task 100% and a percentage above 0 makes it *In progress*. That is why you enter the start first: without a start the app takes the planned start, or, with an actual finish, that finish date itself.',
+      '- **A day of delay on the critical path is a day of delay on the handover.** The excavation took 3 working days instead of 2 and was on the critical path: everything behind it moved a working day and the handover went from 30 to 31 August.',
+      '- **You read variance in working days: a plus is later, a minus is earlier.** You saw it below the bars in the Gantt and in the columns Start variance and Finish variance. In tutorial 7 the same variance is in a report.',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-6.ifc). The rules behind this tutorial are in [Progress, status date and baseline](docs://uitleg-voortgang) and [Critical path and float](docs://uitleg-kritiek-pad). How to do it in your own project is in [Saving and managing a baseline](docs://howto-baseline-opslaan-en-beheren) and [Updating progress](docs://howto-voortgang-bijwerken).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'The starting point',
+        task: [
+          'Make sure the project *House extension* is open as tutorial 5 left it: with the five resources, the plastering on Fixed work with two plasterers and the leveled outer cavity leaf. If not, [open the result of tutorial 5](project://projects/en/na-tut-5.ifc). If the app says *This file contains hour-based planning.*, click **Enable hour planning**. Look at the status bar.',
+        ],
+        explain: [
+          'The status bar says *End: 30-08-2027* and *Critical path: 17 tasks, 46 work days*. That is the schedule as you finished it in tutorial 5: the handover on Monday 30 August.',
+          'But this is a forecast. The app worked out what should happen according to your tasks, relationships and resources, not what has happened on site. As soon as the work is under way, you want to know what is finished and what that means for the handover. For that you need three things: a baseline to measure against, a status date and the progress itself.',
+        ],
+      },
+      baseline: {
+        title: 'Saving a baseline',
+        task: [
+          'First record the agreement. Click *Planning › Baselines & progress › Manage baselines…*. The **Baselines** window opens. Under **Save new baseline** there is a suggested name. Replace it with `Baseline` and click **Save**, then **Close**.',
+          'Does the window say *Schedule is out of date — recalculate first (F5)*? Then close the window, press F5 and start again: a baseline records the dates that were calculated at that moment.',
+        ],
+        explain: [
+          'The window now shows one baseline, *Baseline*, with a dot under **Active**. When you close the window, the Gantt has a thin grey bar below every task bar, and a small diamond below every milestone. That is the baseline. It sits exactly below the bars for now, because nothing has changed yet.',
+          'A baseline is a photo of the schedule at this moment: for every task without subtasks the app records the start, the finish and the duration. What you change afterwards does not touch the photo. That way you can see in a moment how far the execution deviates from the agreement. So record it before you enter progress: a baseline that already contains the actual dates shows a variance of 0.',
+        ],
+      },
+      statusdatum: {
+        title: 'The status date',
+        task: [
+          'In *Planning › Baselines & progress*, click the **Status date** field and type `28`, `06` and `2027` in the boxes for day, month and year (in the order of your date notation). The app jumps to the next box by itself. Press Enter. Do **not** press Calculate yet.',
+        ],
+        explain: [
+          'The Gantt now has an orange dotted line on Monday 28 June, with the date at the top, and the status bar says *Out of date — recalculate (F5)*: the status date is a change that has not been calculated yet. The line makes excursions to the left, to the bars that are planned before 28 June but have no progress yet.',
+          'The status date is the day you take stock: everything before it is fact, everything after it still has to happen. The foreman reports the situation of Friday, you record it on Monday morning, so the status date is Monday. The app does three things with it: it refuses an actual date after the status date, it does not push work that has not started into the past, and the remaining work of a task that is under way starts on this day.',
+          'That last one is why you do not calculate yet. If you pressed Calculate now, the app would move everything that has not started to 28 June, including the tasks you consider long finished: Start of construction on 28 June, the handover on 20 September, and the status bar says *1 deadline(s) missed*. Progress first, then calculate.',
+        ],
+      },
+      voorbereiding: {
+        title: 'The preparation is finished',
+        task: [
+          'The foreman reports what has happened since the start. You enter that in the table. Click the *Table* tab and then *Table › Columns › Columns…* (or the **+** at the right of the task list header). Under **Progress**, choose the column **Actual start**; the menu closes. Open it again and choose **Actual finish**. The column **Progress** is already there.',
+          'Then double-click a cell, type the date and press Enter. Enter:',
+          '- `Start of construction`: at **Actual finish** `07-06-2027`. A milestone has one date; the app fills in the start itself.\n- `Set up site`: **Actual start** `07-06-2027`, **Actual finish** `08-06-2027`.\n- `Clear garden and paving`: start and finish both `09-06-2027`.\n- `Set out the extension`: start and finish both `10-06-2027`.',
+          'For every task, enter the start first and then the finish. If *Calculate automatically* is on, the app calculates along after every entry: your end result is the same, but the bars jump around in between.',
+        ],
+        explain: [
+          'The four tasks show 100% in the Progress column: an actual finish makes the task complete. The phase Preparation is still at 0%. A phase has no progress of its own, it works that out from its tasks, and that only happens at Calculate. The status bar still says *End: 30-08-2027*: that is the old calculation.',
+          'These four tasks went according to plan, so the dates you typed are the same as the planned ones. You still type them: the actual dates are the facts, the calculated dates remain the forecast. That is also why you enter the start first: if you enter only the finish for a two-day task, the app takes the same day as the start.',
+        ],
+      },
+      ontgraven: {
+        title: 'The excavation ran late',
+        task: [
+          'The groundwater was higher than expected: the foundation trench was only finished after 3 working days instead of 2. For `Excavate foundation trench`, enter **Actual start** `11-06-2027` and **Actual finish** `15-06-2027`.',
+        ],
+        explain: [
+          'Excavate foundation trench is at 100%, with start 11-06-2027 and finish 15-06-2027. It was planned for 2 working days, Friday 11 and Monday 14 June; in reality it took 3: Friday 11, Monday 14 and Tuesday 15 June. That is the variance this tutorial is about.',
+          'The rest of the schedule does not know yet: the excavation now ends on 15 June, but everything behind it is still in its old place. Only at Calculate does it move along.',
+        ],
+      },
+      fundering: {
+        title: 'The reinforcement, the inspection and the pour',
+        task: [
+          'Enter:',
+          '- `Foundation formwork and reinforcement`: **Actual start** `16-06-2027`, **Actual finish** `18-06-2027`. The reinforcement could only start when the excavation was finished.\n- `Reinforcement inspection`: at **Actual finish** `18-06-2027`.\n- `Pour foundation`: **Actual start** `21-06-2027 07:00`, **Actual finish** `21-06-2027 14:00`. The pour is a task in hours, so type the clock time as well.',
+        ],
+        explain: [
+          'All three show 100%. The inspection was on Friday 18 June and the pour follows the inspection: after the weekend that is Monday 21 June, from 07:00 to 14:00 (6 hours, with the break from 12 to 13).',
+          'Why the clock time? A task in hours has an actual start and an actual finish with a time of day. If you type only the date, the pour shows `21-06-2027` in the columns, the app does not know what time it started and then calculates with a different time: the result no longer matches the rest of this tutorial.',
+        ],
+      },
+      metselwerk: {
+        title: 'The foundation brickwork is under way',
+        task: [
+          'The foundation brickwork started on Friday 25 June and is half finished on the status date. For `Foundation brickwork`, first enter `25-06-2027` at **Actual start** and then `50` at **Progress**.',
+        ],
+        explain: [
+          'The task is at 50% with an actual start and no actual finish yet: it is under way. The remaining work is the duration times what is still to do: 2 working days × (1 − 0.5) = 1 working day. That remaining work starts on the status date, Monday 28 June.',
+          'Why the start first? If you type only the percentage, the app takes the planned start, Thursday 24 June, as the actual start. But the brickwork started on Friday, after the 3 working days of waiting after the pour from tutorial 2 (22, 23 and 24 June).',
+        ],
+      },
+      berekenen: {
+        title: 'Calculating',
+        task: [
+          'Click *Table › Schedule › Calculate*, or press F5. If *Calculate automatically* is on, the app has already calculated and this step is already done.',
+        ],
+        explain: [
+          'The status bar says *End: 31-08-2027* and *Critical path: 10 tasks, 47 work days*. The handover is on Tuesday 31 August, one working day later than the baseline of Monday 30 August. In the table the eight finished tasks are at 100% and no longer critical: a finished task is fixed on its actual dates and can no longer determine the handover. The phase Preparation is now at 100% and Foundations at 81%.',
+          'Why one day? The excavation was on the critical path: every task behind it waited for its finish. It took a day longer, so everything behind it moves a working day. That is how the foundation brickwork started on Friday 25 June: 3 working days of waiting after the pour of Monday 21 June, so 22, 23 and 24 June. Its bar runs from the actual start to Monday 28 June, the status date: the remaining work of 1 working day. The hollow-core floor follows on Tuesday 29 June, a day later than the Monday 28 June the baseline had.',
+          'The 81% of Foundations is a weighted average: the tasks in it weigh 8.375 working days together (2 + 3 + 0.75 + 2 + 0.625; a milestone weighs 0 and a task in hours counts in proportion to the 8-hour working day) and of that 6.75 is done (2 + 3 + 0.75 + half of 2).',
+        ],
+      },
+      'afwijking-gantt': {
+        title: 'The variance in the Gantt',
+        task: [
+          'Click the *Home* tab. In the Gantt, look below the bars of Excavate foundation trench and the tasks after it. Scroll the Gantt to the right and down to see Handover as well.',
+        ],
+        explain: [
+          'Below every bar there is still the thin grey bar of the baseline, and now you see the difference. The excavation is a day longer at the end than its baseline, and from the reinforcement onwards every task starts and finishes a working day to the right of its baseline. At Handover the diamond of the baseline is a working day to the left of the milestone itself. The eight finished tasks are no longer red.',
+          'The orange line on 28 June is almost straight now: everything to the left of it is finished, except for the half-done foundation brickwork. The line bends there to the point in the bar that the percentage indicates. At a glance it shows who is ahead of or behind the schedule.',
+        ],
+      },
+      'afwijking-tabel': {
+        title: 'The variance in numbers',
+        task: [
+          'Click the *Table* tab. Open *Table › Columns › Columns…* and expand the columns of your baseline under **Baseline**. Choose **Baseline — Finish variance**. If the column is out of view, scroll the table to the right.',
+        ],
+        explain: [
+          'For the first four tasks the column shows 0: they went as agreed. For Excavate foundation trench it shows 1, and for every task after that also 1, up to and including Handover. The variance is in working days: a positive number is later, a negative number earlier.',
+          'One task, one day, and the whole chain behind it moves along. So does the painting, which has 6 working days of float, and also shows 1: float does not stop a task from moving, it only stops the handover from moving with it. The column *Baseline — Start variance* shows that the excavation itself started on time, and that the reinforcement started a day late because it waited for the excavation. In tutorial 7 the same variance is in a report, ready to hand out.',
+        ],
+      },
+    },
+  },
+};
+
+// ── Tutorial 7: Rapporteren en delen ──────────────────────────────────────────────────────────
+
+const TEXT_7 = {
+  nl: {
+    title: 'Rapporteren en delen',
+    whatLabel: '**Wat je nu ziet, en waarom**',
+    intro: [
+      '# Rapporteren en delen',
+      '## Wat je bouwt',
+      'Het is maandag 28 juni 2027, bouwoverleg. De opdrachtgever wil weten hoe het ervoor staat en wat dat voor de oplevering betekent. Je laat twee rapporten van de aanbouw zien, het Voortgangsrapport en de Variance, zet het papier goed, maakt er een PDF van en kijkt hoe je de planning zelf deelt met iemand die een ander planningsprogramma gebruikt.',
+      'Aan het eind heb je een PDF van het Voortgangsrapport op A4 liggend, en je weet welke getallen erin staan: gepland 28,7%, werkelijk 25%, de oplevering op 31 augustus en een afwijking van 1 werkdag. Je hebt gezien dat een rapport niets nieuws uitrekent, maar de berekening van tutorial 6 in een vorm zet die je kunt uitdelen.',
+      '## Uitgangspunt',
+      'Je hebt tutorial 6 afgerond: het project *Aanbouw woning* met de baseline *Basisplanning*, de statusdatum 28 juni 2027 en de voortgang, berekend, met de oplevering op dinsdag 31 augustus 2027. Heb je dat niet, [open dan het resultaat van tutorial 6](project://projects/nl/na-tut-6.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 7*. Rechtsonder verschijnt een paneel met steeds één opdracht. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier alleen bij de eerste stap, waar het zo nodig het resultaat van tutorial 6 opent als nieuw tabblad. Een rapportkeuze, een papierformaat, een PDF en een export laten niets achter in het project; het paneel kan niet zien of je ze gedaan hebt en een extensie kan ze niet voor je doen. Die stappen eindigen daarom met **Klaar, volgende**. Er is ook geen **Opnieuw**: deze tutorial verandert het project niet.',
+    ],
+    outro: [
+      '## Wat je hebt geleerd',
+      '- **Een rapport rekent niet zelf, het toont de laatste berekening.** Is je planning gewijzigd sinds die berekening, dan staat boven een tabelrapport *De planning is gewijzigd sinds de laatste berekening — druk op Bereken (F5) voor actuele waarden.* Reken dus eerst, dan rapporteer je.',
+      '- **Het Voortgangsrapport meet in werkdagen, niet in taken.** Gepland 28,7% en werkelijk 25% zijn gewogen naar de duur van de taken: 12,375 en 10,75 van de 43,125 werkdagen. Het verschil is het halve funderingsmetselwerk en het ene extra dag ontgraven dat de rest naar achteren schoof.',
+      '- **De Variance laat dezelfde afwijking zien als de kolommen uit tutorial 6**, per taak en met een totaal: 19 taken later, 0 eerder en een projecteinde van +1 werkdag.',
+      '- **Papier en opties onthoudt de app op dit apparaat, voor al je projecten, en ze gelden voor alle rapporten.** Standaard staat het papier op A3 liggend; kies A4 voordat je exporteert als je die printer hebt.',
+      '- **Een PDF is om te lezen, een exportbestand om mee verder te werken.** Het rapport eindigt altijd als PDF: de app stuurt niets naar een printer. Wil een collega de planning zelf openen, dan exporteer je het project via *Bestand › Exporteren* naar een ander formaat.',
+      'Wil je je project vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-7.ifc), dat hetzelfde is als dat van tutorial 6. De regels en opties staan in [Een rapport maken en afdrukken](docs://howto-rapport-maken-en-afdrukken), [Rapporttypes](docs://ref-rapporttypes), [De rapportageperiode kiezen](docs://howto-rapportageperiode-kiezen) en [Exporteren](docs://howto-exporteren). Wat de getallen betekenen, lees je in [Voortgang, statusdatum en baseline](docs://uitleg-voortgang). Het voortgangsblad voor de uitvoerder staat in [Voortgang uit een spreadsheet importeren](docs://howto-voortgang-importeren).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'Het startpunt',
+        task: [
+          'Zorg dat het project *Aanbouw woning* openstaat zoals tutorial 6 het achterliet. Heb je dat niet, [open dan het resultaat van tutorial 6](project://projects/nl/na-tut-6.ifc). Meldt de app *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**. Kijk in de statusbalk.',
+        ],
+        explain: [
+          'De statusbalk zegt *Einde: 31-08-2027* en *Kritiek pad: 10 taken, 47 werkdagen*, en er staat geen melding *Verouderd*. Dat is de stand voor de rapporten: de laatste berekening, met de voortgang van 28 juni en de baseline Basisplanning.',
+          'Een rapport rekent niet zelf. Het laat zien wat de laatste berekening opleverde. Daarom is het goed dat de planning hier niet verouderd is: de getallen in de rapporten zijn dan actueel.',
+        ],
+      },
+      'rapport-openen': {
+        title: 'Het tabblad Rapport',
+        task: [
+          'Klik op het tabblad *Rapport*, of druk op Ctrl+P.',
+        ],
+        explain: [
+          'Links staat de kolom **Rapportage** met de keuzelijst **Rapporttype**, daaronder een overzicht en de instellingen. Rechts staat het voorbeeld, en wat je daar ziet komt in de PDF. Het rapporttype staat op *Gantt-afdruk*, de planning als balkenplan voor op papier; staat hij op een ander rapport, dan is dat geen probleem.',
+          'Bij **Overzicht** staat *Taken: 27*, *Bladtaken: 23*, *Kritiek: 10* en *Relaties: 24*. De 27 taken zijn de 23 bladtaken, de taken zonder onderliggende taken, plus de vier fasen. De 10 kritieke taken zijn dezelfde 10 als in de statusbalk.',
+        ],
+      },
+      variance: {
+        title: 'De Variance: wat is er verschoven?',
+        task: [
+          'Kies bij **Rapporttype** het rapport **Variance**.',
+        ],
+        explain: [
+          'Het Variance-rapport zet de huidige planning naast de baseline. Per taak staan de datums uit de baseline, de huidige datums en het verschil in werkdagen, met de status *Op schema* of *Later*. Links staat bij Overzicht *Taken: 23*, *Later: 19*, *Eerder: 0* en *Projecteinde: +1 werkdagen*.',
+          'De vier taken van de voorbereiding staan op *Op schema*. Funderingssleuf ontgraven staat op *Later* met 0 bij de start en +1 bij het einde, en alle taken daarna hebben +1 op start en einde, tot en met Oplevering: 30-08-2027 in de baseline, 31-08-2027 nu. Dat zijn dezelfde getallen als de kolommen Startafwijking en Eindafwijking uit tutorial 6. De 19 taken die later zijn: alles behalve de vier van de voorbereiding.',
+        ],
+      },
+      voortgangsrapport: {
+        title: 'Het Voortgangsrapport: waar staan we?',
+        task: [
+          'Kies bij **Rapporttype** het **Voortgangsrapport**.',
+        ],
+        explain: [
+          'Links en bovenaan het rapport staan de kerncijfers. *Statusdatum 28-06-2027*, *Baseline-einde 30-08-2027*, *Prognose-einde 31-08-2027* en *Δ einde (wd) +1*: de oplevering staat een werkdag later dan afgesproken. Daaronder *Voltooid 8 / 23*, *In uitvoering 1* en *Niet gestart 14*, en lijsten met de taken per groep.',
+          '*Gepland (baseline)* is 28,7% en *Werkelijk* is 25%. Beide zijn gewogen naar werkdagen: de 23 taken wegen samen 43,125 werkdagen (een mijlpaal weegt 0 en een taak in uren telt naar rato van de werkdag van 8 uur). Volgens de baseline hadden op 28 juni taken van 12,375 werkdagen klaar moeten zijn: 4 voor de voorbereiding, 2 voor het ontgraven, 3 voor de wapening, 0,75 voor de stort, 2 voor het funderingsmetselwerk en 0,625 voor de kanaalplaatvloer. Werkelijk is 10,75 gedaan: 4 + 2 + 3 + 0,75 en de helft van het metselwerk, 1. Dat is 12,375 ÷ 43,125 = 28,7% en 10,75 ÷ 43,125 = 24,9%, dat het rapport als 25% toont.',
+          'Het rapport kijkt naar een periode: standaard *Afgelopen maand*, hier 29-05-2027 – 28-06-2027, tot en met de statusdatum, met een vooruitblik tot 29-07-2027. Daar hangen de lijsten *Voltooid in de afgelopen periode* en *Start in de komende periode* aan. Hoe je de periode aanpast, staat in [De rapportageperiode kiezen](docs://howto-rapportageperiode-kiezen).',
+        ],
+      },
+      papier: {
+        title: 'Het papier',
+        task: [
+          'Staat het Voortgangsrapport nog geselecteerd? Kies dan bij **Papier:** de maat **A4**. Laat **Orientatie:** op Liggend staan.',
+        ],
+        explain: [
+          'Op het scherm verandert er niets: een tabelrapport staat als lange tabel in het voorbeeld, zonder pagina\'s. De keuze telt in de PDF, die dan uit A4-pagina\'s in de breedte bestaat. Standaard staat het papier op A3 liggend, wat voor een bouwplanning handig is, maar niet elke printer drukt A3 af. Kies je het formaat nu, dan legt de app de pagina\'s direct voor A4 op, in plaats van dat je ze later moet laten krimpen.',
+          'Papier en oriëntatie gelden voor alle rapporten, ook voor de Variance, en de app onthoudt ze op dit apparaat, voor al je projecten.',
+        ],
+      },
+      pdf: {
+        title: 'De PDF',
+        task: [
+          'Klik onderaan in de kolom links op **Exporteer PDF**. Zie je de knop niet, scroll de kolom dan omlaag.',
+        ],
+        explain: [
+          'De app maakt een PDF van wat je in het voorbeeld ziet: *Aanbouw woning-voortgang.pdf*, drie pagina\'s A4 liggend. In de desktopapp kies je in een opslagdialoog waar het bestand komt. In de browser zet je browser hem in de downloadmap, of vraagt eerst waar hij moet komen; de app zelf meldt daarbij niets, dus kijk in de downloads van je browser.',
+          'Een rapport eindigt altijd als PDF: de app stuurt niets naar een printer. Die PDF druk je af met je PDF-lezer, of mail je door. Wil je ook de Variance, kies hem dan en klik op **Exporteer PDF**: dat geeft *Aanbouw woning-afwijkingen.pdf*, één pagina, ook A4 liggend.',
+        ],
+      },
+      delen: {
+        title: 'Delen: de planning zelf',
+        task: [
+          'Een PDF is om te lezen. Voor een collega die de planning zelf wil openen, in een ander programma, exporteer je het project. Klik op het tabblad *Bestand* en dan op **Exporteren**. Kies **MS Project XML**.',
+        ],
+        explain: [
+          'Het exportscherm toont de formaten: *Voortgangsblad (Excel)*, *Voortgangsblad (CSV)*, *CSV (puntkomma-gescheiden)*, *MS Project XML* (met de toelichting *Te openen in Microsoft Project. Volledige WBS-structuur.*), *Primavera P6 XML* en *IFC 4x3*. Na je keuze komt het bestand *Aanbouw woning.xml*: in de browser meldt de app dat het in je downloadmap staat, of je krijgt een opslagdialoog; in de desktopapp kies je zelf waar het komt. Het project zelf verandert niet.',
+          'In het bestand staan de statusdatum, de voortgang en de baseline: de collega ziet dus niet alleen de planning, maar ook wat er sinds 7 juni gebeurd is. Het *Voortgangsblad* is er voor de andere kant op: een slank blad met alleen id, WBS, naam, datums en voltooiing, dat de uitvoerder kan invullen en dat je terugleest met *Voortgang bijwerken uit een blad*. Zo hoef je volgende week niet alles zelf te typen. Dat doe je in [Voortgang uit een spreadsheet importeren](docs://howto-voortgang-importeren).',
+        ],
+      },
+    },
+  },
+  en: {
+    title: 'Reporting and sharing',
+    whatLabel: '**What you see now, and why**',
+    intro: [
+      '# Reporting and sharing',
+      '## What you build',
+      'It is Monday 28 June 2027, site meeting. The client wants to know how things stand and what that means for the handover. You show two reports of the extension, the Progress report and the Variance, set the paper right, make a PDF of it and look at how to share the schedule itself with someone who uses a different planning program.',
+      'At the end you have a PDF of the Progress report on A4 landscape, and you know which numbers are in it: planned 28.7%, actual 25%, the handover on 31 August and a variance of 1 working day. You have seen that a report works out nothing new, but puts the calculation of tutorial 6 in a form you can hand out.',
+      '## Starting point',
+      'You have finished tutorial 6: the project *House extension* with the baseline *Baseline*, the status date 28 June 2027 and the progress, calculated, with the handover on Tuesday 31 August 2027. If you have not, [open the result of tutorial 6](project://projects/en/na-tut-6.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 7* on the ribbon. A panel appears at the bottom right with one instruction at a time. **Show me** sets the step up for you, but here that is only possible for the first step, where it opens the result of tutorial 6 as a new tab if needed. A report choice, a paper size, a PDF and an export leave nothing behind in the project; the panel cannot see whether you have done them and an extension cannot do them for you. Those steps therefore end with **Done, next**. There is no **Start over** either: this tutorial does not change the project.',
+    ],
+    outro: [
+      '## What you have learned',
+      '- **A report does not calculate by itself, it shows the last calculation.** If your schedule has changed since that calculation, a table report starts with *The schedule changed since the last calculation — press Calculate (F5) for current values.* So calculate first, then report.',
+      '- **The Progress report measures in working days, not in tasks.** Planned 28.7% and actual 25% are weighted by the duration of the tasks: 12.375 and 10.75 of the 43.125 working days. The difference is the half-done foundation brickwork and the one extra day of excavation that pushed the rest back.',
+      '- **The Variance shows the same variance as the columns from tutorial 6**, per task and with a total: 19 tasks later, 0 earlier and a project end of +1 working day.',
+      '- **The app remembers paper and options on this device, for all your projects, and they apply to all reports.** The paper is on A3 landscape by default; choose A4 before you export if that is your printer.',
+      '- **A PDF is for reading, an export file is for working on.** The report always ends as a PDF: the app sends nothing to a printer. If a colleague wants to open the schedule itself, you export the project to another format via *File › Export*.',
+      'Want to compare your project? [Open the end result of this tutorial](project://projects/en/na-tut-7.ifc), which is the same as that of tutorial 6. The rules and options are in [Making and printing a report](docs://howto-rapport-maken-en-afdrukken), [Report types](docs://ref-rapporttypes), [Choosing the reporting period](docs://howto-rapportageperiode-kiezen) and [Exporting](docs://howto-exporteren). What the numbers mean is in [Progress, status date and baseline](docs://uitleg-voortgang). The progress sheet for the foreman is in [Importing progress from a spreadsheet](docs://howto-voortgang-importeren).',
+    ],
+    steps: {
+      startpunt: {
+        title: 'The starting point',
+        task: [
+          'Make sure the project *House extension* is open as tutorial 6 left it. If not, [open the result of tutorial 6](project://projects/en/na-tut-6.ifc). If the app says *This file contains hour-based planning.*, click **Enable hour planning**. Look at the status bar.',
+        ],
+        explain: [
+          'The status bar says *End: 31-08-2027* and *Critical path: 10 tasks, 47 work days*, and there is no *Out of date* message. That is the situation for the reports: the last calculation, with the progress of 28 June and the baseline.',
+          'A report does not calculate by itself. It shows what the last calculation produced. That is why it is good that the schedule is not out of date here: the numbers in the reports are then current.',
+        ],
+      },
+      'rapport-openen': {
+        title: 'The Report tab',
+        task: [
+          'Click the *Report* tab, or press Ctrl+P.',
+        ],
+        explain: [
+          'On the left is the **Report** column with the **Report type** list, below it a summary and the settings. On the right is the preview, and what you see there ends up in the PDF. The report type is on *Gantt chart*, the schedule as a bar chart for paper; if it is on another report, that is no problem.',
+          'Under **Summary** it says *Tasks: 27*, *Leaf tasks: 23*, *Critical: 10* and *Relations: 24*. The 27 tasks are the 23 leaf tasks, the tasks without subtasks, plus the four phases. The 10 critical tasks are the same 10 as in the status bar.',
+        ],
+      },
+      variance: {
+        title: 'The Variance: what has moved?',
+        task: [
+          'Under **Report type**, choose the report **Variance**.',
+        ],
+        explain: [
+          'The Variance report puts the current schedule next to the baseline. Per task it shows the baseline dates, the current dates and the difference in working days, with the status *On schedule* or *Later*. On the left the Summary says *Tasks: 23*, *Later: 19*, *Earlier: 0* and *Project end: +1 work days*.',
+          'The four preparation tasks are *On schedule*. Excavate foundation trench is *Later* with 0 at the start and +1 at the finish, and all tasks after it have +1 at start and finish, up to and including Handover: 30-08-2027 in the baseline, 31-08-2027 now. Those are the same numbers as the columns Start variance and Finish variance from tutorial 6. The 19 tasks that are later: everything except the four of the preparation.',
+        ],
+      },
+      voortgangsrapport: {
+        title: 'The Progress report: where do we stand?',
+        task: [
+          'Under **Report type**, choose the **Progress report**.',
+        ],
+        explain: [
+          'On the left and at the top of the report are the key figures. *Status date 28-06-2027*, *Baseline finish 30-08-2027*, *Forecast finish 31-08-2027* and *Δ finish (wd) +1*: the handover is a working day later than agreed. Below that *Complete 8 / 23*, *In progress 1* and *Not started 14*, and lists of the tasks per group.',
+          '*Planned (baseline)* is 28.7% and *Actual* is 25%. Both are weighted by working days: the 23 tasks weigh 43.125 working days together (a milestone weighs 0 and a task in hours counts in proportion to the 8-hour working day). According to the baseline, tasks of 12.375 working days should have been finished on 28 June: 4 for the preparation, 2 for the excavation, 3 for the reinforcement, 0.75 for the pour, 2 for the foundation brickwork and 0.625 for the hollow-core floor. In reality 10.75 is done: 4 + 2 + 3 + 0.75 and half of the brickwork, 1. That is 12.375 ÷ 43.125 = 28.7% and 10.75 ÷ 43.125 = 24.9%, which the report shows as 25%.',
+          'The report looks at a period: by default *Last month*, here 29-05-2027 – 28-06-2027, up to and including the status date, with a look ahead until 29-07-2027. The lists *Completed in the past period* and *Starting in the next period* hang on that. How to adjust the period is in [Choosing the reporting period](docs://howto-rapportageperiode-kiezen).',
+        ],
+      },
+      papier: {
+        title: 'The paper',
+        task: [
+          'Is the Progress report still selected? Then choose the size **A4** at **Paper:**. Leave **Orientation:** on Landscape.',
+        ],
+        explain: [
+          'Nothing changes on the screen: a table report is a long table in the preview, without pages. The choice counts in the PDF, which then consists of A4 pages. The paper is on A3 landscape by default, which is handy for a construction schedule, but not every printer prints A3. If you choose the size now, the app lays out the pages for A4 straight away, instead of you having to shrink them later.',
+          'Paper and orientation apply to all reports, including the Variance, and the app remembers them on this device, for all your projects.',
+        ],
+      },
+      pdf: {
+        title: 'The PDF',
+        task: [
+          'Click **Export PDF** at the bottom of the left column. If you do not see the button, scroll the column down.',
+        ],
+        explain: [
+          'The app makes a PDF of what you see in the preview: *House extension-voortgang.pdf*, three pages on A4 landscape. In the desktop app you choose in a save dialog where the file goes. In the browser, your browser puts it in the downloads folder, or asks first where it should go; the app itself reports nothing, so look in your browser\'s downloads.',
+          'A report always ends as a PDF: the app sends nothing to a printer. You print that PDF with your PDF reader, or mail it on. If you want the Variance too, choose it and click **Export PDF**: that gives *House extension-afwijkingen.pdf*, one page, also A4 landscape.',
+        ],
+      },
+      delen: {
+        title: 'Sharing: the schedule itself',
+        task: [
+          'A PDF is for reading. For a colleague who wants to open the schedule itself, in another program, you export the project. Click the *File* tab and then **Export**. Choose **MS Project XML**.',
+        ],
+        explain: [
+          'The export screen shows the formats: *Progress sheet (Excel)*, *Progress sheet (CSV)*, *CSV (semicolon-separated)*, *MS Project XML*, *Primavera P6 XML* and *IFC 4x3*. After your choice the file *House extension.xml* appears: in the browser the app reports that it is in your downloads folder, or you get a save dialog; in the desktop app you choose where it goes. The project itself does not change.',
+          'The file holds the status date, the progress and the baseline: your colleague sees not only the schedule, but also what has happened since 7 June. The *Progress sheet* is for the other direction: a slim sheet with only id, WBS, name, dates and completion, which the foreman can fill in and which you read back with *Update progress from a spreadsheet*. That way you do not have to type everything yourself next week. You do that in [Importing progress from a spreadsheet](docs://howto-voortgang-importeren).',
+        ],
+      },
+    },
+  },
+};
+
+// Tutorial 6. De statusdatum en de voortgang zijn te lezen (controle), maar niet te schrijven door de extensie, en een
+// baseline niet te lezen en niet te schrijven. Toon mij bestaat daarom alleen bij `startpunt` (het resultaat van
+// tutorial 5) en vanaf `berekenen` (het resultaat van tutorial 6): dat zijn standen van de generator. `reset` staat
+// alleen bij `baseline`, de eerste stap die het document verandert: de beginstand van die stap is `na-tut-5`. Voor
+// de stappen daarna levert de generator geen beginstand (geen "na-tut-5 + baseline", geen "+ statusdatum" of "+
+// voortgang tot en met …"), dus daar geen Opnieuw. `baseline` heeft geen controle: een baseline laat geen spoor na
+// in `api.data` ("Klaar, volgende").
+//
+// Ankers: alle stappen met invoer in de tabel wijzen een lintitem aan, geen paneel (zie tutorial 2 en 3: een anker
+// in Eigenschappen laat het begeleidingspaneel naar links uitwijken). De lintgroep Baselines & voortgang bevat
+// widgets in één component; daarom het anker op de groep (zie tutorial 5).
+const STEP_ORDER_6 = [
+  'startpunt', 'baseline', 'statusdatum', 'voorbereiding', 'ontgraven', 'fundering', 'metselwerk', 'berekenen',
+  'afwijking-gantt', 'afwijking-tabel',
+];
+
+const STEP_LOGIC_6 = {
+  startpunt: {
+    check: startFromTutorial5,
+    prepare: ensureAfterTutorial5,
+  },
+  baseline: {
+    anchor: 'ribbon-group:planning:baselines',
+    reset: 'na-tut-5',
+  },
+  statusdatum: {
+    anchor: 'ribbon-group:planning:baselines',
+    check: statusDateIsSet,
+  },
+  voorbereiding: {
+    anchor: 'ribbon:table:tableColumns',
+    check: api => progressGroupDone(api, 'voorbereiding'),
+  },
+  ontgraven: {
+    anchor: 'ribbon-tab:table',
+    check: api => progressGroupDone(api, 'ontgraven'),
+  },
+  fundering: {
+    anchor: 'ribbon-tab:table',
+    check: api => progressGroupDone(api, 'fundering'),
+  },
+  metselwerk: {
+    anchor: 'ribbon-tab:table',
+    check: brickworkRunning,
+  },
+  berekenen: {
+    anchor: 'ribbon:table:calc',
+    check: api => startFromTutorial6(api) && progressCalculated(api),
+    prepare: ensureAfterTutorial6,
+  },
+  // De twee leesstappen hebben geen controle (een kolom of een Gantt-weergave laat geen spoor in het document na).
+  // Toon mij zet de stand klaar: voortgang ingevuld en berekend.
+  'afwijking-gantt': {
+    anchor: 'ribbon-tab:start',
+    prepare: ensureAfterTutorial6,
+  },
+  'afwijking-tabel': {
+    anchor: 'ribbon:table:tableColumns',
+    prepare: ensureAfterTutorial6,
+  },
+};
+
+// Tutorial 7. Het project verandert niet: alleen `startpunt` heeft een controle en een Toon mij (het resultaat van
+// tutorial 6, berekend). Een rapportkeuze, het papier, de PDF-export en het exportvenster laten geen spoor na in het
+// document en zijn voor een extensie niet te lezen: "Klaar, volgende". Geen `reset`: er is geen stap die het
+// document verandert. Ankers: het tabblad Rapport, het rapportpaneel en het tabblad Bestand.
+const STEP_ORDER_7 = [
+  'startpunt', 'rapport-openen', 'variance', 'voortgangsrapport', 'papier', 'pdf', 'delen',
+];
+
+const STEP_LOGIC_7 = {
+  startpunt: {
+    check: startFromTutorial6,
+    prepare: ensureAfterTutorial6,
+  },
+  'rapport-openen': { anchor: 'ribbon-tab:report' },
+  variance: { anchor: 'report-panel' },
+  voortgangsrapport: { anchor: 'report-panel' },
+  papier: { anchor: 'report-panel' },
+  pdf: { anchor: 'report-panel' },
+  delen: { anchor: 'ribbon-tab:file' },
+};
+
+/** De zeven tutorials: één bron voor artikel, paneel, lintknop en host-verzoek. */
 const TUTORIALS = [
   { id: TUTORIAL_1_ID, order: 1, label: 'Tutorial 1', text: TEXT_1, stepOrder: STEP_ORDER_1, logic: STEP_LOGIC_1 },
   { id: TUTORIAL_2_ID, order: 2, label: 'Tutorial 2', text: TEXT_2, stepOrder: STEP_ORDER_2, logic: STEP_LOGIC_2 },
   { id: TUTORIAL_3_ID, order: 3, label: 'Tutorial 3', text: TEXT_3, stepOrder: STEP_ORDER_3, logic: STEP_LOGIC_3 },
   { id: TUTORIAL_4_ID, order: 4, label: 'Tutorial 4', text: TEXT_4, stepOrder: STEP_ORDER_4, logic: STEP_LOGIC_4 },
   { id: TUTORIAL_5_ID, order: 5, label: 'Tutorial 5', text: TEXT_5, stepOrder: STEP_ORDER_5, logic: STEP_LOGIC_5 },
+  { id: TUTORIAL_6_ID, order: 6, label: 'Tutorial 6', text: TEXT_6, stepOrder: STEP_ORDER_6, logic: STEP_LOGIC_6 },
+  { id: TUTORIAL_7_ID, order: 7, label: 'Tutorial 7', text: TEXT_7, stepOrder: STEP_ORDER_7, logic: STEP_LOGIC_7 },
 ];
 
 const para = lines => lines.join('\n\n');
@@ -2448,10 +3109,15 @@ module.exports = {
     api.events.on(sdk.hostEvents.scheduleCalculated, (data) => {
       calculatedSignature = data && data.hasError ? null : scheduleSignature(api);
     });
+    // Tutorial 6 en 7: ook de voortgang telt mee in "berekend" (zie `progressSignature`).
+    api.events.on(sdk.hostEvents.scheduleCalculated, (data) => {
+      calculatedProgressSignature = data && data.hasError ? null : progressSignature(api);
+    });
   },
 
   onUnload() {
     // De host ruimt artikelen, knop, begeleiding en event-abonnement zelf op.
     calculatedSignature = null;
+    calculatedProgressSignature = null;
   },
 };
