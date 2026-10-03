@@ -2504,7 +2504,7 @@ const TEXT_6 = {
           'Staat er in het venster *Planning is verouderd — herbereken eerst (F5)*? Sluit het venster dan, druk op F5 en begin opnieuw: een baseline legt de datums vast die op dat moment berekend zijn.',
         ],
         explain: [
-          'Het venster toont nu één baseline, *Basisplanning*, met een bolletje onder **Actief**. Sluit je het venster, dan staat in de Gantt onder elke taakbalk een dunne grijze balk, en onder elke mijlpaal een klein ruitje. Dat is de baseline. Hij valt nu precies onder de balken, want er is nog niets veranderd.',
+          'Het venster toont nu één baseline, *Basisplanning*, met een bolletje onder **Actief**. Sluit je het venster, dan staat in de Gantt onder de taakbalken een dunne grijze balk, en onder de mijlpalen een klein ruitje. Dat is de baseline. Hij valt nu precies onder de balken, want er is nog niets veranderd.',
           'Een baseline is een foto van de planning op dit moment: van elke taak zonder onderliggende taken legt de app de start, het einde en de duur vast. Wat je daarna wijzigt, raakt de foto niet. Zo kun je straks zien hoeveel de uitvoering afwijkt van de afspraak. Leg hem daarom vast voordat je voortgang invult: een baseline die al de werkelijke datums bevat, laat een afwijking van 0 zien.',
         ],
       },
@@ -2539,7 +2539,7 @@ const TEXT_6 = {
         ],
         explain: [
           'Funderingssleuf ontgraven staat op 100%, met start 11-06-2027 en einde 15-06-2027. Gepland waren 2 werkdagen, vrijdag 11 en maandag 14 juni; werkelijk waren het er 3: vrijdag 11, maandag 14 en dinsdag 15 juni. Dat is de afwijking waar deze tutorial om draait.',
-          'De rest van de planning weet het nog niet: het ontgraven staat nu op 15 juni, maar alles erachter staat nog op zijn oude plek. Pas bij Bereken schuift het door.',
+          'De rest van de planning weet het nog niet: de kolommen Start en Einde en alles achter het ontgraven staan nog op de oude berekening. Pas bij Bereken schuift het door.',
         ],
       },
       fundering: {
@@ -2550,7 +2550,7 @@ const TEXT_6 = {
         ],
         explain: [
           'Alle drie staan op 100%. De keuring was vrijdag 18 juni en de stort volgt op de keuring: na het weekend is dat maandag 21 juni, van 07:00 tot 14:00 (6 uur, met de pauze van 12 tot 13).',
-          'Waarom de kloktijd? Bij een taak in uren hoort een werkelijke start en een werkelijk einde met een tijdstip. Typ je alleen de datum, dan staat de stort er in de kolommen als `21-06-2027`, de app weet niet hoe laat hij begon en rekent daarna met een andere tijd: het resultaat klopt dan niet meer met de rest van deze tutorial.',
+          'Waarom de kloktijd? Bij een taak in uren hoort een werkelijke start en een werkelijk einde met een tijdstip. Typ je alleen de datum, dan weet de app niet hoe laat de stort begon en rekent hij daarna met een andere tijd: het resultaat klopt dan niet meer met de rest van deze tutorial, en de stap telt niet als gedaan.',
         ],
       },
       metselwerk: {
@@ -2635,7 +2635,7 @@ const TEXT_6 = {
           'Does the window say *Schedule is out of date — recalculate first (F5)*? Then close the window, press F5 and start again: a baseline records the dates that were calculated at that moment.',
         ],
         explain: [
-          'The window now shows one baseline, *Baseline*, with a dot under **Active**. When you close the window, the Gantt has a thin grey bar below every task bar, and a small diamond below every milestone. That is the baseline. It sits exactly below the bars for now, because nothing has changed yet.',
+          'The window now shows one baseline, *Baseline*, with a dot under **Active**. When you close the window, the Gantt has a thin grey bar below the task bars, and a small diamond below the milestones. That is the baseline. It sits exactly below the bars for now, because nothing has changed yet.',
           'A baseline is a photo of the schedule at this moment: for every task without subtasks the app records the start, the finish and the duration. What you change afterwards does not touch the photo. That way you can see in a moment how far the execution deviates from the agreement. So record it before you enter progress: a baseline that already contains the actual dates shows a variance of 0.',
         ],
       },
@@ -2670,7 +2670,7 @@ const TEXT_6 = {
         ],
         explain: [
           'Excavate foundation trench is at 100%, with start 11-06-2027 and finish 15-06-2027. It was planned for 2 working days, Friday 11 and Monday 14 June; in reality it took 3: Friday 11, Monday 14 and Tuesday 15 June. That is the variance this tutorial is about.',
-          'The rest of the schedule does not know yet: the excavation now ends on 15 June, but everything behind it is still in its old place. Only at Calculate does it move along.',
+          'The rest of the schedule does not know yet: the columns Start and Finish and everything behind the excavation are still on the old calculation. Only at Calculate does it move along.',
         ],
       },
       fundering: {
@@ -2681,7 +2681,7 @@ const TEXT_6 = {
         ],
         explain: [
           'All three show 100%. The inspection was on Friday 18 June and the pour follows the inspection: after the weekend that is Monday 21 June, from 07:00 to 14:00 (6 hours, with the break from 12 to 13).',
-          'Why the clock time? A task in hours has an actual start and an actual finish with a time of day. If you type only the date, the pour shows `21-06-2027` in the columns, the app does not know what time it started and then calculates with a different time: the result no longer matches the rest of this tutorial.',
+          'Why the clock time? A task in hours has an actual start and an actual finish with a time of day. If you type only the date, the app does not know what time the pour started and then calculates with a different time: the result no longer matches the rest of this tutorial, and the step does not count as done.',
         ],
       },
       metselwerk: {
@@ -2747,7 +2747,7 @@ const TEXT_7 = {
     outro: [
       '## Wat je hebt geleerd',
       '- **Een rapport rekent niet zelf, het toont de laatste berekening.** Is je planning gewijzigd sinds die berekening, dan staat boven een tabelrapport *De planning is gewijzigd sinds de laatste berekening — druk op Bereken (F5) voor actuele waarden.* Reken dus eerst, dan rapporteer je.',
-      '- **Het Voortgangsrapport meet in werkdagen, niet in taken.** Gepland 28,7% en werkelijk 25% zijn gewogen naar de duur van de taken: 12,375 en 10,75 van de 43,125 werkdagen. Het verschil is het halve funderingsmetselwerk en het ene extra dag ontgraven dat de rest naar achteren schoof.',
+      '- **Het Voortgangsrapport meet in werkdagen, niet in taken.** Gepland 28,7% en werkelijk 25% zijn gewogen naar de duur van de taken: 12,375 en 10,75 van de 43,125 werkdagen. Het verschil, 1,625 werkdagen, is de helft van het funderingsmetselwerk (1) en de kanaalplaatvloer (0,625): door de extra dag ontgraven liggen die twee een werkdag achter.',
       '- **De Variance laat dezelfde afwijking zien als de kolommen uit tutorial 6**, per taak en met een totaal: 19 taken later, 0 eerder en een projecteinde van +1 werkdag.',
       '- **Papier en opties onthoudt de app op dit apparaat, voor al je projecten, en ze gelden voor alle rapporten.** Standaard staat het papier op A3 liggend; kies A4 voordat je exporteert als je die printer hebt.',
       '- **Een PDF is om te lezen, een exportbestand om mee verder te werken.** Het rapport eindigt altijd als PDF: de app stuurt niets naar een printer. Wil een collega de planning zelf openen, dan exporteer je het project via *Bestand › Exporteren* naar een ander formaat.',
@@ -2780,7 +2780,7 @@ const TEXT_7 = {
           'Kies bij **Rapporttype** het rapport **Variance**.',
         ],
         explain: [
-          'Het Variance-rapport zet de huidige planning naast de baseline. Per taak staan de datums uit de baseline, de huidige datums en het verschil in werkdagen, met de status *Op schema* of *Later*. Links staat bij Overzicht *Taken: 23*, *Later: 19*, *Eerder: 0* en *Projecteinde: +1 werkdagen*.',
+          'Het Variance-rapport zet de huidige planning naast de baseline. Per taak staan de datums uit de baseline, de huidige datums en het verschil in werkdagen, met de status *Op schema* of *Later*. Links staat bij Overzicht *Taken 23*, *Later 19*, *Eerder 0* en *Projecteinde: +1 werkdagen*.',
           'De vier taken van de voorbereiding staan op *Op schema*. Funderingssleuf ontgraven staat op *Later* met 0 bij de start en +1 bij het einde, en alle taken daarna hebben +1 op start en einde, tot en met Oplevering: 30-08-2027 in de baseline, 31-08-2027 nu. Dat zijn dezelfde getallen als de kolommen Startafwijking en Eindafwijking uit tutorial 6. De 19 taken die later zijn: alles behalve de vier van de voorbereiding.',
         ],
       },
@@ -2842,7 +2842,7 @@ const TEXT_7 = {
     outro: [
       '## What you have learned',
       '- **A report does not calculate by itself, it shows the last calculation.** If your schedule has changed since that calculation, a table report starts with *The schedule changed since the last calculation — press Calculate (F5) for current values.* So calculate first, then report.',
-      '- **The Progress report measures in working days, not in tasks.** Planned 28.7% and actual 25% are weighted by the duration of the tasks: 12.375 and 10.75 of the 43.125 working days. The difference is the half-done foundation brickwork and the one extra day of excavation that pushed the rest back.',
+      '- **The Progress report measures in working days, not in tasks.** Planned 28.7% and actual 25% are weighted by the duration of the tasks: 12.375 and 10.75 of the 43.125 working days. The difference, 1.625 working days, is half of the foundation brickwork (1) and the hollow-core floor (0.625): because of the extra day of excavation those two are a working day behind.',
       '- **The Variance shows the same variance as the columns from tutorial 6**, per task and with a total: 19 tasks later, 0 earlier and a project end of +1 working day.',
       '- **The app remembers paper and options on this device, for all your projects, and they apply to all reports.** The paper is on A3 landscape by default; choose A4 before you export if that is your printer.',
       '- **A PDF is for reading, an export file is for working on.** The report always ends as a PDF: the app sends nothing to a printer. If a colleague wants to open the schedule itself, you export the project to another format via *File › Export*.',
@@ -2875,7 +2875,7 @@ const TEXT_7 = {
           'Under **Report type**, choose the report **Variance**.',
         ],
         explain: [
-          'The Variance report puts the current schedule next to the baseline. Per task it shows the baseline dates, the current dates and the difference in working days, with the status *On schedule* or *Later*. On the left the Summary says *Tasks: 23*, *Later: 19*, *Earlier: 0* and *Project end: +1 work days*.',
+          'The Variance report puts the current schedule next to the baseline. Per task it shows the baseline dates, the current dates and the difference in working days, with the status *On schedule* or *Later*. On the left the Summary says *Tasks 23*, *Later 19*, *Earlier 0* and *Project end: +1 work days*.',
           'The four preparation tasks are *On schedule*. Excavate foundation trench is *Later* with 0 at the start and +1 at the finish, and all tasks after it have +1 at start and finish, up to and including Handover: 30-08-2027 in the baseline, 31-08-2027 now. Those are the same numbers as the columns Start variance and Finish variance from tutorial 6. The 19 tasks that are later: everything except the four of the preparation.',
         ],
       },
@@ -2916,7 +2916,7 @@ const TEXT_7 = {
           'A PDF is for reading. For a colleague who wants to open the schedule itself, in another program, you export the project. Click the *File* tab and then **Export**. Choose **MS Project XML**.',
         ],
         explain: [
-          'The export screen shows the formats: *Progress sheet (Excel)*, *Progress sheet (CSV)*, *CSV (semicolon-separated)*, *MS Project XML*, *Primavera P6 XML* and *IFC 4x3*. After your choice the file *House extension.xml* appears: in the browser the app reports that it is in your downloads folder, or you get a save dialog; in the desktop app you choose where it goes. The project itself does not change.',
+          'The export screen shows the formats: *Progress sheet (Excel)*, *Progress sheet (CSV)*, *CSV (semicolon-separated)*, *MS Project XML* (described as *Opens in Microsoft Project. Full WBS structure.*), *Primavera P6 XML* and *IFC 4x3*. After your choice the file *House extension.xml* appears: in the browser the app reports that it is in your downloads folder, or you get a save dialog; in the desktop app you choose where it goes. The project itself does not change.',
           'The file holds the status date, the progress and the baseline: your colleague sees not only the schedule, but also what has happened since 7 June. The *Progress sheet* is for the other direction: a slim sheet with only id, WBS, name, dates and completion, which the foreman can fill in and which you read back with *Update progress from a spreadsheet*. That way you do not have to type everything yourself next week. You do that in [Importing progress from a spreadsheet](docs://howto-voortgang-importeren).',
         ],
       },

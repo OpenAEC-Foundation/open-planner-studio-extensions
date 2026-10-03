@@ -5,7 +5,7 @@
   "apiVersion": "1.4",
   "minAppVersion": "2026.0.0",
   "author": "OpenAEC Foundation",
-  "description": "Leer plannen met Open Planner Studio aan de hand van één doorlopend project, een aanbouw aan een woning. De tutorials staan in Help › Tutorials en je doorloopt ze stap voor stap in de app zelf, met een begeleidingspaneel dat ziet wanneer een stap gedaan is. Nu beschikbaar: tutorial 1 (je eerste planning), tutorial 2 (relaties en het kritieke pad), tutorial 3 (de kalender en datumafspraken), tutorial 4 (plannen in uren) en tutorial 5 (resources en nivelleren).",
+  "description": "Leer plannen met Open Planner Studio aan de hand van één doorlopend project, een aanbouw aan een woning. De tutorials staan in Help › Tutorials en je doorloopt ze stap voor stap in de app zelf, met een begeleidingspaneel dat ziet wanneer een stap gedaan is. Nu beschikbaar: tutorial 1 (je eerste planning), tutorial 2 (relaties en het kritieke pad), tutorial 3 (de kalender en datumafspraken), tutorial 4 (plannen in uren), tutorial 5 (resources en nivelleren), tutorial 6 (voortgang en afwijking) en tutorial 7 (rapporteren en delen).",
   "category": "Other",
   "main": "main.js",
   "permissions": ["help", "ribbon", "events"],
