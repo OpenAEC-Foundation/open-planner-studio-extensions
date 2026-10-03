@@ -55,7 +55,8 @@ stap; **Toon mij** op die stap opent hem als het project niet klopt):
 tutorial 1 stap *De fasen* (`start-tut-1`), tutorial 2 stap *De eerste relatie* (`na-tut-1`), tutorial 3
 stap *De bouwvak in de kalender* (`na-tut-2`) en stap *Een constraint* (`tussen-tut-3-bouwvak`),
 tutorial 4 stap *De betonstort: 6 uur* (`na-tut-3`) en tutorial 5 stap *Vijf resources aanmaken*
-(`na-tut-4`).
+(`na-tut-4`), *De metselaar op vier taken* (`tussen-tut-5-resources`), *De werkregel: Vast werk*
+(`tussen-tut-5-toegewezen`) en *Nivelleren* (`tussen-tut-5-werkregel`).
 
 ## Wat de extensie-API niet kan (en wat dat voor tutorial 4 en 5 betekent)
 
@@ -68,17 +69,41 @@ werkregels of nivellering. Gevolgen:
   geblokkeerde opslag laat de controle gooien, waarna de begeleiding terugvalt op *Klaar, volgende*. Er is
   geen Toon mij. De latere stappen zetten de uren wel klaar (`updateTask` met `durationUnit: 'hours'`).
 - **Tutorial 5.** Resources, toewijzingen en `workRule` zijn te lezen (`getResources`, `getAssignments`,
-  `task.workRule`) en dus te controleren, maar niet te schrijven. **Toon mij** staat daarom alleen bij de
-  eerste stap (opent zo nodig `na-tut-4`) en bij de stappen vanaf het rekenen: de stand vóór het nivelleren is `na-tut-5` met de nivellering er weer uit
-  (`levelingDelay: 0`, daarna herberekenen), de stand erna is `na-tut-5` zelf; ontbreekt er iets in het
-  geopende project, dan opent Toon mij `na-tut-5` als nieuw tabblad. Voor de stappen *resources*,
-  *toewijzen* en *werkregel* heeft Toon mij geen tussenstand. De histogramstappen en de overbezettingsstap
-  hebben geen controle (het histogram openen en een melding aanklikken laat niets achter in het document):
-  *Klaar, volgende*.
-- **Gewenste tussenstanden uit de app-generator** (geen van drie bestaat nu): `tussen-tut-5-resources`
-  (`na-tut-4` + de vijf resources), `tussen-tut-5-toegewezen` (+ de twaalf toewijzingen, berekend) en
-  `tussen-tut-5-werkregel` (+ stucwerk op Vast werk met twee stukadoors, berekend; de overbezette stand
-  vóór het nivelleren). Daarmee kunnen Toon mij en Opnieuw ook de middelste stappen van tutorial 5 doen.
+  `task.workRule`) en dus te controleren, maar niet te schrijven. **Toon mij** opent daarom per stap, als
+  het geopende project de stap nog niet heeft, een stand van de generator waarin hij gedaan is (als nieuw
+  tabblad); staat de stap er al, dan laat Toon mij het project met rust:
+
+  | Stap | Toon mij opent | Opnieuw laadt |
+  |---|---|---|
+  | 1 *Het startpunt* | `na-tut-4` | – |
+  | 2 *Vijf resources aanmaken* | `tussen-tut-5-resources` | `na-tut-4` |
+  | 3 *De metselaar op vier taken* | `tussen-tut-5-toegewezen` (alle twaalf) | `tussen-tut-5-resources` |
+  | 4 *De timmerploeg en de kraan* | `tussen-tut-5-toegewezen` (alle twaalf) | – |
+  | 5 *De stukadoor en het beton* | `tussen-tut-5-toegewezen` | – |
+  | 6 *De werkregel: Vast werk* | `tussen-tut-5-werkregel` (ook stap 7 en 8) | `tussen-tut-5-toegewezen` |
+  | 7 *Een tweede stukadoor* | `tussen-tut-5-werkregel` (ook stap 8) | – |
+  | 8 *Rekenen* | `tussen-tut-5-werkregel`, nivellering eruit, herberekenen | – |
+  | 9 *Het histogram* | idem | – |
+  | 10 *Overbezetting* | idem | – |
+  | 11 *Nivelleren* | `na-tut-5`, herberekenen | `tussen-tut-5-werkregel` |
+
+  Waarom zo:
+  - De generator heeft geen stand per toewijsgroep. Stap 3–5 delen dus één stand, die met álle twaalf
+    toewijzingen; de stap-tekst zegt dat Toon mij ook de volgende stap(pen) al doet. Liever één eerlijke
+    stand dan een die de extensie half zou moeten nabouwen (dat kan ze niet).
+  - Er is geen stand met Vast werk en nog één stukadoor. Toon mij op stap 6 opent daarom de stand met
+    ook de tweede stukadoor, berekend; de tekst zegt het.
+  - Opnieuw staat alleen waar de generator precies de beginstand van de stap levert, bij de eerste stap die
+    vanuit die stand het document verandert. Niet bij stap 4, 5 en 7 (geen stand met een deel van de
+    toewijzingen of met Vast werk en één stukadoor), niet bij *Rekenen* (de meegeleverde stand is al
+    berekend, de stap zou meteen gedaan zijn) en niet bij histogram en overbezetting (die veranderen het
+    document niet).
+  - Stap 8–10 gebruikten eerst `na-tut-5` met de nivellering eruit (`levelingDelay: 0`, herberekenen). Dat
+    levert dezelfde feiten op als `tussen-tut-5-werkregel` (nagerekend in de app-motor: datums, speling,
+    kritiek pad, 46 werkdagen, toewijzingen en overbezette dagen, nl en en); de omweg is vervangen.
+    Een nivellering in het eigen project (wie vanaf stap 11 terug gaat) haalt Toon mij er nog steeds uit.
+  - De histogramstappen en de overbezettingsstap hebben geen controle (het histogram openen en een melding
+    aanklikken laat niets achter in het document): *Klaar, volgende*.
 
 ## Ankers en de plek van het begeleidingspaneel
 
@@ -123,6 +148,15 @@ motor ze, dan wordt `tests/planning/check-tutorial-project.ts` in de app rood; p
   zijn de uren (2, 2 en 3) die een dagtaak niet gebruikt. Wat-als dakelementen 12 u: di 6 jul 07:00 t/m wo 7
   jul 11:00, Dakbedekking do 8 – vr 9 jul (was wo 7 – do 8), speling dakelementen 2,5 dagen, binnenspouwblad
   en dakbedekking 2 werkdagen; oplevering en *8 taken, 48 werkdagen* blijven.
+- **`tussen-tut-5-resources`**: `na-tut-4` + de vijf resources (Timmerploeg Ploeg 1, Metselaar Arbeid 1,
+  Mobiele kraan Materieel 1, Stukadoor Onderaannemer 2, Beton Materiaal 50 m³), geen toewijzingen. Planning
+  gelijk aan `na-tut-4`: oplevering wo 1 sep, *8 taken, 48 werkdagen*.
+- **`tussen-tut-5-toegewezen`**: + de twaalf toewijzingen (beton 8 m³/dag op de stort), berekend. Oplevering
+  nog wo 1 sep, *8 taken, 48 werkdagen*; Stucwerk 4 werkdagen (vr 23 – wo 28 jul) met 1 stukadoor; de
+  metselaar al 5 dagen overbezet (29 jun – 5 jul).
+- **`tussen-tut-5-werkregel`**: + Stucwerk op Vast werk met twee stukadoors, berekend: Stucwerk vr 23 – ma 26
+  jul (2 werkdagen), oplevering ma 30 aug, *8 taken, 46 werkdagen*, de metselaar 5 dagen overbezet (29 jun –
+  5 jul). Dit is de stand vóór het nivelleren.
 - **`na-tut-5`**: `na-tut-4` + vijf resources, twaalf toewijzingen, Stucwerk op Vast werk met twee
   stukadoors (4 → 2 werkdagen, vr 23 – ma 26 jul) en genivelleerd. Vóór het nivelleren: oplevering ma 30
   aug, *8 taken, 46 werkdagen*, de metselaar 5 dagen overbezet (29 jun – 5 jul); in het histogram staat de
@@ -141,18 +175,26 @@ dev-build (ook 2026.9.0) weigeren.
 ## Projectbestanden
 
 `projects/<taal>/start-tut-1.ifc`, `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc`,
-`na-tut-3.ifc`, `na-tut-4.ifc` en `na-tut-5.ifc` zijn **gegenereerd**, niet met de hand gemaakt. Alle
+`na-tut-3.ifc`, `na-tut-4.ifc`, `tussen-tut-5-resources.ifc`, `tussen-tut-5-toegewezen.ifc`,
+`tussen-tut-5-werkregel.ifc` en `na-tut-5.ifc` zijn **gegenereerd**, niet met de hand gemaakt. Alle
 standen komen uit de generator van de app. In een checkout van de app:
 
 ```bash
 npm run gen:tutorial-project -- --out <map>
 # kopieer daarna <map>/<taal>/start-tut-1.ifc, na-tut-1.ifc, na-tut-2.ifc, tussen-tut-3-bouwvak.ifc,
-# na-tut-3.ifc, na-tut-4.ifc en na-tut-5.ifc naar projects/<taal>/
+# na-tut-3.ifc, na-tut-4.ifc, tussen-tut-5-resources.ifc, tussen-tut-5-toegewezen.ifc,
+# tussen-tut-5-werkregel.ifc en na-tut-5.ifc naar projects/<taal>/
 ```
 
 `tussen-tut-3-bouwvak` is `na-tut-2` plus de bouwvak in de kalender. De extensie-API kan de kalender
 niet wijzigen, dus **Toon mij** op de bouwvakstap opent dit project (als nieuw tabblad) in plaats van de
 kalender aan te passen; **Opnieuw** op de constraintstap laadt hem als beginstand van die stap.
+
+De drie `tussen-tut-5-*`-standen (app-generator, branch `claude/tutorial-tussenstanden-tut5`) zijn er
+om dezelfde reden: de API kan geen resources, toewijzingen of werkregels schrijven. De andere bestanden in
+`projects/` zijn niet opnieuw gegenereerd; ze verschillen van de huidige generatoruitvoer alleen in
+GUIDs, tijdstempels en (bij `start-tut-1` en `na-tut-1`) de schrijfversie en de STEP-codering van een
+gedachtestreepje.
 
 ## ZIP maken
 

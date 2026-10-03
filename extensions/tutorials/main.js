@@ -26,14 +26,16 @@
  *
  * De projectbestanden in `projects/<taal>/` zijn GEGENEREERD, niet met de hand gemaakt: in een
  * checkout van de app `npm run gen:tutorial-project -- --out <map>` en daarna `start-tut-1.ifc`,
- * `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc`, `na-tut-3.ifc`, `na-tut-4.ifc` en `na-tut-5.ifc` per taal hierheen
- * kopiëren. De getallen in de tekst
+ * `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc`, `na-tut-3.ifc`, `na-tut-4.ifc`,
+ * `tussen-tut-5-resources.ifc`, `tussen-tut-5-toegewezen.ifc`, `tussen-tut-5-werkregel.ifc` en `na-tut-5.ifc` per taal
+ * hierheen kopiëren. De getallen in de tekst
  * komen uit die standen (zie README.md voor de tabel): tutorial 1 uit `na-tut-1` (7 juni 2027, 14 juni,
  * Buitenspouwblad metselen als enige kritieke taak), tutorial 2 uit `na-tut-2` (6 augustus 2027, 21
  * taken, 45 werkdagen, 2 werkdagen speling), tutorial 3 uit `tussen-tut-3-bouwvak` (27 augustus 2027)
  * en `na-tut-3` (1 september 2027, 8 taken, 48 werkdagen), tutorial 4 uit `na-tut-4` (kloktijden van de
- * stort en de kraan, 3,25 en 3,38 dagen speling) en tutorial 5 uit `na-tut-5` (30 augustus 2027, 46
- * werkdagen, 17 kritieke taken, nivelleervertraging 5).
+ * stort en de kraan, 3,25 en 3,38 dagen speling) en tutorial 5 uit `tussen-tut-5-werkregel` (30 augustus
+ * 2027, 8 kritieke taken, 46 werkdagen, metselaar 5 dagen overbezet) en `na-tut-5` (17 kritieke taken,
+ * nivelleervertraging 5).
  */
 
 const sdk = require('open-planner-studio');
@@ -526,9 +528,13 @@ const deadlineCalculated = (api, date) => constraintCalculated(api) && deadlineI
 //     bewaarde instelling (`ops-enableHourPlanning` in localStorage, zie settingsRegistry van de app) en
 //     heeft geen Toon mij.
 //   • Resources, toewijzingen en werkregels zijn te LEZEN (`getResources`, `getAssignments`, `task.workRule`)
-//     maar niet te schrijven. De checks van tutorial 5 kunnen dus alles volgen; Toon mij kan alleen de
-//     stappen klaarzetten waarvan het resultaat een meegeleverd project is (na-tut-5, met de nivellering
-//     er via `levelingDelay` weer uit gehaald).
+//     maar niet te schrijven. De checks van tutorial 5 kunnen dus alles volgen; Toon mij opent per stap een
+//     meegeleverde stand van de generator waarin de stap gedaan is: `tussen-tut-5-resources` (na-tut-4 + de
+//     vijf resources), `tussen-tut-5-toegewezen` (+ alle twaalf toewijzingen, berekend),
+//     `tussen-tut-5-werkregel` (+ stucwerk op Vast werk met twee stukadoors, berekend: de stand vóór het
+//     nivelleren) en `na-tut-5`. De generator heeft geen stand per toewijsgroep of met Vast werk en nog één
+//     stukadoor; Toon mij op stap 3–5 opent dus steeds de stand met álle toewijzingen, en op stap 6 die met
+//     ook de tweede stukadoor (de tekst zegt dat).
 
 // ── Urenplanning (tutorial 4) ─────────────────────────────────────────────────────────────────
 
@@ -667,11 +673,41 @@ function clearLeveling(api) {
   });
 }
 
-/** De stand vóór het nivelleren: alles t/m de werkregel, berekend, zonder nivellering. De extensie kan geen
- *  resources of werkregels aanmaken; ontbreekt er iets, dan opent Toon mij het resultaat van tutorial 5 (als
- *  nieuw tabblad) en haalt daar de nivellering weer uit. */
+/** Toon mij, tutorial 5 stap 2: het project na tutorial 4 met de vijf resources. De extensie kan geen
+ *  resources aanmaken; ontbreken ze, dan opent Toon mij `tussen-tut-5-resources` (als nieuw tabblad). */
+async function ensureResources(api) {
+  if (!(afterTutorial4(api) && resourcesDone(api))) {
+    await api.help.openBundledProject(projectAsset(uiLang(), 'tussen-tut-5-resources'));
+  }
+}
+
+/** De toewijsgroepen in de volgorde van stap 3, 4 en 5. */
+const ASSIGN_ORDER = ['bricklayer', 'crewCrane', 'other'];
+
+/** Toon mij, tutorial 5 stap 3–5: de toewijzingen t/m `group` (cumulatief). De extensie kan niet toewijzen en
+ *  de generator heeft geen stand per groep; ontbreekt er een, dan opent Toon mij `tussen-tut-5-toegewezen`
+ *  (als nieuw tabblad), met álle twaalf toewijzingen, berekend. */
+async function ensureAssigned(api, group) {
+  const groups = ASSIGN_ORDER.slice(0, ASSIGN_ORDER.indexOf(group) + 1);
+  if (!(afterTutorial4(api) && groups.every(g => assignmentsDone(api, g)))) {
+    await api.help.openBundledProject(projectAsset(uiLang(), 'tussen-tut-5-toegewezen'));
+  }
+}
+
+/** Toon mij, tutorial 5 stap 6 en 7: alle toewijzingen en het stucwerk op Vast werk (stap 6), of ook met twee
+ *  stukadoors (stap 7, `full`). Er is geen stand met Vast werk en nog één stukadoor; ontbreekt er iets, dan
+ *  opent Toon mij `tussen-tut-5-werkregel` (als nieuw tabblad): Vast werk, twee stukadoors, berekend. */
+async function ensureWorkRule(api, full) {
+  const done = tasksPresent(api) && afterTutorial4(api) && resourcesDone(api)
+    && ALL_ASSIGNMENTS.every(a => assignmentDone(api, a)) && (full ? workRuleDone(api) : plasterRuleSet(api));
+  if (!done) await api.help.openBundledProject(projectAsset(uiLang(), 'tussen-tut-5-werkregel'));
+}
+
+/** De stand vóór het nivelleren: alles t/m de werkregel, berekend, zonder nivellering. Ontbreekt er iets, dan
+ *  opent Toon mij `tussen-tut-5-werkregel` (als nieuw tabblad). Een nivellering in het eigen project (wie
+ *  vanaf het nivelleren terug gaat) haalt Toon mij er weer uit. */
 async function ensureBeforeLeveling(api) {
-  if (!setUpDone(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'na-tut-5'));
+  if (!setUpDone(api)) await api.help.openBundledProject(projectAsset(uiLang(), 'tussen-tut-5-werkregel'));
   clearLeveling(api);
   api.data.recalculate();
 }
@@ -1675,7 +1711,7 @@ const TEXT_5 = {
       'Aan het eind is er geen overbezetting meer. De oplevering staat op maandag 30 augustus 2027, twee werkdagen eerder dan in tutorial 4, doordat het stucwerk met twee stukadoors korter wordt. Je hebt gezien dat nivelleren het buitenspouwblad vijf werkdagen laat wachten zonder dat de oplevering schuift, en wat dat de taak kost.',
       '## Uitgangspunt',
       'Je hebt tutorial 4 afgerond: het project met de betonstort en de twee kraaninzetten in uren, berekend, met de oplevering op woensdag 1 september 2027. Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
-      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar, maar dat kan hier niet overal: een extensie kan geen resources, toewijzingen of werkregels aanmaken. Toon mij staat daarom alleen bij de eerste stap, waar het zo nodig het resultaat van tutorial 4 opent, en bij de stappen vanaf het rekenen, waar het zo nodig het resultaat van deze tutorial opent. Beide openen als nieuw tabblad. **Opnieuw** in de stap *Vijf resources aanmaken* laadt het resultaat van tutorial 4 opnieuw.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. Een extensie kan geen resources, toewijzingen of werkregels aanmaken; daarom opent Toon mij in deze tutorial zo nodig een meegeleverd project als nieuw tabblad, waarin de stap al gedaan is. Bij de drie toewijsstappen is dat steeds het project met alle twaalf toewijzingen, en bij de werkregel staat ook de tweede stukadoor er al in. **Opnieuw** laadt de beginstand van een stap opnieuw: in de stap *Vijf resources aanmaken* het resultaat van tutorial 4, in *De metselaar op vier taken* dat resultaat met de vijf resources, in *De werkregel: Vast werk* het project met alle toewijzingen en in *Nivelleren* het project vóór het nivelleren.',
     ],
     outro: [
       '## Wat je hebt geleerd',
@@ -1703,6 +1739,7 @@ const TEXT_5 = {
           'Klik op *Resources › Beheer › Nieuwe resource*. Het resourcepaneel neemt de werkruimte over, met een lege rij onderaan de tabel. Typ de naam, kies het **Type** en druk op Enter: er opent dan direct een lege rij voor de volgende. Maak zo deze vijf resources:',
           '- `Timmerploeg`, type **Ploeg**: de ploeg voor wapening, vloer, dak en kozijnen.\n- `Metselaar`, type **Arbeid**: metselt de fundering en de spouwmuren en breekt de achtergevel door.\n- `Mobiele kraan`, type **Materieel**: legt de kanaalplaten en de dakelementen.\n- `Stukadoor`, type **Onderaannemer**, **Max. eenheden** `2`: een onderaannemer die met twee man kan komen.\n- `Beton`, type **Materiaal**, **Max. eenheden** `50` en **Eenheid** `m³`: het beton voor de stort, in kubieke meter per dag.',
           'Druk na de vijfde op Esc.',
+          '**Toon mij** opent hier het resultaat van tutorial 4 met de vijf resources erin, als nieuw tabblad. Resources aanmaken kan het paneel zelf niet.',
         ],
         explain: [
           'In het resourcepaneel staan vijf rijen. De **Max. eenheden** is de capaciteit per werkdag: 1 is één persoon of één machine, 2 zijn er twee en bij het beton zijn het 50 m³. Dat getal gebruikt de app straks als grens: vraagt de planning op één dag meer dan de capaciteit, dan is de resource overbezet.',
@@ -1713,6 +1750,7 @@ const TEXT_5 = {
         title: 'De metselaar op vier taken',
         task: [
           'Sluit het resourcepaneel met het kruisje rechtsboven en selecteer in de takenlijst **Funderingsmetselwerk** (2.5). Klik op *Resources › Toewijzing › Toewijzen ▾*, laat **Eenh./dag** op 1 en **Curve** op Uniform staan en klik op **Metselaar**. Doe hetzelfde voor Binnenspouwblad metselen (3.1), Buitenspouwblad metselen (3.2) en Achtergevel doorbreken (3.6).',
+          '**Toon mij** opent hier, als nieuw tabblad, het project waarin alle twaalf toewijzingen al staan, ook die van de volgende twee stappen. Toewijzen kan het paneel zelf niet, en een project met alleen de metselaar is er niet.',
         ],
         explain: [
           'De metselaar staat nu op vier taken. Selecteer je een van die taken, dan staat in *Eigenschappen* onder **Toewijzingen**: Metselaar met Eenh./dag 1. Die inzet is hoeveel van de resource er per werkdag aan de taak werkt. De curve, hier Uniform, verdeelt het over de dagen van de taak: elke dag evenveel.',
@@ -1723,6 +1761,7 @@ const TEXT_5 = {
         title: 'De timmerploeg en de kraan',
         task: [
           'Wijs op dezelfde manier de **Timmerploeg** toe aan Wapening en bekisting fundering (2.2), Kanaalplaatvloer leggen (2.6), Dakelementen plaatsen (3.3) en Kozijnen plaatsen (3.5). Wijs daarna de **Mobiele kraan** toe aan Kanaalplaatvloer leggen (2.6) en Dakelementen plaatsen (3.3). Een taak kan meer dan één resource hebben: de vloer en de dakelementen staan straks op ploeg én kraan.',
+          '**Toon mij** opent hier, net als in de vorige stap, het project met alle twaalf toewijzingen als nieuw tabblad, dus ook met die van de volgende stap.',
         ],
         explain: [
           'De vloer en de dakelementen hebben nu twee resources. Selecteer Kanaalplaatvloer leggen: onder Toewijzingen staan de Timmerploeg en de Mobiele kraan, allebei met Eenh./dag 1. Dat is één ploeg en één kraan op een taak van 5 uur. Hoeveel dat per werkdag telt, zie je straks in het histogram.',
@@ -1732,6 +1771,7 @@ const TEXT_5 = {
         title: 'De stukadoor en het beton',
         task: [
           'Wijs de **Stukadoor** toe aan Stucwerk (4.2). Wijs daarna het **Beton** toe aan Fundering storten (2.4): vul in het venster van Toewijzen ▾ eerst bij **Eenh./dag** `8` in en klik dan op **Beton**. Dat is 8 m³ beton per dag.',
+          '**Toon mij** opent hier het project met alle twaalf toewijzingen, als nieuw tabblad.',
         ],
         explain: [
           'Je hebt nu twaalf toewijzingen: vier voor de metselaar, vier voor de timmerploeg, twee voor de kraan, en één voor de stukadoor en het beton. Bij Fundering storten staat onder Toewijzingen *Beton* met Eenh./dag 8.',
@@ -1743,6 +1783,7 @@ const TEXT_5 = {
         task: [
           'Zet eerst de werkregel in beeld: klik op *Instellingen › Project › Instellingen*, open het tabblad **Planning** en zet onder **Berekenen** het vinkje bij **Toon werkregels en werk** aan. Sluit het venster met **Sluiten**.',
           'Het stucwerk gaat straks met twee stukadoors werken. Selecteer **Stucwerk** (4.2) in de takenlijst. Kies in *Eigenschappen* bij **Werkregel** de regel **Vast werk**.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project waarin het stucwerk al op Vast werk staat en ook de tweede stukadoor uit de volgende stap al is ingezet, berekend. Een werkregel instellen kan het paneel zelf niet. Het vinkje bij Toon werkregels en werk is een instelling van de app: dat zet je zelf aan.',
         ],
         explain: [
           'Onder het veld Werkregel staat nu *Beschermd: werk (duur volgt de inzet)*. Er is nog niets veranderd: Stucwerk duurt nog 4d en de planning is niet verouderd. Een werkregel doet pas iets bij je eerstvolgende wijziging. Wel legt de app nu het werk vast, zodat er iets is om te beschermen: 4 dagen × 1 stukadoor × 8 uur is 32 uur. Het staat onder **Toewijzingen** bij **Werk (rest)**.',
@@ -1753,6 +1794,7 @@ const TEXT_5 = {
         title: 'Een tweede stukadoor',
         task: [
           'Zet in *Eigenschappen* in het blok **Toewijzingen** (onderaan, scroll zo nodig omlaag) de **Eenh./dag** van de Stukadoor op `2` en druk op Enter: twee stukadoors dus.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project met het stucwerk op Vast werk en twee stukadoors, al berekend: dan is ook de volgende stap, Rekenen, gedaan.',
         ],
         explain: [
           'Stucwerk duurt nu 2d in plaats van 4d, en de statusbalk meldt weer *Verouderd — herbereken (F5)*. Het werk is gelijk gebleven: 4 dagen × 1 stukadoor × 8 uur is 32 uur, en met twee stukadoors per dag is dat 2 werkdagen.',
@@ -1815,7 +1857,7 @@ const TEXT_5 = {
       'At the end there is no overallocation left. The handover is on Monday 30 August 2027, two working days earlier than in tutorial 4, because the plastering gets shorter with two plasterers. You have seen that leveling makes the outer cavity leaf wait five working days without the handover moving, and what that costs the task.',
       '## Starting point',
       'You have finished tutorial 4: the project with the concrete pour and the two crane jobs in hours, calculated, with the handover on Wednesday 1 September 2027. If you have not, [open the result of tutorial 4](project://projects/en/na-tut-4.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
-      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you, but that is not possible everywhere here: an extension cannot create resources, assignments or work rules. That is why Show me is only there for the first step, where it opens the result of tutorial 4 if needed, and for the steps from calculating onwards, where it opens the result of this tutorial if needed. Both open as a new tab. **Start over** in the step *Creating five resources* reloads the result of tutorial 4.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. An extension cannot create resources, assignments or work rules, so in this tutorial Show me opens a supplied project as a new tab if needed, in which the step has already been done. For the three assignment steps that is always the project with all twelve assignments, and for the work rule the second plasterer is already in it too. **Start over** reloads the starting point of a step: in the step *Creating five resources* the result of tutorial 4, in *The bricklayer on four tasks* that result with the five resources, in *The work rule: Fixed work* the project with all assignments and in *Leveling* the project before leveling.',
     ],
     outro: [
       '## What you have learned',
@@ -1843,6 +1885,7 @@ const TEXT_5 = {
           'Click *Resources › Manage › New resource*. The resource panel takes over the workspace, with an empty row at the bottom of the table. Type the name, choose the **Type** and press Enter: an empty row for the next one then opens straight away. Create these five resources:',
           '- `Carpentry crew`, type **Crew**: the crew for reinforcement, floor, roof and window frames.\n- `Bricklayer`, type **Labor**: builds the foundation brickwork and the cavity walls and breaks through the rear wall.\n- `Mobile crane`, type **Equipment**: places the hollow-core slabs and the roof elements.\n- `Plasterer`, type **Subcontractor**, **Max units** `2`: a subcontractor who can come with two people.\n- `Concrete`, type **Material**, **Max units** `50` and **Unit** `m³`: the concrete for the pour, in cubic metres per day.',
           'Press Esc after the fifth.',
+          '**Show me** opens the result of tutorial 4 with the five resources in it, as a new tab. The guide cannot create resources itself.',
         ],
         explain: [
           'The resource panel now has five rows. **Max units** is the capacity per working day: 1 is one person or one machine, 2 is two, and for the concrete it is 50 m³. The app uses that number as a limit in a moment: if the schedule asks more than the capacity on one day, the resource is overallocated.',
@@ -1853,6 +1896,7 @@ const TEXT_5 = {
         title: 'The bricklayer on four tasks',
         task: [
           'Close the resource panel with the cross at the top right and select **Foundation brickwork** (2.5) in the task list. Click *Resources › Assignment › Assign ▾*, leave **Units/day** on 1 and **Curve** on Uniform and click **Bricklayer**. Do the same for Build inner cavity leaf (3.1), Build outer cavity leaf (3.2) and Break through rear wall (3.6).',
+          '**Show me** opens, as a new tab, the project with all twelve assignments already in it, including those of the next two steps. The guide cannot assign resources itself, and there is no project with only the bricklayer.',
         ],
         explain: [
           'The bricklayer is now on four tasks. Select one of those tasks and in *Properties* under **Assignments** it says: Bricklayer with Units/day 1. That is how much of the resource works on the task per working day. The curve, Uniform here, spreads it over the days of the task: the same every day.',
@@ -1863,6 +1907,7 @@ const TEXT_5 = {
         title: 'The carpentry crew and the crane',
         task: [
           'In the same way, assign the **Carpentry crew** to Foundation formwork and reinforcement (2.2), Lay hollow-core floor (2.6), Place roof elements (3.3) and Install window frames (3.5). Then assign the **Mobile crane** to Lay hollow-core floor (2.6) and Place roof elements (3.3). A task can have more than one resource: the floor and the roof elements will be on crew and crane.',
+          '**Show me** opens, as in the previous step, the project with all twelve assignments as a new tab, so including those of the next step.',
         ],
         explain: [
           'The floor and the roof elements now have two resources. Select Lay hollow-core floor: under Assignments there are the Carpentry crew and the Mobile crane, both with Units/day 1. That is one crew and one crane on a 5-hour task. How much that counts per working day, you see in the histogram in a moment.',
@@ -1872,6 +1917,7 @@ const TEXT_5 = {
         title: 'The plasterer and the concrete',
         task: [
           'Assign the **Plasterer** to Plastering (4.2). Then assign the **Concrete** to Pour foundation (2.4): in the Assign ▾ window first enter `8` at **Units/day** and then click **Concrete**. That is 8 m³ of concrete per day.',
+          '**Show me** opens the project with all twelve assignments, as a new tab.',
         ],
         explain: [
           'You now have twelve assignments: four for the bricklayer, four for the carpentry crew, two for the crane, and one each for the plasterer and the concrete. At Pour foundation, under Assignments, it says *Concrete* with Units/day 8.',
@@ -1883,6 +1929,7 @@ const TEXT_5 = {
         task: [
           'First make the work rule visible: click *Settings › Project › Settings*, open the **Planning** tab and tick **Show work rules and work** under **Calculation**. Close the window with **Close**.',
           'The plastering is going to be done with two plasterers. Select **Plastering** (4.2) in the task list. In *Properties*, choose the rule **Fixed work** at **Work rule**.',
+          '**Show me** opens, as a new tab, the project in which the plastering is already on Fixed work and the second plasterer from the next step is already in place, calculated. The guide cannot set a work rule itself. The Show work rules and work tick box is a setting of the app: you turn that on yourself.',
         ],
         explain: [
           'Under the Work rule field it now says *Protected: work (duration follows units)*. Nothing has changed yet: Plastering still takes 4d and the schedule is not out of date. A work rule only does something at your next change. What the app does now is fix the work, so that there is something to protect: 4 days × 1 plasterer × 8 hours is 32 hours. It is shown under **Assignments**, at **Work (rem.)**.',
@@ -1893,6 +1940,7 @@ const TEXT_5 = {
         title: 'A second plasterer',
         task: [
           'In *Properties*, in the **Assignments** block (at the bottom, scroll down if needed), set the **Units/day** of the Plasterer to `2` and press Enter: two plasterers.',
+          '**Show me** opens, as a new tab, the project with the plastering on Fixed work and two plasterers, already calculated: then the next step, Calculating, is done as well.',
         ],
         explain: [
           'Plastering now takes 2d instead of 4d, and the status bar says *Out of date — recalculate (F5)* again. The work stayed the same: 4 days × 1 plasterer × 8 hours is 32 hours, and with two plasterers per day that is 2 working days.',
@@ -2218,9 +2266,13 @@ const STEP_LOGIC_4 = {
 };
 
 // Tutorial 5. Resources, toewijzingen en werkregels zijn voor de extensie alleen te lezen. De checks volgen
-// dus elke stap; Toon mij bestaat alleen waar het resultaat van de stap een meegeleverd project is: de stand
-// vóór het nivelleren (na-tut-5 zonder de nivellering) en de stand erna (na-tut-5). `reset` staat bij de
-// eerste stap die het document verandert; voor de latere stappen levert de generator geen tussenstand.
+// dus elke stap; Toon mij opent per stap een meegeleverde stand waarin die stap gedaan is (zie de helpers
+// hierboven). `reset` staat alleen waar de generator de beginstand van de stap levert, bij de eerste stap die
+// vanuit die stand het document verandert: `resources` (na-tut-4), `toewijzen-metselaar`
+// (tussen-tut-5-resources), `werkregel` (tussen-tut-5-toegewezen) en `nivelleren` (tussen-tut-5-werkregel).
+// Niet bij stap 4, 5 en 7 (geen stand met een deel van de toewijzingen of met Vast werk en één stukadoor), niet
+// bij `berekenen` (de meegeleverde stand is al berekend) en niet bij histogram en overbezetting (die
+// veranderen het document niet).
 const STEP_ORDER_5 = [
   'startpunt', 'resources', 'toewijzen-metselaar', 'toewijzen-ploeg-kraan', 'toewijzen-overig', 'werkregel',
   'tweede-stukadoor', 'berekenen', 'histogram', 'overbezetting', 'nivelleren',
@@ -2240,23 +2292,30 @@ const STEP_LOGIC_5 = {
   resources: {
     anchor: 'ribbon:resources:newResource',
     check: resourcesDone,
+    prepare: ensureResources,
     reset: 'na-tut-4',
   },
   'toewijzen-metselaar': {
     anchor: 'ribbon-group:resources:resourceAssignment',
     check: api => assignmentsDone(api, 'bricklayer'),
+    prepare: api => ensureAssigned(api, 'bricklayer'),
+    reset: 'tussen-tut-5-resources',
   },
   'toewijzen-ploeg-kraan': {
     anchor: 'ribbon-group:resources:resourceAssignment',
     check: api => assignmentsDone(api, 'crewCrane'),
+    prepare: api => ensureAssigned(api, 'crewCrane'),
   },
   'toewijzen-overig': {
     anchor: 'ribbon-group:resources:resourceAssignment',
     check: api => assignmentsDone(api, 'other'),
+    prepare: api => ensureAssigned(api, 'other'),
   },
   werkregel: {
     anchor: 'ribbon:instellingen:projectSettings',
     check: plasterRuleSet,
+    prepare: api => ensureWorkRule(api, false),
+    reset: 'tussen-tut-5-toegewezen',
   },
   // Anker op Eigenschappen: het blok Toewijzingen staat onderaan in dat paneel; het begeleidingspaneel wijkt dan
   // naar links uit en bedekt het niet. Stucwerk staat nog geselecteerd uit de vorige stap, de takenlijst is niet
@@ -2264,6 +2323,7 @@ const STEP_LOGIC_5 = {
   'tweede-stukadoor': {
     anchor: 'properties-panel',
     check: workRuleDone,
+    prepare: api => ensureWorkRule(api, true),
   },
   berekenen: {
     anchor: 'ribbon:start:calc',
@@ -2284,6 +2344,7 @@ const STEP_LOGIC_5 = {
     anchor: 'ribbon:resources:levelResources',
     check: levelingApplied,
     prepare: ensureLeveled,
+    reset: 'tussen-tut-5-werkregel',
   },
 };
 
