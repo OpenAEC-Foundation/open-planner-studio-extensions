@@ -2390,8 +2390,11 @@ const STEP_LOGIC_5 = {
     anchor: 'ribbon:resources:toggleHistogram',
     prepare: ensureBeforeLeveling,
   },
+  // Het anker is het paneel Waarschuwingen, niet de lintgroep Overallocatie: de stap laat daarin een
+  // regel aanklikken, en voor een anker wijkt het begeleidingspaneel uit (anders ligt het erover). Het
+  // paneel opent pas na de klik op de statusbalk; tot dan is er geen markering.
   overbezetting: {
-    anchor: 'ribbon-group:resources:overallocationIndicator',
+    anchor: 'rail:warnings',
     prepare: ensureBeforeLeveling,
   },
   nivelleren: {

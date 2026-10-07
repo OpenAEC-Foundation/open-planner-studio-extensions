@@ -190,8 +190,11 @@ Opnieuw een nieuw tabblad opent.
 
 ## Ankers en de plek van het begeleidingspaneel
 
-Het begeleidingspaneel staat rechtsonder en is hoog zodra de uitleg zichtbaar is. Gecontroleerd op 1600×950 en
-1366×768:
+Het begeleidingspaneel staat rechtsonder en is hoog zodra de uitleg zichtbaar is. Het wijkt uit voor het anker
+en voor een open venster, keert terug zodra de weg vrij is, en klapt vanzelf in tot een knopje als het naast
+een venster nergens past (Kalenders op 1280×1050 of 1366×768); de gebruiker kan het ook zelf inklappen. Dat
+gedrag zit in de app (app-PR #289); oudere app-builds legden het paneel over de knop Toepassen. Gecontroleerd
+op 1600×950, 1280×1050 en 1366×768:
 
 - Stappen in Eigenschappen hebben geen anker (het paneel zou naar links uitwijken over de takenlijst), behalve
   waar je links niets aanklikt: tutorial 3 *deadline-krap* en tutorial 5 *tweede-stukadoor* (blok
@@ -200,14 +203,19 @@ Het begeleidingspaneel staat rechtsonder en is hoog zodra de uitleg zichtbaar is
   links dan de tabelrij en de kolom Duur waar je in klikt.
 - Voor lintitems die een eigen component renderen (de keuzelijst *Toewijzen*, de indicator *Overallocatie*)
   wijst tutorial 5 de lintgroep aan (`ribbon-group:resources:resourceAssignment`,
-  `ribbon-group:resources:overallocationIndicator`). Het item-anker raakt kwijt zodra er een extensie met
-  lintknoppen actief is en de taakselectie wisselt; de markering viel dan terug op de linttab.
+  `ribbon-group:resources:overallocationIndicator`). Het item-anker raakte kwijt na een bezoek aan het tabblad
+  Bestand (zoals bij het installeren van deze ZIP) gevolgd door een andere taakselectie; dat is opgelost in de
+  app (app-PR #289), maar de groep blijft een goed anker.
+- Tutorial 5 *overbezetting* wijst `rail:warnings` aan, het paneel Waarschuwingen waarin je de regel van de
+  Metselaar aanklikt: dat paneel staat onderaan de rechterrail, precies onder het begeleidingspaneel, en het
+  begeleidingspaneel wijkt alleen uit voor een anker. Het paneel Waarschuwingen opent pas na de klik op de
+  statusbalk; tot dan is er geen markering.
 - Tutorial 5 *histogram*: vanaf *tweede-stukadoor* (anker `properties-panel`) staat het paneel links, en op
   1366×768 bedekt het dan de resourcelijst onder de Gantt. Bovendien toont het histogram bij een geselecteerde
   taak alleen de resources van die taak, en het Stucwerk is na stap 6–7 nog geselecteerd. De tekst zegt daarom:
   eerst Esc, dan *Mobiele kraan* in de lijst of via *Resources › Histogram › Volgende* (in de app nagelopen:
-  Esc heft de selectie op, drie keer Volgende geeft de kraan). Geen anker kan het paneel hier naar rechts
-  zetten: het wijkt alleen uit voor een anker dat eronder ligt.
+  Esc heft de selectie op, drie keer Volgende geeft de kraan). Sinds app-PR #289 keert het paneel na
+  *tweede-stukadoor* terug naar rechts, zodat de resourcelijst weer vrij ligt.
 
 ## De getallen in de tekst
 
