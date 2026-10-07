@@ -290,13 +290,16 @@ motor ze, dan wordt `tests/planning/check-tutorial-project.ts` in de app rood; p
   De PDF van het Voortgangsrapport heeft dezelfde cijfers als het scherm (tekst uit de PDF gelezen).
 - **`na-tut-7`**: gelijk aan `na-tut-6` (een rapport is geen projectdata); bestand byte-gelijk.
 
-## `minAppVersion`: nog een placeholder
+## `minAppVersion`: 2026.10.0
 
-`minAppVersion` staat voorlopig op `2026.0.0`. **Bij de release zetten op de eerste app-versie met
-extensiecontract 1.4** (release v2026.9.0 heeft contract 1.0.0), en pas daarna een catalogusentry
-maken. Tot die tijd houdt `"apiVersion": "1.4"` oudere apps tegen: een host met een lagere
-contract-minor weigert de extensie. Een hogere `minAppVersion` nu zou de extensie in de huidige
-dev-build (ook 2026.9.0) weigeren.
+`minAppVersion` staat op `2026.10.0`, de eerste app-release met extensiecontract 1.4 (besluit eigenaar,
+2026-10-07; release v2026.9.0 heeft contract 1.0.0). Pas na die release een catalogusentry maken.
+
+Gevolg tot de bump: de app op `main` heet nog `2026.9.0` (`package.json`), en de lader vergelijkt de
+versienummers per deel (`extensionLoader.ts`, `compareVersions`). Een build van vóór de bump naar 2026.10.0,
+ook de dev-server en de browserversie, weigert deze ZIP dus met *Vereist Open Planner Studio ≥ 2026.10.0*.
+Wie vóór de release lokaal wil testen, zet `minAppVersion` tijdelijk terug in een eigen kopie, of draait
+eerst `npm run bump 2026.10.0` in de app (niet committen).
 
 ## Beelden
 
