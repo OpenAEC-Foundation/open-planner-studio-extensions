@@ -850,7 +850,7 @@ const TEXT_1 = {
       voorbereiding: {
         title: 'De taken van de voorbereiding',
         task: [
-          'Start bouw is nog geselecteerd. Klik op *Start › Taken › Taak*, typ de naam en druk op Enter. Klik daarna in **Eigenschappen** in het veld **Duur**, typ het aantal werkdagen en druk op Enter. Doe dat voor deze drie taken, in deze volgorde:',
+          'Start bouw is nog geselecteerd. Klik op *Start › Taken › Taak*, typ de naam en druk op Enter. Dubbelklik daarna in **Eigenschappen** in het veld **Duur**, zodat de 5 geselecteerd is, typ het aantal werkdagen en druk op Enter. Met één klik staat de cursor achter de 5 en wordt 2 dan 52. Doe dat voor deze drie taken, in deze volgorde:',
           '- `Bouwplaats inrichten`, 2 werkdagen: hekken, keet en bouwstroom neerzetten.\n- `Tuin en bestrating verwijderen`, 1 werkdag: ruimte maken voor de aanbouw.\n- `Aanbouw uitzetten`, 1 werkdag: de maten van de aanbouw op de grond zetten.',
           'Tik je iets verkeerd, dan draait *Start › Bewerken › Ongedaan* (Ctrl+Z) je laatste handeling terug.',
         ],
@@ -979,7 +979,7 @@ const TEXT_1 = {
       voorbereiding: {
         title: 'The preparation tasks',
         task: [
-          'Start of construction is still selected. Click *Home › Tasks › Task*, type the name and press Enter. Then click the **Duration** field in **Properties**, type the number of working days and press Enter. Do this for these three tasks, in this order:',
+          'Start of construction is still selected. Click *Home › Tasks › Task*, type the name and press Enter. Then double-click the **Duration** field in **Properties**, so that the 5 is selected, type the number of working days and press Enter. With a single click the cursor sits after the 5, and 2 becomes 52. Do this for these three tasks, in this order:',
           '- `Set up site`, 2 working days: fences, site hut and site power.\n- `Clear garden and paving`, 1 working day: making room for the extension.\n- `Set out the extension`, 1 working day: marking the extension out on the ground.',
           'Made a typo? *Home › Edit › Undo* (Ctrl+Z) reverses your last action.',
         ],
@@ -1579,7 +1579,7 @@ const TEXT_4 = {
       stort: {
         title: 'De betonstort: 6 uur',
         task: [
-          'Klik in de takenlijst op **Fundering storten** (2.4). Klik in het paneel *Eigenschappen* (scroll zo nodig omlaag) in het veld **Duur**, typ `6h` en druk op Enter. De h staat voor uur (*hour*).',
+          'Klik in de takenlijst op **Fundering storten** (2.4). Dubbelklik in het paneel *Eigenschappen* (scroll zo nodig omlaag) in het veld **Duur**, zodat de 1 geselecteerd is, typ `6h` en druk op Enter. De h staat voor uur (*hour*).',
         ],
         explain: [
           'In de takenlijst staat bij Fundering storten nu *6h* in plaats van 1d, en in *Eigenschappen* staat naast het veld Duur de eenheid **Uren**. Onderaan in de statusbalk staat weer *Verouderd — herbereken (F5)*: een nieuwe duur verandert de datums pas als je rekent.',
@@ -1589,7 +1589,7 @@ const TEXT_4 = {
       'kraan-vloer': {
         title: 'De kraan: 5 uur voor de kanaalplaten',
         task: [
-          'Klik op **Kanaalplaatvloer leggen** (2.6). Typ in het veld **Duur** `5h` en druk op Enter. De kraan legt de kanaalplaten van de vloer in 5 uur.',
+          'Klik op **Kanaalplaatvloer leggen** (2.6). Dubbelklik in het veld **Duur**, typ `5h` en druk op Enter. De kraan legt de kanaalplaten van de vloer in 5 uur.',
         ],
         explain: [
           'Ook hier staat nu *5h* in de takenlijst. Een kraaninzet in uren is precies waar urenplanning voor dient: een kraan huur je per uur en niet per dag, en 5 uur is een ochtend. De rest van de taken blijft in dagen. Er is nog niets herberekend.',
@@ -1598,7 +1598,7 @@ const TEXT_4 = {
       'kraan-dak': {
         title: 'De kraan: 6 uur voor de dakelementen',
         task: [
-          'Klik op **Dakelementen plaatsen** (3.3). Typ in het veld **Duur** `6h` en druk op Enter.',
+          'Klik op **Dakelementen plaatsen** (3.3). Dubbelklik in het veld **Duur**, typ `6h` en druk op Enter.',
         ],
         explain: [
           'Je hebt nu drie taken in uren: Fundering storten (6h), Kanaalplaatvloer leggen (5h) en Dakelementen plaatsen (6h). Alle andere taken staan nog in dagen. Dat is een gemengde planning. Wat de app daarmee doet, zie je als je rekent.',
@@ -1619,7 +1619,7 @@ const TEXT_4 = {
       'langere-kraan': {
         title: 'Wat als de kraan langer nodig is?',
         task: [
-          'Het dak komt toch in twee ritten en de kraan is 12 uur nodig. Klik op **Dakelementen plaatsen** (3.3), typ in het paneel *Eigenschappen* in het veld **Duur** `12h`, druk op Enter en druk op F5.',
+          'Het dak komt toch in twee ritten en de kraan is 12 uur nodig. Klik op **Dakelementen plaatsen** (3.3), dubbelklik in het paneel *Eigenschappen* in het veld **Duur**, typ `12h`, druk op Enter en druk op F5.',
         ],
         explain: [
           'Een werkdag heeft 8 uur, dus 12 uur past niet in één dag. Dakelementen plaatsen loopt nu van dinsdag 6 juli 07:00 tot woensdag 7 juli 11:00: 8 uur op dinsdag en 4 uur op woensdag.',
@@ -1630,7 +1630,7 @@ const TEXT_4 = {
       terugzetten: {
         title: 'Terug naar 6 uur',
         task: [
-          'Zet het veld **Duur** van Dakelementen plaatsen terug op `6h`, druk op Enter en druk op F5.',
+          'Dubbelklik in het veld **Duur** van Dakelementen plaatsen, typ `6h`, druk op Enter en druk op F5.',
         ],
         explain: [
           'Alles staat weer zoals na het eerste rekenen: Dakelementen plaatsen op dinsdag 6 juli van 07:00 tot 14:00 met 3,25 dagen speling, Dakbedekking weer vanaf woensdag 7 juli, *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*.',
@@ -1687,7 +1687,7 @@ const TEXT_4 = {
       stort: {
         title: 'The concrete pour: 6 hours',
         task: [
-          'Click **Pour foundation** (2.4) in the task list. In the *Properties* panel (scroll down if needed), click the **Duration** field, type `6h` and press Enter. The h stands for hour.',
+          'Click **Pour foundation** (2.4) in the task list. In the *Properties* panel (scroll down if needed), double-click the **Duration** field, so that the 1 is selected, type `6h` and press Enter. The h stands for hour.',
         ],
         explain: [
           'In the task list Pour foundation now says *6h* instead of 1d, and in *Properties* the unit **Hours** sits next to the Duration field. At the bottom, the status bar says *Out of date — recalculate (F5)* again: a new duration only changes the dates when you calculate.',
@@ -1697,7 +1697,7 @@ const TEXT_4 = {
       'kraan-vloer': {
         title: 'The crane: 5 hours for the slabs',
         task: [
-          'Click **Lay hollow-core floor** (2.6). Type `5h` in the **Duration** field and press Enter. The crane places the hollow-core slabs of the floor in 5 hours.',
+          'Click **Lay hollow-core floor** (2.6). Double-click the **Duration** field, type `5h` and press Enter. The crane places the hollow-core slabs of the floor in 5 hours.',
         ],
         explain: [
           'Here too the task list now says *5h*. Crane work in hours is exactly what hour planning is for: you hire a crane by the hour and not by the day, and 5 hours is a morning. The rest of the tasks stays in days. Nothing has been recalculated yet.',
@@ -1706,7 +1706,7 @@ const TEXT_4 = {
       'kraan-dak': {
         title: 'The crane: 6 hours for the roof elements',
         task: [
-          'Click **Place roof elements** (3.3). Type `6h` in the **Duration** field and press Enter.',
+          'Click **Place roof elements** (3.3). Double-click the **Duration** field, type `6h` and press Enter.',
         ],
         explain: [
           'You now have three tasks in hours: Pour foundation (6h), Lay hollow-core floor (5h) and Place roof elements (6h). All other tasks are still in days. That is a mixed schedule. What the app does with it, you see when you calculate.',
@@ -1727,7 +1727,7 @@ const TEXT_4 = {
       'langere-kraan': {
         title: 'What if the crane is needed longer?',
         task: [
-          'The roof comes in two lifts after all and the crane is needed for 12 hours. Click **Place roof elements** (3.3), type `12h` in the **Duration** field in the *Properties* panel, press Enter and press F5.',
+          'The roof comes in two lifts after all and the crane is needed for 12 hours. Click **Place roof elements** (3.3), double-click the **Duration** field in the *Properties* panel, type `12h`, press Enter and press F5.',
         ],
         explain: [
           'A working day has 8 hours, so 12 hours does not fit in one day. Place roof elements now runs from Tuesday 6 July 07:00 to Wednesday 7 July 11:00: 8 hours on Tuesday and 4 hours on Wednesday.',
@@ -1738,7 +1738,7 @@ const TEXT_4 = {
       terugzetten: {
         title: 'Back to 6 hours',
         task: [
-          'Set the **Duration** field of Place roof elements back to `6h`, press Enter and press F5.',
+          'Double-click the **Duration** field of Place roof elements, type `6h`, press Enter and press F5.',
         ],
         explain: [
           'Everything is back as after the first calculation: Place roof elements on Tuesday 6 July from 07:00 to 14:00 with 3.25 days of float, Apply roofing again from Wednesday 7 July, *End: 01-09-2027* and *Critical path: 8 tasks, 48 work days*.',
@@ -1792,7 +1792,7 @@ const TEXT_5 = {
         task: [
           'Klik op *Resources › Beheer › Nieuwe resource*. Het resourcepaneel neemt de werkruimte over, met een lege rij onderaan de tabel. Typ de naam, kies het **Type** en druk op Enter: er opent dan direct een lege rij voor de volgende. Maak zo deze vijf resources:',
           '- `Timmerploeg`, type **Ploeg**: de ploeg voor wapening, vloer, dak en kozijnen.\n- `Metselaar`, type **Arbeid**: metselt de fundering en de spouwmuren en breekt de achtergevel door.\n- `Mobiele kraan`, type **Materieel**: legt de kanaalplaten en de dakelementen.\n- `Stukadoor`, type **Onderaannemer**, **Max. eenheden** `2`: een onderaannemer die met twee man kan komen.\n- `Beton`, type **Materiaal**, **Max. eenheden** `50` en **Eenheid** `m³`: het beton voor de stort, in kubieke meter per dag.',
-          'Druk na de vijfde op Esc.',
+          'Max. eenheden en Eenheid vul je in de rij in voordat je op Enter drukt. Dubbelklik in het vak Max. eenheden, zodat de 1 geselecteerd is, en typ het getal: met één klik komt de cursor naast de 1 en wordt 2 dan 21. Druk na de vijfde op Esc.',
           '**Toon mij** opent hier het resultaat van tutorial 4 met de vijf resources erin, als nieuw tabblad. Resources aanmaken kan het paneel zelf niet.',
         ],
         explain: [
@@ -1824,7 +1824,7 @@ const TEXT_5 = {
       'toewijzen-overig': {
         title: 'De stukadoor en het beton',
         task: [
-          'Wijs de **Stukadoor** toe aan Stucwerk (4.2). Wijs daarna het **Beton** toe aan Fundering storten (2.4): vul in het venster van Toewijzen ▾ eerst bij **Eenh./dag** `8` in en klik dan op **Beton**. Dat is 8 m³ beton per dag.',
+          'Wijs de **Stukadoor** toe aan Stucwerk (4.2). Wijs daarna het **Beton** toe aan Fundering storten (2.4): dubbelklik in het venster van Toewijzen ▾ eerst in het vak **Eenh./dag**, typ `8` en klik dan op **Beton**. Dat is 8 m³ beton per dag.',
           '**Toon mij** opent hier het project met alle twaalf toewijzingen, als nieuw tabblad.',
         ],
         explain: [
@@ -1847,7 +1847,7 @@ const TEXT_5 = {
       'tweede-stukadoor': {
         title: 'Een tweede stukadoor',
         task: [
-          'Zet in *Eigenschappen* in het blok **Toewijzingen** (onderaan, scroll zo nodig omlaag) de **Eenh./dag** van de Stukadoor op `2` en druk op Enter: twee stukadoors dus.',
+          'Zet in *Eigenschappen* in het blok **Toewijzingen** (onderaan, scroll zo nodig omlaag) de **Eenh./dag** van de Stukadoor op `2` (dubbelklik in het vak en typ `2`) en druk op Enter: twee stukadoors dus.',
           '**Toon mij** opent hier, als nieuw tabblad, het project met het stucwerk op Vast werk en twee stukadoors, al berekend: dan is ook de volgende stap, Rekenen, gedaan.',
         ],
         explain: [
@@ -1938,7 +1938,7 @@ const TEXT_5 = {
         task: [
           'Click *Resources › Manage › New resource*. The resource panel takes over the workspace, with an empty row at the bottom of the table. Type the name, choose the **Type** and press Enter: an empty row for the next one then opens straight away. Create these five resources:',
           '- `Carpentry crew`, type **Crew**: the crew for reinforcement, floor, roof and window frames.\n- `Bricklayer`, type **Labor**: builds the foundation brickwork and the cavity walls and breaks through the rear wall.\n- `Mobile crane`, type **Equipment**: places the hollow-core slabs and the roof elements.\n- `Plasterer`, type **Subcontractor**, **Max units** `2`: a subcontractor who can come with two people.\n- `Concrete`, type **Material**, **Max units** `50` and **Unit** `m³`: the concrete for the pour, in cubic metres per day.',
-          'Press Esc after the fifth.',
+          'Fill in Max units and Unit in the row before you press Enter. Double-click the Max units box, so that the 1 is selected, and type the number: with a single click the cursor lands next to the 1 and 2 becomes 21. Press Esc after the fifth.',
           '**Show me** opens the result of tutorial 4 with the five resources in it, as a new tab. The guide cannot create resources itself.',
         ],
         explain: [
@@ -1970,7 +1970,7 @@ const TEXT_5 = {
       'toewijzen-overig': {
         title: 'The plasterer and the concrete',
         task: [
-          'Assign the **Plasterer** to Plastering (4.2). Then assign the **Concrete** to Pour foundation (2.4): in the Assign ▾ window first enter `8` at **Units/day** and then click **Concrete**. That is 8 m³ of concrete per day.',
+          'Assign the **Plasterer** to Plastering (4.2). Then assign the **Concrete** to Pour foundation (2.4): in the Assign ▾ window first double-click the **Units/day** box, type `8` and then click **Concrete**. That is 8 m³ of concrete per day.',
           '**Show me** opens the project with all twelve assignments, as a new tab.',
         ],
         explain: [
@@ -1993,7 +1993,7 @@ const TEXT_5 = {
       'tweede-stukadoor': {
         title: 'A second plasterer',
         task: [
-          'In *Properties*, in the **Assignments** block (at the bottom, scroll down if needed), set the **Units/day** of the Plasterer to `2` and press Enter: two plasterers.',
+          'In *Properties*, in the **Assignments** block (at the bottom, scroll down if needed), set the **Units/day** of the Plasterer to `2` (double-click the box and type `2`) and press Enter: two plasterers.',
           '**Show me** opens, as a new tab, the project with the plastering on Fixed work and two plasterers, already calculated: then the next step, Calculating, is done as well.',
         ],
         explain: [
@@ -3110,6 +3110,122 @@ const STEP_LOGIC_7 = {
   delen: { anchor: 'ribbon-tab:file' },
 };
 
+// ── De beelden ────────────────────────────────────────────────────────────────────────────────
+//
+// GEGENEREERD, niet met de hand gemaakt: in een checkout van de app `npm run gen:docs-screenshots -- --out
+// <deze map>`. Dat draait per tutorial het stapscript (`tests/browser/tutorials/tut-<n>.ts` van de app) met echte
+// klikken vanaf de stand van de generator, controleert na elke stap de toestand en schrijft de uitsneden naar
+// `img/<taal>/<naam>.webp` (alleen licht thema). De naam hier is die van het beeld in het stapscript.
+//
+// Alleen waar het beeld iets toevoegt (ontwerp gebruikersdocumentatie §4): een venster dat de lezer moet
+// invullen, en wat je na een stap ziet als dat in woorden lastig is (de Gantt, het histogram, een rapport).
+// `at`: 'task' = onder de opdracht (het venster tijdens de stap), 'explain' = in "Wat je nu ziet, en waarom",
+// na de eerste alinea (die zegt wat je ziet; de rest legt uit waarom). In het artikel staan ze allemaal. In het paneel alleen `panel: true`: kleine uitsneden (±300 px,
+// leesbaar in het paneel) van iets in de rechterrail, waar het begeleidingspaneel overheen kan liggen.
+const STEP_IMAGES = {
+  [TUTORIAL_1_ID]: {
+    'nieuw-project': [{ file: 'tut-1-nieuw-project', at: 'task', alt: {
+      nl: 'Het venster Nieuw project, ingevuld: projectnaam Aanbouw woning, startdatum 07-06-2027, land Nederland, bouwvak Geen en de regel 36 feestdagen, 2026–2030.',
+      en: 'The New project window, filled in: project name House extension, start date 07-06-2027, country Netherlands, construction holiday None and the line 36 holidays, 2026–2030.',
+    } }],
+    berekenen: [{ file: 'tut-1-berekend', at: 'explain', alt: {
+      nl: 'De takenlijst met de vier fasen en hun taken, en de Gantt na Bereken: alle balken beginnen op maandag 7 juni, Buitenspouwblad metselen is rood en achter de andere taken loopt een groene band speling.',
+      en: 'The task list with the four phases and their tasks, and the Gantt after Calculate: every bar starts on Monday 7 June, Build outer cavity leaf is red and a green float band runs behind the other tasks.',
+    } }],
+  },
+  [TUTORIAL_2_ID]: {
+    'relaties-tekenen': [{ file: 'tut-2-type-relatie', at: 'task', alt: {
+      nl: 'Het venstertje Type relatie in de Gantt, met FS gekozen en een vak voor de lag, na het slepen van Bouwplaats inrichten naar Tuin en bestrating verwijderen.',
+      en: 'The small Relation type window in the Gantt, with FS selected and a box for the lag, after dragging from Set up site to Clear garden and paving.',
+    } }],
+    berekenen: [{ file: 'tut-2-kritiek-pad', at: 'explain', alt: {
+      nl: 'De Gantt na Bereken, passend gemaakt op het project: de taken staan achter elkaar van juni tot augustus, het kritieke pad is rood, en Buitenspouwblad metselen en Schilderwerk zijn blauw met een groene band speling.',
+      en: 'The Gantt after Calculate, fitted to the project: the tasks follow each other from June to August, the critical path is red, and Build outer cavity leaf and Painting are blue with a green float band.',
+    } }],
+    uitloop: [{ file: 'tut-2-speling', at: 'task', alt: {
+      nl: 'De tabel bij de ruwbouw, 3.1 tot en met 3.6: Buitenspouwblad metselen is niet kritiek en heeft 2d totale speling, de andere taken zijn kritiek met 0d, en bij Kozijnen plaatsen staat het bliksemsymbool achter 3.4 FS.',
+      en: 'The table at the shell, 3.1 up to 3.6: Build outer cavity leaf is not critical and has 2d total float, the other tasks are critical with 0d, and at Install window frames the lightning symbol follows 3.4 FS.',
+    } }],
+  },
+  [TUTORIAL_3_ID]: {
+    bouwvak: [{ file: 'tut-3-feestdagen-genereren', at: 'task', alt: {
+      nl: 'Feestdagen genereren in het venster Kalenders: land Nederland, bouwvak Midden gekozen, de regel 41 feestdagen, 2026–2030 en de knop Genereren.',
+      en: 'Generate holidays in the Calendars window: country Netherlands, construction holiday Central selected, the line 41 holidays, 2026–2030 and the Generate button.',
+    } }],
+    berekenen: [{ file: 'tut-3-bouwvak-constraint', at: 'explain', alt: {
+      nl: 'De Gantt na Bereken: het grijze blok Bouwvak (Midden) in augustus, het kritieke pad in rood vanaf Kozijnen plaatsen, de taken daarvoor blauw met speling, en Schilderwerk dat over de bouwvak heen loopt.',
+      en: 'The Gantt after Calculate: the grey Bouwvak (Midden) block in August, the critical path in red from Install window frames, the tasks before it blue with float, and Painting running across the construction holiday.',
+    } }],
+    'deadline-krap': [{ file: 'tut-3-deadline-overschreden', at: 'explain', panel: true, alt: {
+      nl: 'Het paneel Waarschuwingen: 0 fout(en), 1 waarschuwing(en), met bij 4.7 Oplevering de melding Deadline 27-08-2027 overschreden — vroegste einde 01-09-2027.',
+      en: 'The Warnings panel: 0 error(s), 1 warning(s), with at 4.7 Handover the message Deadline 27-08-2027 missed — early finish 01-09-2027.',
+    } }],
+  },
+  [TUTORIAL_4_ID]: {
+    urenplanning: [{ file: 'tut-4-urenplanning', at: 'task', alt: {
+      nl: 'Het venster Instellingen op het tabblad Planning: onder Urenplanning staan Urenplanning inschakelen en Gemengde dag/uur-planning toestaan aan.',
+      en: 'The Settings window on the Planning tab: under Hour planning, Enable hour planning and Allow mixed day/hour planning are on.',
+    } }],
+    berekenen: [{ file: 'tut-4-kloktijden', at: 'explain', alt: {
+      nl: 'De tabel na Bereken, met bredere kolommen Start en Einde: Fundering storten 18-06-2027 07:00 tot 14:00, Kanaalplaatvloer leggen 28-06-2027 07:00 tot 12:00 en Dakelementen plaatsen 06-07-2027 07:00 tot 14:00, met 3,25d en 3,38d totale speling.',
+      en: 'The table after Calculate, with wider Start and Finish columns: Pour foundation 18-06-2027 07:00 to 14:00, Lay hollow-core floor 28-06-2027 07:00 to 12:00 and Place roof elements 06-07-2027 07:00 to 14:00, with 3.25d and 3.38d total float.',
+    } }],
+  },
+  [TUTORIAL_5_ID]: {
+    resources: [{ file: 'tut-5-resources', at: 'explain', alt: {
+      nl: 'Het resourcepaneel met de vijf resources: Timmerploeg (Ploeg, 1), Metselaar (Arbeid, 1), Mobiele kraan (Materieel, 1), Stukadoor (Onderaannemer, 2) en Beton (Materiaal, 50, eenheid m³).',
+      en: 'The resource panel with the five resources: Carpentry crew (Crew, 1), Bricklayer (Labor, 1), Mobile crane (Equipment, 1), Plasterer (Subcontractor, 2) and Concrete (Material, 50, unit m³).',
+    } }],
+    werkregel: [{ file: 'tut-5-werkregel', at: 'explain', panel: true, alt: {
+      nl: 'In Eigenschappen staat het veld Werkregel op Vast werk, met eronder Beschermd: werk (duur volgt de inzet).',
+      en: 'In Properties the Work rule field is on Fixed work, with Protected: work (duration follows units) below it.',
+    } }],
+    histogram: [{ file: 'tut-5-histogram-kraan', at: 'explain', alt: {
+      nl: 'Het histogram met links de resourcelijst en Mobiele kraan gekozen: twee smalle balken die niet tot de bovenkant van de schaal (1 eenheden) reiken.',
+      en: 'The histogram with the resource list on the left and Mobile crane selected: two narrow bars that do not reach the top of the scale (1 units).',
+    } }],
+    overbezetting: [{ file: 'tut-5-overbezetting', at: 'explain', alt: {
+      nl: 'De Gantt met de vier taken van de metselaar geselecteerd, en eronder het histogram van de Metselaar: op vijf dagen steken de balken rood boven de capaciteit uit.',
+      en: 'The Gantt with the four tasks of the bricklayer selected, and below it the histogram of the Bricklayer: on five days the bars stick out in red above the capacity.',
+    } }],
+    nivelleren: [{ file: 'tut-5-nivelleren', at: 'explain', alt: {
+      nl: 'Het venster Resources nivelleren na Berekenen: Projecteinddatum: ongewijzigd (30-08-2027) en één regel, Buitenspouwblad metselen, oude start 29-06-2027, nieuwe start 06-07-2027, 5 d.',
+      en: 'The Level resources window after Calculate: Project end date: unchanged (30-08-2027) and one line, Build outer cavity leaf, old start 29-06-2027, new start 06-07-2027, 5 d.',
+    } }],
+  },
+  [TUTORIAL_6_ID]: {
+    baseline: [{ file: 'tut-6-baseline', at: 'explain', alt: {
+      nl: 'Het venster Baselines met één baseline, Basisplanning, met het bolletje onder Actief.',
+      en: 'The Baselines window with one baseline, Baseline, with the dot under Active.',
+    } }],
+    metselwerk: [{ file: 'tut-6-voortgang', at: 'explain', alt: {
+      nl: 'De tabel met de kolommen Voortgang, Werkelijke start en Werkelijke einde ingevuld: de acht taken van de voorbereiding en de fundering op 100 %, Funderingsmetselwerk op 50 % met alleen een werkelijke start.',
+      en: 'The table with the Progress, Actual start and Actual finish columns filled in: the eight tasks of the preparation and the foundations at 100%, Foundation brickwork at 50% with only an actual start.',
+    } }],
+    'afwijking-gantt': [{ file: 'tut-6-afwijking-gantt', at: 'explain', alt: {
+      nl: 'De Gantt na Bereken: onder elke balk de grijze balk van de baseline, de oranje statusdatumlijn op 28 juni, en vanaf het ontgraven ligt elke taak een werkdag rechts van zijn baseline.',
+      en: 'The Gantt after Calculate: below every bar the grey baseline bar, the orange status date line on 28 June, and from the excavation onwards every task lies a working day to the right of its baseline.',
+    } }],
+  },
+  [TUTORIAL_7_ID]: {
+    variance: [{ file: 'tut-7-variance', at: 'explain', alt: {
+      nl: 'Het Variance-rapport: links Taken 23, Later 19, Eerder 0 en Projecteinde: +1 werkdagen; rechts per taak de datums uit de baseline, de huidige datums, de afwijking en de status.',
+      en: 'The Variance report: on the left Tasks 23, Later 19, Earlier 0 and Project end: +1 work days; on the right per task the baseline dates, the current dates, the variance and the status.',
+    } }],
+    voortgangsrapport: [{ file: 'tut-7-voortgangsrapport', at: 'explain', alt: {
+      nl: 'Het Voortgangsrapport: statusdatum 28-06-2027, baseline-einde 30-08-2027, prognose-einde 31-08-2027, Δ einde +1, gepland 28,7 % en werkelijk 25 %, met daaronder de takenlijsten per groep.',
+      en: 'The Progress report: status date 28-06-2027, baseline finish 30-08-2027, forecast finish 31-08-2027, Δ finish +1, planned 28.7% and actual 25%, with the task lists per group below.',
+    } }],
+  },
+};
+
+/** De beelden van een stap op plek `at` als Markdown-regels; `panelOnly`: alleen die ook in het paneel staan. */
+function imageLines(def, key, lang, at, panelOnly) {
+  return ((STEP_IMAGES[def.id] || {})[key] || [])
+    .filter(img => img.at === at && (!panelOnly || img.panel))
+    .map(img => `![${img.alt[lang]}](img/{lang}/${img.file}.webp)`);
+}
+
 /** De zeven tutorials: één bron voor artikel, paneel, lintknop en host-verzoek. */
 const TUTORIALS = [
   { id: TUTORIAL_1_ID, order: 1, label: 'Tutorial 1', text: TEXT_1, stepOrder: STEP_ORDER_1, logic: STEP_LOGIC_1 },
@@ -3127,7 +3243,9 @@ const para = lines => lines.join('\n\n');
 function stepBody(def, lang, key) {
   const t = def.text[lang];
   const s = t.steps[key];
-  return `**${s.title}**\n\n${para(s.task)}\n\n---\n\n${t.whatLabel}\n\n${para([...s.explain, ...(s.panelOnly || [])])}`;
+  const task = [...s.task, ...imageLines(def, key, lang, 'task', true)];
+  const explain = [s.explain[0], ...imageLines(def, key, lang, 'explain', true), ...s.explain.slice(1), ...(s.panelOnly || [])];
+  return `**${s.title}**\n\n${para(task)}\n\n---\n\n${t.whatLabel}\n\n${para(explain)}`;
 }
 
 /** Leesversie: dezelfde stappen, als artikel. */
@@ -3136,7 +3254,9 @@ function articleBody(def, lang) {
   const stepWord = lang === 'nl' ? 'Stap' : 'Step';
   const steps = def.stepOrder.map((key, i) => {
     const s = t.steps[key];
-    return `## ${stepWord} ${i + 1} — ${s.title}\n\n${para(s.task)}\n\n${t.whatLabel}\n\n${para(s.explain)}`;
+    const task = [...s.task, ...imageLines(def, key, lang, 'task', false)];
+    const explain = [s.explain[0], ...imageLines(def, key, lang, 'explain', false), ...s.explain.slice(1)];
+    return `## ${stepWord} ${i + 1} — ${s.title}\n\n${para(task)}\n\n${t.whatLabel}\n\n${para(explain)}`;
   });
   return [para(t.intro), ...steps, para(t.outro)].join('\n\n');
 }

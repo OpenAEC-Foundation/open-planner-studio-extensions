@@ -39,6 +39,9 @@ Interactieve tutorials voor **Open Planner Studio** (extensie-API 1.4, permissie
   lintknop — synchroon, want de app kijkt meteen daarna of er een begeleiding loopt. Een verzoek voor
   tutorial 2 t/m 7 werkt op dezelfde manier.
 
+- **Beelden**: twintig schermafbeeldingen per taal (`img/nl/`, `img/en/`), gegenereerd uit de echte app; zie
+  *Beelden* hieronder.
+
 Leesversie en paneel komen uit dezelfde tekst in `main.js`. De extensielader kent één bestand
 (`require()` geeft alleen `open-planner-studio`), dus `main.js` heeft duidelijke secties: het project en
 de leesfuncties, tutorial 1, de logica van tutorial 2 en 3, die van tutorial 4 en 5, de teksten
@@ -287,6 +290,39 @@ maken. Tot die tijd houdt `"apiVersion": "1.4"` oudere apps tegen: een host met 
 contract-minor weigert de extensie. Een hogere `minAppVersion` nu zou de extensie in de huidige
 dev-build (ook 2026.9.0) weigeren.
 
+## Beelden
+
+`img/<taal>/tut-<n>-<onderwerp>.webp` zijn **gegenereerd**, niet met de hand gemaakt. In een checkout van de app
+(branch `claude/tutorial-screenshots`, PR OpenAEC-Foundation/open-planner-studio#288):
+
+```bash
+npm run gen:docs-screenshots -- --out <pad naar extensions/tutorials>
+# alleen een paar tutorials: -- --out <map> --only tut-3-kalender,tut-4-uren
+```
+
+Dat draait per tutorial het stapscript van de app (`tests/browser/tutorials/tut-<n>.ts`): dezelfde stappen,
+knopnamen en invoer als de tekst hier, met echte klikken en toetsen vanaf de stand van de generator, een
+controle na elke stap en aan het eind een vergelijking met de eindstand (`na-tut-<n>`). Pas als alles groen is,
+vervangt het `img/<taal>/tut-*.webp`. Alleen licht thema, venster 1280×1050 (de tabel van tutorial 6 tijdelijk
+1440 breed, de rapporten van tutorial 7 1000), WebP-kwaliteit 0,9. Dezelfde stapscripts draaien in de CI van de
+app zonder beelden: wordt een knop hernoemd of verandert een uitkomst, dan wordt de tutorial daar rood.
+
+Welke beelden, en waar (`STEP_IMAGES` in `main.js`, met alt-tekst in nl en en):
+
+- alleen waar het beeld iets toevoegt: een venster dat je moet invullen (Nieuw project, Type relatie,
+  Feestdagen genereren, Instellingen › Planning) en wat je na een stap ziet als dat in woorden lastig is (de
+  Gantt na Bereken, het histogram, de afwijking, de rapporten). Twee tot vijf per tutorial;
+- `at: 'task'` onder de opdracht (het venster tijdens de stap), `at: 'explain'` in *Wat je nu ziet, en
+  waarom*, na de eerste alinea (die zegt wat je ziet);
+- in het artikel staan ze allemaal; in het paneel alleen `panel: true`: de twee kleine uitsneden uit de
+  rechterrail (Waarschuwingen in tutorial 3, Werkregel in tutorial 5), ±300 px breed en dus leesbaar in het
+  paneel, en precies waar het paneel overheen kan liggen. De grote beelden zouden in het paneel (296 px)
+  onleesbaar klein worden.
+
+Wat de stapscripts in de app ook vonden: een klik in het veld **Duur** (Eigenschappen) zet de cursor áchter de
+oude waarde, dus typen voegt toe (5 → 52, 1 → 16h); bij **Max. eenheden** in het resourcepaneel wordt 2 zo 21.
+Tutorial 1, 4 en 5 zeggen nu *dubbelklik* in die velden (dubbelklikken selecteert de waarde).
+
 ## Projectbestanden
 
 `projects/<taal>/start-tut-1.ifc`, `na-tut-1.ifc`, `na-tut-2.ifc`, `tussen-tut-3-bouwvak.ifc`,
@@ -311,16 +347,23 @@ kalender aan te passen; **Opnieuw** op de constraintstap laadt hem als beginstan
 De drie `tussen-tut-5-*`-standen (app-generator, PR OpenAEC-Foundation/open-planner-studio#279, branch `claude/tutorial-tussenstanden-tut5`) zijn er
 om dezelfde reden: de API kan geen resources, toewijzingen of werkregels schrijven. De zes `tussen-tut-6-*`-standen
 (app-generator, branch `claude/tutorial-tussenstanden-tut6`) idem: de API kan geen baseline, statusdatum of (via
-de regels van de app) voortgang schrijven. De andere bestanden in
-`projects/` zijn niet opnieuw gegenereerd; ze verschillen van de huidige generatoruitvoer alleen in
-GUIDs, tijdstempels en (bij `start-tut-1` en `na-tut-1`) de schrijfversie en de STEP-codering van een
-gedachtestreepje.
+de regels van de app) voortgang schrijven.
+
+`start-tut-1` en `na-tut-1` zijn op 7 oktober 2026 opnieuw gegenereerd (app op `main` `a2063790`), zodat alle
+standen uit dezelfde generator komen: ze hadden nog schrijfversie 0.1 en een ongecodeerd gedachtestreepje in de
+projectbeschrijving. Verder zijn ze gelijk gebleven (alleen GUIDs, interne id's en tijdstempels verschillen), en
+tutorial 1 loopt er in de app, nl en en, hetzelfde mee. De andere bestanden in `projects/` verschillen van de
+huidige generatoruitvoer alleen in GUIDs, interne id's en tijdstempels.
 
 ## ZIP maken
 
 ```bash
-zip -X tutorials-1.2.0.zip manifest.json main.js projects/nl/*.ifc projects/en/*.ifc
+rm -f tutorials-1.2.0.zip
+zip -X tutorials-1.2.0.zip manifest.json main.js projects/nl/*.ifc projects/en/*.ifc img/nl/*.webp img/en/*.webp
 git add -f tutorials-1.2.0.zip
 ```
+
+De ZIP bevat precies deze bestanden, niet meer en niet minder (controleer met `unzip -l`); de app begrenst een
+extensie op 24 MiB per bestand en 48 MiB samen.
 
 Installeren om te testen: Bestand › Extensies › **ZIP** › kies `tutorials-1.2.0.zip`.
