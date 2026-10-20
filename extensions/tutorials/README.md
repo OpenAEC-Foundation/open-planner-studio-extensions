@@ -10,7 +10,7 @@ Interactieve tutorials voor **Open Planner Studio** (extensie-API 1.4, permissie
    en een deadline.
 4. *Plannen in uren* (`tut-4-uren`): urenplanning aanzetten, de betonstort en twee kraaninzetten in uren,
    en zien hoe de app dagen en uren door elkaar rekent.
-5. *Resources en nivelleren* (`tut-5-resources`): vijf resources aanmaken en toewijzen, de werkregel van
+5. *Resources en nivelleren* (`tut-5-resources`): vijf resources aanmaken en toewijzen, het taaktype van
    het stucwerk, het histogram, overbezetting en nivelleren.
 6. *Voortgang en afwijking* (`tut-6-uitvoering`): baseline opslaan, statusdatum zetten, voortgang in de
    tabel invullen, rekenen en de afwijking lezen (Gantt en tabelkolom).
@@ -30,7 +30,7 @@ Interactieve tutorials voor **Open Planner Studio** (extensie-API 1.4, permissie
   **Opnieuw**.
 - Stappen die rekenen (Bereken, en de stappen van tutorial 3 en 4) herkennen een berekening van precies de
   huidige planning via `host:schedule-calculated` (permissie `events`); de vingerafdruk dekt taken
-  (duur in dagen of uren, constraint, deadline, werkregel, nivelleervertraging), toewijzingen (resource en
+  (duur in dagen of uren, constraint, deadline, taaktype, nivelleervertraging), toewijzingen (resource en
   inzet), relaties (soort, lag) en kalender (werkdagen, vrije dagen).
 - **Op verzoek van de app**: zegt de gebruiker na de eerste voltooide rondleiding "Ja" op de
   tutorialvraag, dan zendt de app `host:tutorial-requested` met
@@ -65,7 +65,7 @@ stap; **Toon mij** op die stap opent hem als het project niet klopt):
 tutorial 1 stap *De fasen* (`start-tut-1`), tutorial 2 stap *De eerste relatie* (`na-tut-1`), tutorial 3
 stap *De bouwvak in de kalender* (`na-tut-2`) en stap *Een constraint* (`tussen-tut-3-bouwvak`),
 tutorial 4 stap *De betonstort: 6 uur* (`na-tut-3`) en tutorial 5 stap *Vijf resources aanmaken*
-(`na-tut-4`), *De metselaar op vier taken* (`tussen-tut-5-resources`), *De werkregel: Vast werk*
+(`na-tut-4`), *De metselaar op vier taken* (`tussen-tut-5-resources`), *Het taaktype: Vast werk*
 (`tussen-tut-5-toegewezen`) en *Nivelleren* (`tussen-tut-5-werkregel`), en tutorial 6 stap *Een baseline
 opslaan* (`na-tut-5`), *De statusdatum* (`tussen-tut-6-baseline`), *De voorbereiding is klaar*
 (`tussen-tut-6-statusdatum`), *Het ontgraven liep uit* (`tussen-tut-6-voorbereiding`), *De wapening, de keuring
@@ -75,7 +75,7 @@ Tutorial 7 heeft geen Opnieuw: het verandert het project niet.
 ## Wat de extensie-API niet kan (en wat dat voor tutorial 4 en 5 betekent)
 
 `api.data` kan taken en relaties schrijven, maar geen kalender, instellingen, resources, toewijzingen,
-werkregels of nivellering. Gevolgen:
+taaktypes of nivellering. Gevolgen:
 
 - **Tutorial 4, stap *Urenplanning aanzetten*.** Urenplanning is een instelling van de app (niet van het
   document) en de API kent geen instellingen. De controle leest de bewaarde instelling,
@@ -102,7 +102,7 @@ werkregels of nivellering. Gevolgen:
   | 3 *De metselaar op vier taken* | `tussen-tut-5-toegewezen` (alle twaalf) | `tussen-tut-5-resources` |
   | 4 *De timmerploeg en de kraan* | `tussen-tut-5-toegewezen` (alle twaalf) | – |
   | 5 *De stukadoor en het beton* | `tussen-tut-5-toegewezen` | – |
-  | 6 *De werkregel: Vast werk* | `tussen-tut-5-werkregel` (ook stap 7 en 8) | `tussen-tut-5-toegewezen` |
+  | 6 *Het taaktype: Vast werk* | `tussen-tut-5-werkregel` (ook stap 7 en 8) | `tussen-tut-5-toegewezen` |
   | 7 *Een tweede stukadoor* | `tussen-tut-5-werkregel` (ook stap 8) | – |
   | 8 *Rekenen* | `tussen-tut-5-werkregel`, nivellering eruit, herberekenen | – |
   | 9 *Het histogram* | idem | – |
@@ -145,7 +145,7 @@ Gecontroleerd in de app-code (`src/extensions/extTypes.ts`, `extensionApi.ts`) e
   maar na Toon mij of Opnieuw in stap 3–7 ziet de lezer een berekende planning, niet de oude berekening die de
   uitleg van die stap beschrijft. De tekst bij Toon mij en de intro zeggen dat, met de getallen hieronder. Bij
   Rekenen (stap 8) komt alles op `na-tut-6` uit.
-- **Een urentaak heeft kloktijden.** De stort (`Fundering storten`, 6 u) heeft in `na-tut-6` een werkelijke
+- **Een urentaak heeft kloktijden.** De stort (`Fundering storten`, 6u) heeft in `na-tut-6` een werkelijke
   start `2027-06-21T07:00` en een werkelijk einde `2027-06-21T14:00`; de lezer typt `21-06-2027 07:00` en
   `21-06-2027 14:00` in de tabel. Alleen de datum geeft een andere uitkomst (vroege start 18-06T16:00,
   speling 1 in plaats van 0,25): de controle eist de kloktijd.
@@ -238,11 +238,11 @@ motor ze, dan wordt `tests/planning/check-tutorial-project.ts` in de app rood; p
   Wat-als deadline vr 27 aug: *1 deadline(s) overschreden*, *21 taken*, oplevering blijft 1 sep,
   totale speling −3 dagen.
 - **`na-tut-4`**: `na-tut-3` + urenplanning aan en drie taken in uren (gepind in
-  `check-tutorial-project.ts`). Fundering storten (6 u) vr 18 jun 07:00–14:00, Kanaalplaatvloer leggen (5 u)
-  ma 28 jun 07:00–12:00, Dakelementen plaatsen (6 u) di 6 jul 07:00–14:00 (werkdag 07:00–12:00 en
+  `check-tutorial-project.ts`). Fundering storten (6u) vr 18 jun 07:00–14:00, Kanaalplaatvloer leggen (5u)
+  ma 28 jun 07:00–12:00, Dakelementen plaatsen (6u) di 6 jul 07:00–14:00 (werkdag 07:00–12:00 en
   13:00–16:00, 8 netto-uren). Oplevering blijft wo 1 sep, *8 taken, 48 werkdagen*. Totale speling stort en
   dakelementen 3,25 dagen, vloer 3,375 (de tabel toont 3,38d): de dagtaken eromheen hebben 3, het verschil
-  zijn de uren (2, 2 en 3) die een dagtaak niet gebruikt. Wat-als dakelementen 12 u: di 6 jul 07:00 t/m wo 7
+  zijn de uren (2, 2 en 3) die een dagtaak niet gebruikt. Wat-als dakelementen 12u: di 6 jul 07:00 t/m wo 7
   jul 11:00, Dakbedekking do 8 – vr 9 jul (was wo 7 – do 8), speling dakelementen 2,5 dagen, binnenspouwblad
   en dakbedekking 2 werkdagen; oplevering en *8 taken, 48 werkdagen* blijven.
 - **`tussen-tut-5-resources`**: `na-tut-4` + de vijf resources (Timmerploeg Ploeg 1, Metselaar Arbeid 1,
@@ -326,12 +326,12 @@ Welke beelden, en waar (`STEP_IMAGES` in `main.js`, met alt-tekst in nl en en):
 - `at: 'task'` onder de opdracht (het venster tijdens de stap), `at: 'explain'` in *Wat je nu ziet, en
   waarom*, na de eerste alinea (die zegt wat je ziet);
 - in het artikel staan ze allemaal; in het paneel alleen `panel: true`: de twee kleine uitsneden uit de
-  rechterrail (Waarschuwingen in tutorial 3, Werkregel in tutorial 5), ±300 px breed en dus leesbaar in het
+  rechterrail (Waarschuwingen in tutorial 3, Taaktype in tutorial 5), ±300 px breed en dus leesbaar in het
   paneel, en precies waar het paneel overheen kan liggen. De grote beelden zouden in het paneel (296 px)
   onleesbaar klein worden.
 
 Wat de stapscripts in de app ook vonden: een klik in het veld **Duur** (Eigenschappen) zet de cursor áchter de
-oude waarde, dus typen voegt toe (5 → 52, 1 → 16h); bij **Max. eenheden** in het resourcepaneel wordt 2 zo 21.
+oude waarde, dus typen voegt toe (5 → 52, 1 → 16u); bij **Max. eenheden** in het resourcepaneel wordt 2 zo 21.
 Tutorial 1, 4 en 5 zeggen nu *dubbelklik* in die velden (dubbelklikken selecteert de waarde).
 
 ## Projectbestanden
@@ -356,7 +356,7 @@ niet wijzigen, dus **Toon mij** op de bouwvakstap opent dit project (als nieuw t
 kalender aan te passen; **Opnieuw** op de constraintstap laadt hem als beginstand van die stap.
 
 De drie `tussen-tut-5-*`-standen (app-generator, PR OpenAEC-Foundation/open-planner-studio#279, branch `claude/tutorial-tussenstanden-tut5`) zijn er
-om dezelfde reden: de API kan geen resources, toewijzingen of werkregels schrijven. De zes `tussen-tut-6-*`-standen
+om dezelfde reden: de API kan geen resources, toewijzingen of taaktypes schrijven. De zes `tussen-tut-6-*`-standen
 (app-generator, branch `claude/tutorial-tussenstanden-tut6`) idem: de API kan geen baseline, statusdatum of (via
 de regels van de app) voortgang schrijven.
 

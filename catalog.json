@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-10-13",
+  "lastUpdated": "2026-10-20",
   "extensions": [
     {
       "id": "voorbeeld-takenlijst-importer",
@@ -65,7 +65,7 @@
       "minAppVersion": "2026.10.0",
       "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
       "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/tutorials/tutorials-1.2.0.zip",
-      "sha256": "a3112166a25b6275ad184fc7e4e4a89395420699e55a126c2a6de705a2bc44cb",
+      "sha256": "cd74e40aeb3a0aca0294014f124c386064da934f39c36605625090d388784b1b",
       "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10 12 5 2 10l10 5 10-5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>"
     }
   ]
