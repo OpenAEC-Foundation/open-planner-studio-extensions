@@ -536,7 +536,7 @@ const deadlineCalculated = (api, date) => constraintCalculated(api) && deadlineI
 // `na-tut-4` en `na-tut-5` van de generator en uit wat-als-berekeningen op die standen (zie README).
 //
 // WAT DE EXTENSIE-API HIER NIET KAN, en wat daarvan het gevolg is:
-//   • De instelling Urenplanning (en Toon werkregels en werk) is een instelling van de app, geen
+//   • De instelling Urenplanning (en Taaktypes gebruiken) is een instelling van de app, geen
 //     documentdata. `api.data` kent geen instellingen. Tutorial 4 stap "Urenplanning aanzetten" leest de
 //     bewaarde instelling (`ops-enableHourPlanning` in localStorage, zie settingsRegistry van de app) en
 //     heeft geen Toon mij.
@@ -1548,7 +1548,7 @@ const TEXT_4 = {
     ],
     outro: [
       '## Wat je hebt geleerd',
-      '- **Urenplanning is een instelling van de app, de eenheid hoort bij de taak.** Je zette hem één keer aan en koos daarna per taak: drie taken in uren (6h, 5h en 6h), de rest in dagen. Dat is een gemengde planning. Je gebruikt uren alleen waar een dag te grof is; voor al het andere zijn dagen overzichtelijker.',
+      '- **Urenplanning is een instelling van de app, de eenheid hoort bij de taak.** Je zette hem één keer aan en koos daarna per taak: drie taken in uren (6u, 5u en 6u), de rest in dagen. Dat is een gemengde planning. Je gebruikt uren alleen waar een dag te grof is; voor al het andere zijn dagen overzichtelijker.',
       '- **Een urentaak telt werkminuten door de werktijdblokken heen.** De stort van 6 uur liep van 07:00 tot 14:00 met de pauze ertussen. Twaalf uur kraan liep door in de volgende dag, van dinsdag 07:00 tot woensdag 11:00.',
       '- **Een dagtaak begint nooit midden op een dag.** Dakbedekking begon op de eerstvolgende werkdag na de dakelementen en niet om 14:00: woensdag 7 juli bij 6 uur kraan, donderdag 8 juli bij 12 uur.',
       '- **Wat een dagtaak niet kan gebruiken, wordt speling.** De 2 uur van de middag na de stort, een kwart dag, werden speling: 3,25 dagen in plaats van 3. Bij 12 uur kraan kromp de speling van het dak met een dag, van 3 naar 2 werkdagen. De oplevering schuift pas als een keten geen speling meer heeft.',
@@ -1573,35 +1573,35 @@ const TEXT_4 = {
         ],
         explain: [
           'Onder **Urenplanning** staat nu een tweede vinkje: **Gemengde dag/uur-planning toestaan**, standaard aan. Daarmee kies je per taak of hij in dagen of in uren telt, en staan dagtaken en urentaken in één planning naast elkaar. Zo plan je zo meteen drie taken in uren en laat je de rest in dagen.',
-          'Zolang urenplanning uit staat, werkt de app volledig in dagen en neemt hij een duur in uren niet over: typ je `6h` in het veld Duur, dan meldt het veld *Schakel urenplanning in om deze urentaak te bewerken.* Het is een instelling van de app, niet van dit project: je zet hem één keer aan. Onder *Beeld › Tijdschaal* kun je nu ook de schaal **Uur** kiezen.',
+          'Zolang urenplanning uit staat, werkt de app volledig in dagen en neemt hij een duur in uren niet over: typ je `6u` in het veld Duur, dan meldt het veld *Schakel urenplanning in om deze urentaak te bewerken.* Het is een instelling van de app, niet van dit project: je zet hem één keer aan. Onder *Beeld › Tijdschaal* kun je nu ook de schaal **Uur** kiezen.',
         ],
       },
       stort: {
         title: 'De betonstort: 6 uur',
         task: [
-          'Klik in de takenlijst op **Fundering storten** (2.4). Dubbelklik in het paneel *Eigenschappen* (scroll zo nodig omlaag) in het veld **Duur**, zodat de 1 geselecteerd is, typ `6h` en druk op Enter. De h staat voor uur (*hour*).',
+          'Klik in de takenlijst op **Fundering storten** (2.4). Dubbelklik in het paneel *Eigenschappen* (scroll zo nodig omlaag) in het veld **Duur**, zodat de 1 geselecteerd is, typ `6u` en druk op Enter. De u staat voor uur.',
         ],
         explain: [
-          'In de takenlijst staat bij Fundering storten nu *6h* in plaats van 1d, en in *Eigenschappen* staat naast het veld Duur de eenheid **Uren**. Onderaan in de statusbalk staat weer *Verouderd — herbereken (F5)*: een nieuwe duur verandert de datums pas als je rekent.',
+          'In de takenlijst staat bij Fundering storten nu *6u* in plaats van 1d, en in *Eigenschappen* staat naast het veld Duur de eenheid **Uren**. Onderaan in de statusbalk staat weer *Verouderd — herbereken (F5)*: een nieuwe duur verandert de datums pas als je rekent.',
           'Waarom 6 uur en niet 8? Een werkdag heeft in deze kalender 8 netto-uren: van 07:00 tot 12:00 en van 13:00 tot 16:00, met een uur pauze. Een stort van 6 uur beslaat daar 0,75 van. Als taak van 1d zou de planning de stort een hele werkdag laten bezetten.',
         ],
       },
       'kraan-vloer': {
         title: 'De kraan: 5 uur voor de kanaalplaten',
         task: [
-          'Klik op **Kanaalplaatvloer leggen** (2.6). Dubbelklik in het veld **Duur**, typ `5h` en druk op Enter. De kraan legt de kanaalplaten van de vloer in 5 uur.',
+          'Klik op **Kanaalplaatvloer leggen** (2.6). Dubbelklik in het veld **Duur**, typ `5u` en druk op Enter. De kraan legt de kanaalplaten van de vloer in 5 uur.',
         ],
         explain: [
-          'Ook hier staat nu *5h* in de takenlijst. Een kraaninzet in uren is precies waar urenplanning voor dient: een kraan huur je per uur en niet per dag, en 5 uur is een ochtend. De rest van de taken blijft in dagen. Er is nog niets herberekend.',
+          'Ook hier staat nu *5u* in de takenlijst. Een kraaninzet in uren is precies waar urenplanning voor dient: een kraan huur je per uur en niet per dag, en 5 uur is een ochtend. De rest van de taken blijft in dagen. Er is nog niets herberekend.',
         ],
       },
       'kraan-dak': {
         title: 'De kraan: 6 uur voor de dakelementen',
         task: [
-          'Klik op **Dakelementen plaatsen** (3.3). Dubbelklik in het veld **Duur**, typ `6h` en druk op Enter.',
+          'Klik op **Dakelementen plaatsen** (3.3). Dubbelklik in het veld **Duur**, typ `6u` en druk op Enter.',
         ],
         explain: [
-          'Je hebt nu drie taken in uren: Fundering storten (6h), Kanaalplaatvloer leggen (5h) en Dakelementen plaatsen (6h). Alle andere taken staan nog in dagen. Dat is een gemengde planning. Wat de app daarmee doet, zie je als je rekent.',
+          'Je hebt nu drie taken in uren: Fundering storten (6u), Kanaalplaatvloer leggen (5u) en Dakelementen plaatsen (6u). Alle andere taken staan nog in dagen. Dat is een gemengde planning. Wat de app daarmee doet, zie je als je rekent.',
         ],
       },
       berekenen: {
@@ -1619,7 +1619,7 @@ const TEXT_4 = {
       'langere-kraan': {
         title: 'Wat als de kraan langer nodig is?',
         task: [
-          'Het dak komt toch in twee ritten en de kraan is 12 uur nodig. Klik op **Dakelementen plaatsen** (3.3), dubbelklik in het paneel *Eigenschappen* in het veld **Duur**, typ `12h`, druk op Enter en druk op F5.',
+          'Het dak komt toch in twee ritten en de kraan is 12 uur nodig. Klik op **Dakelementen plaatsen** (3.3), dubbelklik in het paneel *Eigenschappen* in het veld **Duur**, typ `12u`, druk op Enter en druk op F5.',
         ],
         explain: [
           'Een werkdag heeft 8 uur, dus 12 uur past niet in één dag. Dakelementen plaatsen loopt nu van dinsdag 6 juli 07:00 tot woensdag 7 juli 11:00: 8 uur op dinsdag en 4 uur op woensdag.',
@@ -1630,7 +1630,7 @@ const TEXT_4 = {
       terugzetten: {
         title: 'Terug naar 6 uur',
         task: [
-          'Dubbelklik in het veld **Duur** van Dakelementen plaatsen, typ `6h`, druk op Enter en druk op F5.',
+          'Dubbelklik in het veld **Duur** van Dakelementen plaatsen, typ `6u`, druk op Enter en druk op F5.',
         ],
         explain: [
           'Alles staat weer zoals na het eerste rekenen: Dakelementen plaatsen op dinsdag 6 juli van 07:00 tot 14:00 met 3,25 dagen speling, Dakbedekking weer vanaf woensdag 7 juli, *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*.',
@@ -1761,26 +1761,26 @@ const TEXT_5 = {
     intro: [
       '# Resources en nivelleren',
       '## Wat je bouwt',
-      'Je zet de mensen en machines in de planning van de aanbouw: vijf resources en twaalf toewijzingen, van de timmerploeg tot het beton voor de stort. Daarna stel je de werkregel van het stucwerk in, lees je in het histogram wie wanneer werkt en ontdek je dat één metselaar op twee muren tegelijk staat. Die overbezetting los je op met nivelleren.',
+      'Je zet de mensen en machines in de planning van de aanbouw: vijf resources en twaalf toewijzingen, van de timmerploeg tot het beton voor de stort. Daarna stel je het taaktype van het stucwerk in, lees je in het histogram wie wanneer werkt en ontdek je dat één metselaar op twee muren tegelijk staat. Die overbezetting los je op met nivelleren.',
       'Aan het eind is er geen overbezetting meer. De oplevering staat op maandag 30 augustus 2027, twee werkdagen eerder dan in tutorial 4, doordat het stucwerk met twee stukadoors korter wordt. Je hebt gezien dat nivelleren het buitenspouwblad vijf werkdagen laat wachten zonder dat de oplevering schuift, en wat dat de taak kost.',
       '## Uitgangspunt',
       'Je hebt tutorial 4 afgerond: het project met de betonstort en de twee kraaninzetten in uren, berekend, met de oplevering op woensdag 1 september 2027. Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
-      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. Een extensie kan geen resources, toewijzingen of werkregels aanmaken; daarom opent Toon mij in deze tutorial zo nodig een meegeleverd project als nieuw tabblad, waarin de stap al gedaan is. Bij de drie toewijsstappen is dat steeds het project met alle twaalf toewijzingen, en bij de werkregel staat ook de tweede stukadoor er al in. **Opnieuw** laadt de beginstand van een stap opnieuw: in de stap *Vijf resources aanmaken* het resultaat van tutorial 4, in *De metselaar op vier taken* dat resultaat met de vijf resources, in *De werkregel: Vast werk* het project met alle toewijzingen en in *Nivelleren* het project vóór het nivelleren.',
+      'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 5*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. Een extensie kan geen resources of toewijzingen aanmaken en geen taaktype instellen; daarom opent Toon mij in deze tutorial zo nodig een meegeleverd project als nieuw tabblad, waarin de stap al gedaan is. Bij de drie toewijsstappen is dat steeds het project met alle twaalf toewijzingen, en bij het taaktype staat ook de tweede stukadoor er al in. **Opnieuw** laadt de beginstand van een stap opnieuw: in de stap *Vijf resources aanmaken* het resultaat van tutorial 4, in *De metselaar op vier taken* dat resultaat met de vijf resources, in *Het taaktype: Vast werk* het project met alle toewijzingen en in *Nivelleren* het project vóór het nivelleren.',
     ],
     outro: [
       '## Wat je hebt geleerd',
       '- **Een resource heeft een capaciteit en een toewijzing zet hem op een taak.** De app legt per werkdag de vraag naast *Max. eenheden*. De metselaar, met capaciteit 1, kreeg op 5 dagen 2 gevraagd: dat is overbezetting.',
       '- **Het histogram weegt uren mee.** De kraan stond op 28 juni en 6 juli voor 0,625 en 0,75 eenheid: 5 en 6 van de 8 werkuren van die dag.',
-      '- **De werkregel bepaalt wat meebeweegt als je de inzet wijzigt.** Met Vast werk werd het stucwerk met twee stukadoors 2 werkdagen in plaats van 4 en de oplevering twee werkdagen eerder, maandag 30 augustus. Met de standaardregel was het werk verdubbeld.',
+      '- **Het taaktype bepaalt wat meebeweegt als je de inzet wijzigt.** Met Vast werk werd het stucwerk met twee stukadoors 2 werkdagen in plaats van 4 en de oplevering twee werkdagen eerder, maandag 30 augustus. Met het standaardtaaktype was het werk verdubbeld.',
       '- **Relaties kennen geen capaciteit.** Volgens de relaties mochten het binnen- en buitenspouwblad tegelijk, maar met één metselaar kan dat niet. Dat zie je pas met resources.',
       '- **Nivelleren laat taken later beginnen, meer niet, en gebruikt daarvoor speling.** Het buitenspouwblad wachtte 5 werkdagen en de oplevering bleef op 30 augustus, maar de taak is nu kritiek: loopt hij uit, dan schuift de oplevering.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Werkregel kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Taaktypes: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Taaktype kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
     ],
     steps: {
       startpunt: {
         title: 'Het startpunt',
         task: [
-          'Zorg dat het project *Aanbouw woning* openstaat met de drie taken in uren uit tutorial 4: Fundering storten (6h), Kanaalplaatvloer leggen (5h) en Dakelementen plaatsen (6h). Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**. Kijk in de statusbalk.',
+          'Zorg dat het project *Aanbouw woning* openstaat met de drie taken in uren uit tutorial 4: Fundering storten (6u), Kanaalplaatvloer leggen (5u) en Dakelementen plaatsen (6u). Heb je dat niet, [open dan het resultaat van tutorial 4](project://projects/nl/na-tut-4.ifc). Meldt de app *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**. Kijk in de statusbalk.',
         ],
         explain: [
           'De statusbalk zegt *Einde: 01-09-2027* en *Kritiek pad: 8 taken, 48 werkdagen*, en er staat geen melding over resources.',
@@ -1833,15 +1833,15 @@ const TEXT_5 = {
         ],
       },
       werkregel: {
-        title: 'De werkregel: Vast werk',
+        title: 'Het taaktype: Vast werk',
         task: [
-          'Zet eerst de werkregel in beeld: klik op *Instellingen › Project › Instellingen*, open het tabblad **Planning** en zet onder **Berekenen** het vinkje bij **Toon werkregels en werk** aan. Sluit het venster met **Sluiten**.',
-          'Het stucwerk gaat straks met twee stukadoors werken. Selecteer **Stucwerk** (4.2) in de takenlijst. Kies in *Eigenschappen* bij **Werkregel** de regel **Vast werk**.',
-          '**Toon mij** opent hier, als nieuw tabblad, het project waarin het stucwerk al op Vast werk staat en ook de tweede stukadoor uit de volgende stap al is ingezet, berekend. Een werkregel instellen kan het paneel zelf niet. Het vinkje bij Toon werkregels en werk is een instelling van de app: dat zet je zelf aan.',
+          'Zet eerst het taaktype in beeld: klik op *Instellingen › Project › Instellingen*, open het tabblad **Planning** en zet onder **Berekenen** het vinkje bij **Taaktypes gebruiken** aan. Sluit het venster met **Sluiten**.',
+          'Het stucwerk gaat straks met twee stukadoors werken. Selecteer **Stucwerk** (4.2) in de takenlijst. Kies in *Eigenschappen* bij **Taaktype** de optie **Vast werk**.',
+          '**Toon mij** opent hier, als nieuw tabblad, het project waarin het stucwerk al op Vast werk staat en ook de tweede stukadoor uit de volgende stap al is ingezet, berekend. Een taaktype instellen kan het paneel zelf niet. Het vinkje bij Taaktypes gebruiken is een instelling van de app: dat zet je zelf aan.',
         ],
         explain: [
-          'Onder het veld Werkregel staat nu *Beschermd: werk (duur volgt de inzet)*. Er is nog niets veranderd: Stucwerk duurt nog 4d en de planning is niet verouderd. Een werkregel doet pas iets bij je eerstvolgende wijziging. Wel legt de app nu het werk vast, zodat er iets is om te beschermen: 4 dagen × 1 stukadoor × 8 uur is 32 uur. Het staat onder **Toewijzingen** bij **Werk (rest)**.',
-          'De werkregel bepaalt wat de app aanpast als je de duur, de inzet of het werk wijzigt. Bij **Vast werk** blijft het werk staan en volgt de duur de inzet. Meer: [Werkregels: duur, inzet en werk](docs://uitleg-werkregels).',
+          'In het veld **Taaktype** staat nu Vast werk. Wijs je het i-icoon ernaast aan, dan lees je *De duur volgt uit het werk en de inzet.* Er is nog niets veranderd: Stucwerk duurt nog 4d en de planning is niet verouderd. Een taaktype doet pas iets bij je eerstvolgende wijziging. Wel legt de app nu het werk vast, zodat er iets is om te beschermen: 4 dagen × 1 stukadoor × 8 uur is 32 uur. Het staat onder **Toewijzingen** bij **Werk (rest)**.',
+          'Het taaktype bepaalt wat de app aanpast als je de duur, de inzet of het werk wijzigt. Bij **Vast werk** blijft het werk staan en volgt de duur de inzet. Meer: [Taaktypes: duur, inzet en werk](docs://uitleg-werkregels).',
         ],
       },
       'tweede-stukadoor': {
@@ -1896,7 +1896,7 @@ const TEXT_5 = {
           'En waarom schuift de oplevering niet? Het buitenspouwblad had 5 werkdagen speling, omdat de kozijnen sinds tutorial 3 pas op 14 juli komen. Nivelleren gebruikt die speling op. Het buitenspouwblad heeft er nu 0 en is kritiek: de statusbalk zegt *Kritiek pad: 17 taken, 46 werkdagen*, tegen 8 taken ervoor. Loopt het buitenspouwblad nu uit, dan schuift de oplevering. Meer: [Nivelleren](docs://uitleg-nivelleren).',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Werkregel kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Taaktypes: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Taaktype kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
         ],
       },
     },
@@ -1907,20 +1907,20 @@ const TEXT_5 = {
     intro: [
       '# Resources and leveling',
       '## What you build',
-      'You put the people and machines into the schedule for the extension: five resources and twelve assignments, from the carpentry crew to the concrete for the pour. Then you set the work rule of the plastering, read in the histogram who works when and find out that one bricklayer is standing on two walls at once. You solve that overallocation with leveling.',
+      'You put the people and machines into the schedule for the extension: five resources and twelve assignments, from the carpentry crew to the concrete for the pour. Then you set the task type of the plastering, read in the histogram who works when and find out that one bricklayer is standing on two walls at once. You solve that overallocation with leveling.',
       'At the end there is no overallocation left. The handover is on Monday 30 August 2027, two working days earlier than in tutorial 4, because the plastering gets shorter with two plasterers. You have seen that leveling makes the outer cavity leaf wait five working days without the handover moving, and what that costs the task.',
       '## Starting point',
       'You have finished tutorial 4: the project with the concrete pour and the two crane jobs in hours, calculated, with the handover on Wednesday 1 September 2027. If you have not, [open the result of tutorial 4](project://projects/en/na-tut-4.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
-      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. An extension cannot create resources, assignments or work rules, so in this tutorial Show me opens a supplied project as a new tab if needed, in which the step has already been done. For the three assignment steps that is always the project with all twelve assignments, and for the work rule the second plasterer is already in it too. **Start over** reloads the starting point of a step: in the step *Creating five resources* the result of tutorial 4, in *The bricklayer on four tasks* that result with the five resources, in *The work rule: Fixed work* the project with all assignments and in *Leveling* the project before leveling.',
+      'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 5* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. An extension cannot create resources or assignments or set a task type, so in this tutorial Show me opens a supplied project as a new tab if needed, in which the step has already been done. For the three assignment steps that is always the project with all twelve assignments, and for the task type the second plasterer is already in it too. **Start over** reloads the starting point of a step: in the step *Creating five resources* the result of tutorial 4, in *The bricklayer on four tasks* that result with the five resources, in *The task type: Fixed work* the project with all assignments and in *Leveling* the project before leveling.',
     ],
     outro: [
       '## What you have learned',
       '- **A resource has a capacity and an assignment puts it on a task.** Per working day the app sets the demand against *Max units*. The bricklayer, with capacity 1, was asked for 2 on 5 days: that is overallocation.',
       '- **The histogram counts hours.** The crane stood at 0.625 and 0.75 units on 28 June and 6 July: 5 and 6 of the 8 working hours of that day.',
-      '- **The work rule decides what moves when you change the units.** With Fixed work the plastering with two plasterers took 2 working days instead of 4 and the handover came two working days earlier, Monday 30 August. With the default rule the work would have doubled.',
+      '- **The task type decides what moves when you change the units.** With Fixed work the plastering with two plasterers took 2 working days instead of 4 and the handover came two working days earlier, Monday 30 August. With the default task type the work would have doubled.',
       '- **Relationships know no capacity.** According to the relationships the inner and outer cavity leaf could run at the same time, but not with one bricklayer. You only see that with resources.',
       '- **Leveling makes tasks start later, nothing more, and uses float to do it.** The outer cavity leaf waited 5 working days and the handover stayed on 30 August, but the task is now critical: if it runs late, the handover moves.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a work rule](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Task types: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a task type](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
     ],
     steps: {
       startpunt: {
@@ -1979,15 +1979,15 @@ const TEXT_5 = {
         ],
       },
       werkregel: {
-        title: 'The work rule: Fixed work',
+        title: 'The task type: Fixed work',
         task: [
-          'First make the work rule visible: click *Settings › Project › Settings*, open the **Planning** tab and tick **Show work rules and work** under **Calculation**. Close the window with **Close**.',
-          'The plastering is going to be done with two plasterers. Select **Plastering** (4.2) in the task list. In *Properties*, choose the rule **Fixed work** at **Work rule**.',
-          '**Show me** opens, as a new tab, the project in which the plastering is already on Fixed work and the second plasterer from the next step is already in place, calculated. The guide cannot set a work rule itself. The Show work rules and work tick box is a setting of the app: you turn that on yourself.',
+          'First make the task type visible: click *Settings › Project › Settings*, open the **Planning** tab and tick **Use task types** under **Calculation**. Close the window with **Close**.',
+          'The plastering is going to be done with two plasterers. Select **Plastering** (4.2) in the task list. In *Properties*, choose **Fixed work** at **Task type**.',
+          '**Show me** opens, as a new tab, the project in which the plastering is already on Fixed work and the second plasterer from the next step is already in place, calculated. The guide cannot set a task type itself. The Use task types tick box is a setting of the app: you turn that on yourself.',
         ],
         explain: [
-          'Under the Work rule field it now says *Protected: work (duration follows units)*. Nothing has changed yet: Plastering still takes 4d and the schedule is not out of date. A work rule only does something at your next change. What the app does now is fix the work, so that there is something to protect: 4 days × 1 plasterer × 8 hours is 32 hours. It is shown under **Assignments**, at **Work (rem.)**.',
-          'The work rule decides what the app adjusts when you change the duration, the units or the work. With **Fixed work** the work stays put and the duration follows the units. More: [Work rules: duration, units and work](docs://uitleg-werkregels).',
+          'The **Task type** field now says Fixed work. Point at the i icon next to it and you read *Duration follows from work and units.* Nothing has changed yet: Plastering still takes 4d and the schedule is not out of date. A task type only does something at your next change. What the app does now is fix the work, so that there is something to protect: 4 days × 1 plasterer × 8 hours is 32 hours. It is shown under **Assignments**, at **Work (rem.)**.',
+          'The task type decides what the app adjusts when you change the duration, the units or the work. With **Fixed work** the work stays put and the duration follows the units. More: [Task types: duration, units and work](docs://uitleg-werkregels).',
         ],
       },
       'tweede-stukadoor': {
@@ -2042,7 +2042,7 @@ const TEXT_5 = {
           'And why does the handover not move? The outer cavity leaf had 5 working days of float, because since tutorial 3 the window frames only arrive on 14 July. Leveling uses up that float. The outer leaf now has 0 and is critical: the status bar says *Critical path: 17 tasks, 46 work days*, against 8 tasks before. If the outer leaf runs late now, the handover moves. More: [Resource leveling](docs://uitleg-nivelleren).',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a work rule](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Task types: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a task type](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
         ],
       },
     },
@@ -2542,7 +2542,7 @@ const TEXT_6 = {
       'Je zet de planning van de aanbouw om van voorspelling naar werkelijkheid. Je legt de planning vast als baseline, een afspraak om later aan te meten, zet de statusdatum op maandag 28 juni 2027 en vult in wat er in de eerste drie weken werkelijk is gebeurd: acht taken klaar, één taak halverwege en een ontgraving die een dag langer duurde dan gepland. Daarna reken je en lees je de afwijking af.',
       'Aan het eind staat de oplevering op dinsdag 31 augustus 2027, één werkdag later dan de baseline. Je hebt gezien waarom die ene dag van het ontgraven de hele oplevering laat opschuiven, en waar je de afwijking leest: onder de balken in de Gantt en in de tabel.',
       '## Uitgangspunt',
-      'Je hebt tutorial 5 afgerond: het project *Aanbouw woning* met vijf resources, de werkregel van het stucwerk en het genivelleerde buitenspouwblad, met de oplevering op maandag 30 augustus 2027. Heb je dat niet, [open dan het resultaat van tutorial 5](project://projects/nl/na-tut-5.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
+      'Je hebt tutorial 5 afgerond: het project *Aanbouw woning* met vijf resources, het taaktype van het stucwerk en het genivelleerde buitenspouwblad, met de oplevering op maandag 30 augustus 2027. Heb je dat niet, [open dan het resultaat van tutorial 5](project://projects/nl/na-tut-5.ifc). Meldt de app daarbij *Dit bestand bevat urenplanning.*, klik dan op **Urenplanning aanzetten**.',
       'Wil je de stappen in de app zelf doorlopen, klik dan in het lint op *Start › Tutorials › Tutorial 6*. Rechtsonder verschijnt een paneel met steeds één opdracht. Het paneel ziet zelf wanneer je een stap hebt gedaan en vertelt dan wat je ziet. Met **Toon mij** zet het paneel de stap voor je klaar. Een extensie kan geen baseline opslaan, geen statusdatum zetten en geen voortgang invoeren; daarom opent Toon mij in deze tutorial zo nodig een meegeleverd project als nieuw tabblad, waarin de stap al gedaan is: bij de eerste stap het resultaat van tutorial 5, bij de stappen daarna dat resultaat met de baseline, de statusdatum en de voortgang tot en met die stap, en vanaf het rekenen het resultaat van deze tutorial. Let op: de app rekent een project bij het openen altijd door, ook als je in de tutorial nog niet zou rekenen. Na Toon mij in de stappen 3 tot en met 7 zie je dus een berekende planning, niet de oude berekening die de tekst beschrijft; bij het rekenen in stap 8 komt alles op hetzelfde uit. De stap *Een baseline opslaan* kan het paneel niet zien: daar staat **Klaar, volgende**. **Opnieuw** laadt de beginstand van een stap opnieuw: in *Een baseline opslaan* het resultaat van tutorial 5, en in de stappen 3 tot en met 7 het project zoals het na de vorige stap is (ook dat rekent de app bij het openen door).',
     ],
     outro: [
@@ -2682,7 +2682,7 @@ const TEXT_6 = {
       'You turn the schedule for the house extension from a forecast into reality. You save the schedule as a baseline, an agreement to measure against later, set the status date to Monday 28 June 2027 and enter what really happened in the first three weeks: eight tasks finished, one task halfway and an excavation that took a day longer than planned. Then you calculate and read the variance.',
       'At the end the handover is on Tuesday 31 August 2027, one working day later than the baseline. You have seen why that one day of excavation moves the whole handover, and where you read the variance: below the bars in the Gantt and in the table.',
       '## Starting point',
-      'You have finished tutorial 5: the project *House extension* with five resources, the work rule of the plastering and the leveled outer cavity leaf, with the handover on Monday 30 August 2027. If you have not, [open the result of tutorial 5](project://projects/en/na-tut-5.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
+      'You have finished tutorial 5: the project *House extension* with five resources, the task type of the plastering and the leveled outer cavity leaf, with the handover on Monday 30 August 2027. If you have not, [open the result of tutorial 5](project://projects/en/na-tut-5.ifc). If the app then says *This file contains hour-based planning.*, click **Enable hour planning**.',
       'To walk through the steps in the app itself, click *Home › Tutorials › Tutorial 6* on the ribbon. A panel appears at the bottom right with one instruction at a time. The panel notices when you have done a step and then tells you what you see. **Show me** sets the step up for you. An extension cannot save a baseline, set a status date or enter progress; that is why in this tutorial Show me opens a bundled project as a new tab if needed, in which the step has been done: for the first step the result of tutorial 5, for the steps after that this result with the baseline, the status date and the progress up to and including that step, and from calculating onwards the result of this tutorial. Note: the app always calculates a project when it opens it, even when the tutorial would not calculate yet. After Show me in steps 3 to 7 you therefore see a calculated schedule, not the old calculation the text describes; when you calculate in step 8 everything comes out the same. The panel cannot see the step *Saving a baseline*: it says **Done, next**. **Start over** reloads the starting point of a step: in *Saving a baseline* the result of tutorial 5, and in steps 3 to 7 the project as it is after the previous step (the app calculates that one too when it opens it).',
     ],
     outro: [
@@ -3180,8 +3180,8 @@ const STEP_IMAGES = {
       en: 'The resource panel with the five resources: Carpentry crew (Crew, 1), Bricklayer (Labor, 1), Mobile crane (Equipment, 1), Plasterer (Subcontractor, 2) and Concrete (Material, 50, unit m³).',
     } }],
     werkregel: [{ file: 'tut-5-werkregel', at: 'explain', panel: true, alt: {
-      nl: 'In Eigenschappen staat het veld Werkregel op Vast werk, met eronder Beschermd: werk (duur volgt de inzet).',
-      en: 'In Properties the Work rule field is on Fixed work, with Protected: work (duration follows units) below it.',
+      nl: 'In Eigenschappen staat het veld Taaktype op Vast werk, met ernaast het i-icoon met de uitleg.',
+      en: 'In Properties the Task type field is on Fixed work, with the i icon with the explanation next to it.',
     } }],
     histogram: [{ file: 'tut-5-histogram-kraan', at: 'explain', alt: {
       nl: 'Het histogram met links de resourcelijst en Mobiele kraan gekozen: twee smalle balken die niet tot de bovenkant van de schaal (1 eenheden) reiken.',
