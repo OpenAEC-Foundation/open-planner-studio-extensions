@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "lastUpdated": "2026-10-13",
+  "lastUpdated": "2026-10-22",
   "extensions": [
     {
       "id": "voorbeeld-takenlijst-importer",
@@ -57,15 +57,15 @@
     {
       "id": "tutorials",
       "name": "Tutorials",
-      "version": "1.2.0",
+      "version": "1.2.1",
       "author": "OpenAEC Foundation",
       "description": "Leer plannen met Open Planner Studio aan de hand van één doorlopend project, een aanbouw aan een woning. De tutorials staan in Help › Tutorials en je doorloopt ze stap voor stap in de app zelf, met een begeleidingspaneel dat ziet wanneer een stap gedaan is. Nu beschikbaar: tutorial 1 (je eerste planning), tutorial 2 (relaties en het kritieke pad), tutorial 3 (de kalender en datumafspraken), tutorial 4 (plannen in uren), tutorial 5 (resources en nivelleren), tutorial 6 (voortgang en afwijking) en tutorial 7 (rapporteren en delen).",
       "category": "Other",
       "tags": ["tutorial", "leren", "help", "begeleiding"],
       "minAppVersion": "2026.10.0",
       "repository": "https://github.com/OpenAEC-Foundation/open-planner-studio-extensions",
-      "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/tutorials/tutorials-1.2.0.zip",
-      "sha256": "a3112166a25b6275ad184fc7e4e4a89395420699e55a126c2a6de705a2bc44cb",
+      "downloadUrl": "https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/tutorials/tutorials-1.2.1.zip",
+      "sha256": "54fb5f5b980b46d255602e994af30e62b5fc7cf78290bb3cdd002a1ea4846de5",
       "icon": "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 10 12 5 2 10l10 5 10-5z'/><path d='M6 12v5c3 3 9 3 12 0v-5'/></svg>"
     }
   ]
