@@ -1,0 +1,55 @@
+name: Tutorials-pakket
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tutorials-package-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  tutorials-package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ env.SOURCE_COMMIT }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22'
+          package-manager-cache: false
+
+      - name: Controleer JavaScript-syntax (geen uitvoering)
+        run: node --check extensions/tutorials/main.js
+
+      - name: Test pakket- en leveringsgrenzen
+        run: python3 -m unittest discover -s scripts -p 'test_tutorial_package.py' -v
+
+      - name: Bouw en controleer het exacte bronpakket
+        id: package
+        run: python3 scripts/tutorial_package.py build
+
+      # Ook wanneer de volgende leveringspoort nog rood is, is dit gecontroleerde pakket beschikbaar.
+      - name: Bewaar ZIP, digest en bronbewijs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: tutorials-${{ steps.package.outputs.version }}-${{ env.SOURCE_COMMIT }}-${{ github.run_attempt }}
+          path: build/tutorials/
+          if-no-files-found: error
+          retention-days: 14
+
+      # Geen continue-on-error of tijdelijke uitzondering: oude ZIP/catalogus blokkeren de mergepoort.
+      - name: Vereis gecommitteerd pakket en bijpassende catalogus
+        run: python3 scripts/tutorial_package.py verify
