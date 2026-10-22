@@ -1552,7 +1552,7 @@ const TEXT_4 = {
       '- **Een urentaak telt werkminuten door de werktijdblokken heen.** De stort van 6 uur liep van 07:00 tot 14:00 met de pauze ertussen. Twaalf uur kraan liep door in de volgende dag, van dinsdag 07:00 tot woensdag 11:00.',
       '- **Een dagtaak begint nooit midden op een dag.** Dakbedekking begon op de eerstvolgende werkdag na de dakelementen en niet om 14:00: woensdag 7 juli bij 6 uur kraan, donderdag 8 juli bij 12 uur.',
       '- **Wat een dagtaak niet kan gebruiken, wordt speling.** De 2 uur van de middag na de stort, een kwart dag, werden speling: 3,25 dagen in plaats van 3. Bij 12 uur kraan kromp de speling van het dak met een dag, van 3 naar 2 werkdagen. De oplevering schuift pas als een keten geen speling meer heeft.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). De regels achter deze tutorial staan in [Dagen en uren](docs://uitleg-dagen-en-uren). Hoe je het in je eigen project doet, lees je in [Urenplanning aanzetten](docs://howto-urenplanning-aanzetten). Wat de instelling Urenplanning inschakelen nog meer verandert, staat in [Instellingen](docs://ref-instellingen-lijst).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). De regels achter deze tutorial staan in [Dagen en uren](docs://uitleg-dagen-en-uren). Hoe je het in je eigen project doet, lees je in [Urenplanning aanzetten](docs://howto-urenplanning-aanzetten). Wat de instelling Urenplanning inschakelen nog meer verandert, staat in [App-instellingen](docs://ref-instellingen).',
     ],
     steps: {
       startpunt: {
@@ -1637,7 +1637,7 @@ const TEXT_4 = {
           'Dit is het resultaat van tutorial 4 en het beginpunt van tutorial 5: daarin komen de kraan, de ploeg en de andere resources erbij.',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). Meer over de regels lees je in [Dagen en uren](docs://uitleg-dagen-en-uren). Hoe je het in je eigen project doet, lees je in [Urenplanning aanzetten](docs://howto-urenplanning-aanzetten). Wat de instelling Urenplanning inschakelen nog meer verandert, staat in [Instellingen](docs://ref-instellingen-lijst).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-4.ifc). Meer over de regels lees je in [Dagen en uren](docs://uitleg-dagen-en-uren). Hoe je het in je eigen project doet, lees je in [Urenplanning aanzetten](docs://howto-urenplanning-aanzetten). Wat de instelling Urenplanning inschakelen nog meer verandert, staat in [App-instellingen](docs://ref-instellingen).',
         ],
       },
     },
@@ -1660,7 +1660,7 @@ const TEXT_4 = {
       '- **An hour task counts working minutes through the working-time blocks.** The 6-hour pour ran from 07:00 to 14:00 with the break in between. Twelve hours of crane carried on into the next day, from Tuesday 07:00 to Wednesday 11:00.',
       '- **A day task never starts in the middle of a day.** Applying the roofing started on the first working day after the roof elements and not at 14:00: Wednesday 7 July with 6 hours of crane, Thursday 8 July with 12 hours.',
       '- **What a day task cannot use becomes float.** The 2 hours of the afternoon after the pour, a quarter of a day, became float: 3.25 days instead of 3. With 12 hours of crane the float of the roof shrank by a day, from 3 to 2 working days. The handover only moves when a chain has no float left.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). The rules behind this tutorial are in [Days and hours](docs://uitleg-dagen-en-uren). How to do it in your own project is in [Turning on hour planning](docs://howto-urenplanning-aanzetten). What else the setting Enable hour planning changes is in [Settings](docs://ref-instellingen-lijst).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). The rules behind this tutorial are in [Days and hours](docs://uitleg-dagen-en-uren). How to do it in your own project is in [Turning on hour planning](docs://howto-urenplanning-aanzetten). What else the setting Enable hour planning changes is in [App settings](docs://ref-instellingen).',
     ],
     steps: {
       startpunt: {
@@ -1745,7 +1745,7 @@ const TEXT_4 = {
           'This is the result of tutorial 4 and the starting point of tutorial 5: in that one the crane, the crew and the other resources are added.',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). You can read more about the rules in [Days and hours](docs://uitleg-dagen-en-uren). How to do it in your own project is in [Turning on hour planning](docs://howto-urenplanning-aanzetten). What else the setting Enable hour planning changes is in [Settings](docs://ref-instellingen-lijst).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-4.ifc). You can read more about the rules in [Days and hours](docs://uitleg-dagen-en-uren). How to do it in your own project is in [Turning on hour planning](docs://howto-urenplanning-aanzetten). What else the setting Enable hour planning changes is in [App settings](docs://ref-instellingen).',
         ],
       },
     },
@@ -1774,7 +1774,7 @@ const TEXT_5 = {
       '- **De werkregel bepaalt wat meebeweegt als je de inzet wijzigt.** Met Vast werk werd het stucwerk met twee stukadoors 2 werkdagen in plaats van 4 en de oplevering twee werkdagen eerder, maandag 30 augustus. Met de standaardregel was het werk verdubbeld.',
       '- **Relaties kennen geen capaciteit.** Volgens de relaties mochten het binnen- en buitenspouwblad tegelijk, maar met één metselaar kan dat niet. Dat zie je pas met resources.',
       '- **Nivelleren laat taken later beginnen, meer niet, en gebruikt daarvoor speling.** Het buitenspouwblad wachtte 5 werkdagen en de oplevering bleef op 30 augustus, maar de taak is nu kritiek: loopt hij uit, dan schuift de oplevering.',
-      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Werkregel kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
+      'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). De regels achter deze tutorial staan in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen) en [Werkregel kiezen](docs://howto-werkregel-kiezen). De velden van het resourcepaneel staan in [Resourcepaneel](docs://ref-resourcepaneel). Het nivelleervenster staat bij stap 3 van [Overbezetting oplossen](docs://howto-overbezetting-oplossen).',
     ],
     steps: {
       startpunt: {
@@ -1896,7 +1896,7 @@ const TEXT_5 = {
           'En waarom schuift de oplevering niet? Het buitenspouwblad had 5 werkdagen speling, omdat de kozijnen sinds tutorial 3 pas op 14 juli komen. Nivelleren gebruikt die speling op. Het buitenspouwblad heeft er nu 0 en is kritiek: de statusbalk zegt *Kritiek pad: 17 taken, 46 werkdagen*, tegen 8 taken ervoor. Loopt het buitenspouwblad nu uit, dan schuift de oplevering. Meer: [Nivelleren](docs://uitleg-nivelleren).',
         ],
         panelOnly: [
-          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen), [Werkregel kiezen](docs://howto-werkregel-kiezen) en [Overbezetting oplossen](docs://howto-overbezetting-oplossen). Elk veld en elke knop staat in [Resourcepaneel](docs://ref-resourcepaneel) en [Nivelleringsopties](docs://ref-nivellering).',
+          'Wil je je resultaat vergelijken? [Open het eindresultaat van deze tutorial](project://projects/nl/na-tut-5.ifc). Meer over de regels lees je in [Werkregels: duur, inzet en werk](docs://uitleg-werkregels) en [Nivelleren](docs://uitleg-nivelleren). Hoe je het in je eigen project doet, lees je in [Resources beheren](docs://howto-resources-beheren), [Resources toewijzen met een curve](docs://howto-resource-toewijzen) en [Werkregel kiezen](docs://howto-werkregel-kiezen). De velden van het resourcepaneel staan in [Resourcepaneel](docs://ref-resourcepaneel). Het nivelleervenster staat bij stap 3 van [Overbezetting oplossen](docs://howto-overbezetting-oplossen).',
         ],
       },
     },
@@ -1920,7 +1920,7 @@ const TEXT_5 = {
       '- **The work rule decides what moves when you change the units.** With Fixed work the plastering with two plasterers took 2 working days instead of 4 and the handover came two working days earlier, Monday 30 August. With the default rule the work would have doubled.',
       '- **Relationships know no capacity.** According to the relationships the inner and outer cavity leaf could run at the same time, but not with one bricklayer. You only see that with resources.',
       '- **Leveling makes tasks start later, nothing more, and uses float to do it.** The outer cavity leaf waited 5 working days and the handover stayed on 30 August, but the task is now critical: if it runs late, the handover moves.',
-      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a work rule](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
+      'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). The rules behind this tutorial are in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen) and [Choosing a work rule](docs://howto-werkregel-kiezen). The fields of the resource panel are in [Resource panel](docs://ref-resourcepaneel). Step 3 of [Resolving overallocation](docs://howto-overbezetting-oplossen) describes the leveling dialog.',
     ],
     steps: {
       startpunt: {
@@ -2042,7 +2042,7 @@ const TEXT_5 = {
           'And why does the handover not move? The outer cavity leaf had 5 working days of float, because since tutorial 3 the window frames only arrive on 14 July. Leveling uses up that float. The outer leaf now has 0 and is critical: the status bar says *Critical path: 17 tasks, 46 work days*, against 8 tasks before. If the outer leaf runs late now, the handover moves. More: [Resource leveling](docs://uitleg-nivelleren).',
         ],
         panelOnly: [
-          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen), [Choosing a work rule](docs://howto-werkregel-kiezen) and [Resolving overallocation](docs://howto-overbezetting-oplossen). Every field and button is in [Resource panel](docs://ref-resourcepaneel) and [Leveling options](docs://ref-nivellering).',
+          'Want to compare your result? [Open the end result of this tutorial](project://projects/en/na-tut-5.ifc). You can read more about the rules in [Work rules: duration, units and work](docs://uitleg-werkregels) and [Resource leveling](docs://uitleg-nivelleren). How to do it in your own project is in [Managing resources](docs://howto-resources-beheren), [Assigning resources with a curve](docs://howto-resource-toewijzen) and [Choosing a work rule](docs://howto-werkregel-kiezen). The fields of the resource panel are in [Resource panel](docs://ref-resourcepaneel). Step 3 of [Resolving overallocation](docs://howto-overbezetting-oplossen) describes the leveling dialog.',
         ],
       },
     },
