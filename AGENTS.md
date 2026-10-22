@@ -1,7 +1,9 @@
 # AGENTS.md
 
 Dit is een **statische catalogus** van extensies voor [Open Planner Studio](https://github.com/OpenAEC-Foundation/open-planner-studio).
-Geen build, test, lint, codegen of CI — de "deploy" is een git push naar `main` (de app leest `catalog.json` en de ZIP's via `raw.githubusercontent.com`).
+De app leest `catalog.json` en de gecommitteerde ZIP’s via `raw.githubusercontent.com` op `main`; een merge naar `main` levert die bestanden dus direct. Er is geen tag of GitHub Release nodig. Alleen de tutorials hebben een gerichte pakket-CI; er is geen algemene appbuild in deze repo.
+
+**Serverbeperking voor alle agents:** geen lokale Node/npm/npx, installaties, tests, builds, generators, ZIP-generatie of hooks uitvoeren. Pakketbouw en uitvoeringscontroles lopen uitsluitend in GitHub CI. Statisch lezen en wijzigen met git/gh/rg/Python mag wel.
 
 ## De grote val: ZIP's moeten wél gecommit zijn, maar `.gitignore` negeert ze
 
@@ -52,3 +54,20 @@ omdat de app `raw.githubusercontent.com` gebruikt (release-assets falen op CORS 
 `extensions/voorbeeld-takenlijst-importer/` is de volledige referentie (importer + ribbon-knop +
 event-listener). Lees deze map voordat je een nieuwe extensie schrijft — alle API-oppervlakken
 worden daar gedemonstreerd.
+
+## Tutorials-pakket via CI
+
+`.github/workflows/tutorials-package.yml` draait op PR’s naar `main` en pushes op `main`, met alleen
+`contents: read`, gepinde actions en zonder opgeslagen git-credentials. Geen dispatch, writeback of publicatiestap.
+De workflow checkt de echte PR-head, controleert JS-syntax met Node 22 en draait de gerichte Python-contracttests.
+`scripts/tutorial_package.py build` pakt exact de 78 paden uit `scripts/tutorial-package-files.txt`, controleert
+alle bron-/assetbytes; de workflow uploadt ZIP, digest, bronbewijs en catalogusvoorstel als CI-artefact.
+Deze commando’s uitsluitend in CI uitvoeren, nooit op deze server.
+
+De laatste stap `verify` is de **leveringspoort**: gecommitteerde ZIP, bronmanifest, alle 78 bronbestanden,
+versie/URL/hash in de catalogus en de reproduceerbare CI-ZIP moeten overeenkomen. Hij blijft bewust rood
+zolang het CI-artefact nog niet met bijpassende catalogusmetadata is gecommit. Niet overslaan,
+geen `continue-on-error` toevoegen en geen uitzondering voor een voorbereidings-PR maken.
+Download het artefact met `gh run download`, inspecteer het, voeg de ZIP met `git add -f` toe en pas alleen
+de tutorials-entry plus de echte `lastUpdated`-datum aan. Een volgende gewone push controleert die commit opnieuw.
+Het volledige recept en de integratievoorwaarde voor PR #6 staan in `extensions/tutorials/README.md`.

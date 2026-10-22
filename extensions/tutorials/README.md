@@ -366,15 +366,80 @@ projectbeschrijving. Verder zijn ze gelijk gebleven (alleen GUIDs, interne id's 
 tutorial 1 loopt er in de app, nl en en, hetzelfde mee. De andere bestanden in `projects/` verschillen van de
 huidige generatoruitvoer alleen in GUIDs, interne id's en tijdstempels.
 
-## ZIP maken
+## ZIP maken en leveren via CI
 
-```bash
-rm -f tutorials-1.2.0.zip
-zip -X tutorials-1.2.0.zip manifest.json main.js projects/nl/*.ifc projects/en/*.ifc img/nl/*.webp img/en/*.webp
-git add -f tutorials-1.2.0.zip
-```
+De tutorials worden uitsluitend in GitHub CI gepakt. Het bestaande inhoudsrecept blijft:
+`manifest.json main.js projects/nl/*.ifc projects/en/*.ifc img/nl/*.webp img/en/*.webp`.
+De vaste lijst staat in [tutorial-package-files.txt](../../scripts/tutorial-package-files.txt):
+2 bronbestanden, 18 IFC-bestanden per taal en 20 WebP-afbeeldingen per taal, samen **exact 78 entries**.
+Een ontbrekend of extra bestand onder `projects/` of `img/`, een afwijkende ZIP-entry, een dubbel pad,
+een symlink of afwijkende bron-/assetbytes maakt de controle rood. De appgrenzen blijven 24 MiB per
+bestand en 48 MiB samen.
 
-De ZIP bevat precies deze bestanden, niet meer en niet minder (controleer met `unzip -l`); de app begrenst een
-extensie op 24 MiB per bestand en 48 MiB samen.
+### Versie en bestaande installaties
 
-Installeren om te testen: Bestand › Extensies › **ZIP** › kies `tutorials-1.2.0.zip`.
+De bron bereidt patchversie **1.2.1** voor. De bestaande `tutorials-1.2.0.zip` blijft intact; de nieuwe
+URL wordt `https://raw.githubusercontent.com/OpenAEC-Foundation/open-planner-studio-extensions/main/extensions/tutorials/tutorials-1.2.1.zip`.
+Dat geeft de nieuwe bytes een eigen versie en download-URL. De catalogus en het ZIP-manifest moeten
+exact hetzelfde id en versienummer hebben: de app weigert een verschil. `minAppVersion` blijft `2026.10.0`.
+
+Een versie-bump werkt bestaande installaties niet automatisch bij: de app markeert een catalogusitem
+als geïnstalleerd op basis van het id. Een gebruiker kan de nieuwe ZIP lokaal installeren (vervangt
+hetzelfde id na toestemming), of de oude extensie verwijderen en opnieuw via de catalogus installeren.
+De catalogus heeft een app-cache van 30 minuten. Dit PR verandert die app-routes niet.
+
+PR #6 bevat andere tutorialcorrecties en wijzigt nog pakket 1.2.0. Hij wordt hier niet meegenomen.
+Als die wijziging later wordt geïntegreerd, moeten beide broncorrecties en versie 1.2.1 behouden blijven
+en moet CI opnieuw uit de uiteindelijke gezamenlijke bron pakken; een eerdere ZIP is dan niet voldoende.
+
+### Workflow en artefact
+
+[De workflow](../../.github/workflows/tutorials-package.yml) draait op PR’s naar `main` en pushes op `main`.
+Hij checkt de PR-**head**, niet de tijdelijke mergecommit, en gebruikt alleen leesrechten.
+Er is geen dispatch, tag/release, automatische writeback of publicatiestap.
+
+1. Node 22 controleert `main.js` met `--check` (syntax, geen tutorialuitvoering).
+2. De contracttests bewaken onder meer ontbrekende/extra/dubbele paden, gewijzigde bron-/assetbytes,
+   reproduceerbaarheid en weigering van een oud pakket of verkeerde catalogusmetadata.
+3. De builder maakt en herleest de ZIP; alle 78 entries moeten bytegelijk zijn aan de bronbestanden.
+4. CI bewaart het artefact **`tutorials-<versie>-<headsha>-<poging>`** gedurende 14 dagen, met:
+   - `tutorials-<versie>.zip` en `tutorials-<versie>.zip.sha256`;
+   - `package-inputs.json`: head, versie, entryaantal en grootte/SHA-256 van elk bronbestand;
+   - `catalog-entry.json`: uitsluitend het voorstel voor de tutorials-entry, met de werkelijk gebouwde hash.
+5. **Na de upload** volgt de strikte leveringspoort: de gecommitteerde ZIP moet exact dezelfde bytes
+   hebben als de herbouw uit de actuele bron. Ook catalogusversie, `minAppVersion`, raw-URL, SHA-256 en
+   de geldigheid van `lastUpdated` worden gecontroleerd. Geen tijdelijke uitzondering of foutonderdrukking.
+
+Tijdens de voorbereidingscommit zijn het nieuwe CI-artefact en de latere leveringscommit twee aparte
+stappen: de bestaande ZIP/catalogus leveren nog 1.2.0. De laatste CI-stap blijft daarom rood tot de
+juiste 1.2.1-ZIP en catalogusmetadata zijn gecommit. Een beschikbare ZIP betekent nog geen groene leveringspoort.
+
+### Reproduceerbaarheid en afronden
+
+Dezelfde 78 bestanden krijgen een vaste lexicografische volgorde, ZIP-tijd `1980-01-01 00:00:00`,
+reguliere bestandsmodus 0644, geen extra velden/commentaar en compressiemethode **STORE**. Daarmee hangt
+de ZIP niet af van bestandstijden, tijdzone of zlib-versie. Dit is het bestaande `zip -X`-inhoudsrecept
+met genormaliseerde metadata; circa 2,7 MB blijft ruim binnen de appgrenzen. De app ondersteunt STORE.
+Head en catalogusdatum zitten buiten de ZIP, zodat alleen een catalogus-/documentatiecommit dezelfde
+ZIP reproduceert. Wijzigt een van de 78 bronbestanden, dan moet een nieuw CI-artefact worden gebruikt.
+
+De reviewer/ouder rondt het concrete pakket als volgt af:
+
+1. Download het artefact van de bedoelde head en run met `gh run download <run-id> --repo
+   OpenAEC-Foundation/open-planner-studio-extensions --name tutorials-1.2.1-<headsha>-<poging> --dir <artefactmap>`.
+   Controleer de head in `package-inputs.json`, de ZIP-digest en de 78 bron-/assetbytes. De `.sha256`
+   hoort bij de binnenste tutorials-ZIP; de Actions-artefactdigest hoort bij de transportcontainer.
+2. Kopieer de ongewijzigde CI-ZIP naar `extensions/tutorials/tutorials-1.2.1.zip` en voeg die met
+   `git add -f` toe. Neem de tutorials-entry uit `catalog-entry.json` over en zet `lastUpdated` op de
+   werkelijke leveringsdatum. Andere catalogusentries en het oude pakket blijven gelijk.
+3. Commit en push volgens de gewone reviewafspraken (agents: hooks uit). Die push bouwt opnieuw uit
+   de definitieve head en controleert bron, ZIP en catalogus; wacht op groene CI en onafhankelijke review.
+4. Een gewone merge naar `main` levert de raw-bestanden. Controleer daarna de werkelijk geleverde ZIP,
+   catalogushash en gecorrigeerde `main.js`. Pas met dat bewijs kan app-knownbug 72 worden verwijderd.
+   Een tag of GitHub Release is niet nodig.
+
+De actions zijn op volledige commits gepind volgens de
+[officiële beveiligingsrichtlijn](https://docs.github.com/en/actions/reference/security/secure-use).
+De gebruikte inputs volgen [checkout](https://github.com/actions/checkout),
+[setup-node](https://github.com/actions/setup-node) en [upload-artifact](https://github.com/actions/upload-artifact).
+De ZIP-metadata en STORE volgen de [Python-documentatie](https://docs.python.org/3.12/library/zipfile.html).
